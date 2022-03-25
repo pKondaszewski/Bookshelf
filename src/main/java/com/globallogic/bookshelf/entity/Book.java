@@ -1,8 +1,9 @@
-package com.globallogic.bookshelf.controller;
+package com.globallogic.bookshelf.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
-@Data
+@AllArgsConstructor
 public class Book {
     String id;
     String author;

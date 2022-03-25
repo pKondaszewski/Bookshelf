@@ -1,6 +1,7 @@
 package com.globallogic.bookshelf.controller;
 
 
+import com.globallogic.bookshelf.entity.Book;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,12 +16,7 @@ public class BookShelfController {
 
     @GetMapping(path = "/{id}")
     public Book get(@PathVariable(name = "id")String id){
-        Book book = new Book();
-        book.setAuthor("Adam");
-        book.setCategory("Sport");
-        book.setId(id);
-        book.setName("Skoki");
-
+        Book book = new Book(id,"adam","dwd","dwad");
         log.info("Returning books={}",book);
 
         return book;
