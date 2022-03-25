@@ -7,11 +7,14 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.service.ApiInfo;
+import springfox.documentation.service.Contact;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import javax.servlet.ServletContext;
+import java.util.Collections;
 
 @Configuration
 @EnableSwagger2
@@ -26,7 +29,19 @@ public class BookShelfConfig implements WebMvcConfigurer {
                 .select()
                 .apis(RequestHandlerSelectors.basePackage(getClass().getPackageName()))
                 .paths(PathSelectors.any())
-                .build();
+                .build()
+                .apiInfo(createApiInfo());
+    }
+
+    private ApiInfo createApiInfo() {
+        return new ApiInfo("Bookshelf API",
+                "This is a server API for internal Bookshelf",
+                "1.00",
+                "http://www.google.com",
+                new Contact("Przemek", "http://www.google.com", "p.kondaszewski@globallogic.com"),
+                "Open source license",
+                "https://www.apache.org/licenses/LICENSE-2.0.html",
+                Collections.emptyList());
     }
 
     @Override

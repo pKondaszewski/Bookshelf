@@ -4,8 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @AllArgsConstructor
+@Data
 public class Book {
-    String id;
+    Integer id;
     String author;
     String name;
     String category;
