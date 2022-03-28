@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_book_table
+      author: gl
+      changes:
+        - createTable:
+            tableName: book
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: author
+                  type: varchar(25)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: name
+                  type: varchar(25)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: category
+                  type: varchar(25)
+                  constraints:
+                    nullable: false

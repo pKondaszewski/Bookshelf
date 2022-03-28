@@ -1,13 +1,25 @@
 package com.globallogic.bookshelf.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
-@AllArgsConstructor
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+
+/**
+ * Definition class of the book entity.
+ *
+ * @author Bartlomiej Chojnacki
+ */
 @Data
+@Entity
 public class Book {
-    Integer id;
-    String author;
-    String name;
-    String category;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    protected Integer id;
+    protected String author;
+    protected String name;
+    protected String category;
 }
