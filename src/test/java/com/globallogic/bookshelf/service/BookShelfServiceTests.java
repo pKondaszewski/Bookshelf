@@ -1,8 +1,8 @@
-package com.globallogic.bookshelf;
-
+package com.globallogic.bookshelf.service;
 
 import com.globallogic.bookshelf.controller.BookSO;
 import com.globallogic.bookshelf.entity.Book;
+import com.globallogic.bookshelf.entity.Category;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.service.BookShelfService;
 import org.junit.jupiter.api.Test;
@@ -44,13 +44,13 @@ public class BookShelfServiceTests {
         service = new BookShelfService(repository,model);
         bookTest = new Book();
         bookTest.setName("TestName");
-        bookTest.setCategory("TestCategory");
+        bookTest.setCategory(new Category(1, "testCategoryName"));
         bookTest.setAuthor("TestAuthor");
         bookTest.setId(2);
 
         bookSOTest = new BookSO();
         bookSOTest.setName("TestName");
-        bookSOTest.setCategory("TestCategory");
+        bookSOTest.setCategory(new Category(1, "testCategoryName"));
         bookSOTest.setAuthor("TestAuthor");
         bookSOTest.setId(2);
     }
@@ -63,9 +63,4 @@ public class BookShelfServiceTests {
         assertThat(bookSO).isEqualTo(bookSOTest);
     }
 
-    @Test
-    public void testCreate(){
-        doReturn(bookTest).when(repository).save(ArgumentMatchers.any(Book.class));
-        assertThat(service.create(bookSOTest)).isEqualTo(bookSOTest);
-    }
 }

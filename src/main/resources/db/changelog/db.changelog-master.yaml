@@ -4,6 +4,21 @@ databaseChangeLog:
       author: gl
       changes:
         - createTable:
+            tableName: category
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(25)
+                  constraints:
+                    nullable: false
+        - createTable:
             tableName: book
             columns:
               - column:
@@ -18,14 +33,17 @@ databaseChangeLog:
                   type: varchar(25)
                   constraints:
                     nullable: false
-                    unique: true
               - column:
                   name: name
                   type: varchar(25)
                   constraints:
                     nullable: false
               - column:
-                  name: category
-                  type: varchar(25)
+                  name: category_id
+                  type: int
                   constraints:
                     nullable: false
+                    foreignKeyName: fk_category_id
+                    references: category(id)
+  - include:
+      - file: /db/changelog/changes/database_categories_init.sql

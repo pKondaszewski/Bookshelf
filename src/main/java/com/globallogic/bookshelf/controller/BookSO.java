@@ -1,5 +1,6 @@
 package com.globallogic.bookshelf.controller;
 
+import com.globallogic.bookshelf.entity.Category;
 import lombok.Data;
 
 /**
@@ -12,5 +13,5 @@ public class BookSO {
     private Integer id;
     private String author;
     private String name;
-    private String category;
+    private Category category;
 }

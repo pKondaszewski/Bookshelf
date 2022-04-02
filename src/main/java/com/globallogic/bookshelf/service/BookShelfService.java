@@ -2,7 +2,10 @@ package com.globallogic.bookshelf.service;
 
 import com.globallogic.bookshelf.controller.BookSO;
 import com.globallogic.bookshelf.entity.Book;
+import com.globallogic.bookshelf.entity.Category;
+import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
+import com.globallogic.bookshelf.repository.CategoryRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,7 +21,9 @@ import org.springframework.stereotype.Component;
 public class BookShelfService {
 
     @Autowired
-    private BookRepository bookRepository;
+    protected BookRepository bookRepository;
+    @Autowired
+    protected CategoryRepository categoryRepository;
     @Autowired
     protected ModelMapper modelMapper;
 
@@ -47,6 +52,14 @@ public class BookShelfService {
      */
     public BookSO create(BookSO so){
         Book book = modelMapper.map(so,Book.class);
+        Category category = categoryRepository.findByName(book.getCategory().getName());
+        if(category == null) {
+            throw new BookshelfResourceNotFoundException("Category not found");
+        } else if(category.getName().equals("Default")) {
+            book.setCategory(categoryRepository.getById(4));
+        } else {
+            book.setCategory(categoryRepository.getById(category.getId()));
+        }
         return modelMapper.map(bookRepository.save(book),BookSO.class);
     }
 

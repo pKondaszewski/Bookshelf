@@ -2,14 +2,11 @@ package com.globallogic.bookshelf.entity;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 
 /**
- * Definition class of the book entity.
+ * Definition class of the Book entity.
  *
  * @author Bartlomiej Chojnacki
  */
@@ -21,5 +18,8 @@ public class Book {
     protected Integer id;
     protected String author;
     protected String name;
-    protected String category;
+
+    @OneToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "category_id", referencedColumnName = "id")
+    protected Category category;
 }

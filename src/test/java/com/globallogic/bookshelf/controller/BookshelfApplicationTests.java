@@ -1,4 +1,4 @@
-package com.globallogic.bookshelf;
+package com.globallogic.bookshelf.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
