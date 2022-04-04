@@ -28,4 +28,43 @@ databaseChangeLog:
                   name: category
                   type: varchar(25)
                   constraints:
+        - createTable:
+            tableName: borrow
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
                     nullable: false
+              - column:
+                  name: borrowed
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: returned
+                  type: date
+                  constraints:
+                    nullable: true
+              - column:
+                  name: book_id
+                  type: int
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_book_id
+                    references: book(id)
+              - column:
+                  name: name
+                  type: varchar(25)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: surname
+                  type: varchar(25)
+                  constraints:
+                    nullable: true
+
+
+

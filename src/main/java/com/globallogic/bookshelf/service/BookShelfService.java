@@ -23,7 +23,7 @@ public class BookShelfService {
     protected ModelMapper modelMapper;
 
 
-    public BookShelfService(BookRepository repository,ModelMapper model){
+    public BookShelfService(BookRepository repository, ModelMapper model) {
         bookRepository = repository;
         modelMapper = model;
     }
@@ -34,9 +34,9 @@ public class BookShelfService {
      * @param name name of the wanted book
      * @return DTO of the wanted book
      */
-    public BookSO get(String name){
+    public BookSO get(String name) {
         Book found = bookRepository.findByName(name);
-        return modelMapper.map(found,BookSO.class);
+        return modelMapper.map(found, BookSO.class);
     }
 
     /**
@@ -45,9 +45,9 @@ public class BookShelfService {
      * @param so DTO body to specify the book parameters in repository
      * @return DTO of the created book
      */
-    public BookSO create(BookSO so){
-        Book book = modelMapper.map(so,Book.class);
-        return modelMapper.map(bookRepository.save(book),BookSO.class);
+    public BookSO create(BookSO so) {
+        Book book = modelMapper.map(so, Book.class);
+        return modelMapper.map(bookRepository.save(book), BookSO.class);
     }
 
 }
