@@ -6,9 +6,13 @@ import com.globallogic.bookshelf.entity.Category;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.CategoryRepository;
+import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.List;
 
 
 /**
@@ -28,20 +32,9 @@ public class BookShelfService {
     protected ModelMapper modelMapper;
 
 
-    public BookShelfService(BookRepository repository,ModelMapper model){
+    public BookShelfService(BookRepository repository, ModelMapper model) {
         bookRepository = repository;
         modelMapper = model;
-    }
-
-    /**
-     * Get the specific book from the repository
-     *
-     * @param name name of the wanted book
-     * @return DTO of the wanted book
-     */
-    public BookSO get(String name){
-        Book found = bookRepository.findByName(name);
-        return modelMapper.map(found,BookSO.class);
     }
 
     /**
@@ -63,4 +56,44 @@ public class BookShelfService {
         return modelMapper.map(bookRepository.save(book),BookSO.class);
     }
 
+
+    public void delete(Integer id) {
+        Book found_book = bookRepository.getById(id);
+        if (!found_book.isAvailable()) {
+            throw new BookshelfConflictException(String.format("Can't delete %s. This book is borrowed", found_book.getName()));
+        }
+        bookRepository.delete(found_book);
+    }
+
+
+    public HashMap<String, String> getAllBooks() {
+        HashMap<String, String> bookMap = new HashMap<>();
+        List<Book> bookList = bookRepository.findAll();
+
+        for (Book book : bookList) {
+
+                String bookName = book.getName();
+                String bookAuthor= book.getAuthor();
+                bookMap.put(bookAuthor, bookName);
+
+
+        }
+        return bookMap;
+    }
+
+    public HashMap<String, Boolean> getAllBooksAvailable() {
+        HashMap<String, Boolean> bookMap = new HashMap<>();
+        List<Book> bookList = bookRepository.findAll();
+
+        for (Book book : bookList) {
+            if (book.isAvailable()) {
+                String bookName = book.getName();
+                Boolean aBoolean = book.isAvailable();
+                bookMap.put(bookName, aBoolean);
+            }
+
+        }
+        return bookMap;
+    }
 }
+

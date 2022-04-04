@@ -18,6 +18,7 @@ public class Book {
     protected Integer id;
     protected String author;
     protected String name;
+    protected boolean available;
 
     @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "category_id", referencedColumnName = "id")

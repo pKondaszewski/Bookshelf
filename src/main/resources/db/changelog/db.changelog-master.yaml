@@ -39,11 +39,59 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: category_id
-                  type: int
+                  name: available
+                  type: boolean
                   constraints:
+                    nullable: false
+              - column:
+                  name: category
+                  type: varchar(25)
+                  constraints:
+        - createTable:
+            tableName: borrow
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
                     nullable: false
                     foreignKeyName: fk_category_id
                     references: category(id)
+              - column:
+                  name: username
+                  type: varchar(25)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: surname
+                  type: varchar(25)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: borrowed
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: returned
+                  type: date
+                  constraints:
+                    nullable: true
+              - column:
+                  name: comment
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: book_id
+                  type: int
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_book_id
+                    references: book(id)
+
   - include:
       - file: /db/changelog/changes/database_categories_init.sql
+      - file: /db/changelog/changes/database_book_init.sql

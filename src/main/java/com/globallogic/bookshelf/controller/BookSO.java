@@ -14,4 +14,5 @@ public class BookSO {
     private String author;
     private String name;
     private Category category;
+    private boolean available;
 }

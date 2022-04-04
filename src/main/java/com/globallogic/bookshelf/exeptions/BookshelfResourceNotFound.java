@@ -3,11 +3,10 @@ package com.globallogic.bookshelf.exeptions;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(value = HttpStatus.CONFLICT)
-public class BookshelfConflictException extends BookshelfException {
+@ResponseStatus(value = HttpStatus.NOT_FOUND)
+public class BookshelfResourceNotFound extends BookshelfException {
 
-    public BookshelfConflictException(String message) {
+    public BookshelfResourceNotFound(String message) {
         super(message);
     }
-
 }
