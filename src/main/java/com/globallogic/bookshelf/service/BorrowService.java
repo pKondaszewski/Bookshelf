@@ -1,11 +1,9 @@
 package com.globallogic.bookshelf.service;
 
-
-import com.globallogic.bookshelf.controller.BorrowSO;
 import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.entity.Borrow;
 import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
-import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFound;
+import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
 import org.modelmapper.ModelMapper;
@@ -14,12 +12,9 @@ import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.NoSuchElementException;
 
 /**
- * Business logic of the /borrows request
+ * Business logic of the /borrow request
  *
  * @author Bartłomiej Chojnacki
  */
@@ -42,7 +37,6 @@ public class BorrowService {
      * Create a borrow
      *
      * @param borrowBody
-     * @return String.format informing that book was borrowed
      * @throws BookshelfConflictException exception informing that book is already borrowed
      */
     @Transactional
@@ -89,8 +83,7 @@ public class BorrowService {
      * Return a book
      *
      * @param borrowBody
-     * @return Integer value = 0 informing that returning process went OK
-     * @throws BookshelfResourceNotFound exception informing that book was not borrowed
+     * @throws BookshelfResourceNotFoundException exception informing that book was not borrowed
      */
     @Transactional
     public void returnBook(Borrow borrowBody) {
@@ -99,19 +92,14 @@ public class BorrowService {
         Borrow borrow = borrowsRepository.findById(id).get();
         Book book = bookRepository.findById(borrow.getId()).get();
 
-        if (book.isAvailable() == false) {
+        if (!book.isAvailable()) {
             book.setAvailable(true);
             bookRepository.save(book);
             borrow.setReturned(new Date());
             borrowsRepository.save(borrow);
         } else {
-            throw new BookshelfConflictException(String.format("Book with name : %s is not borrowed.", book.getName()));
-
+            throw new BookshelfResourceNotFoundException(String.format("Book with name : %s is not borrowed.", book.getName()));
         }
 
     }
 }
-
-
-
-

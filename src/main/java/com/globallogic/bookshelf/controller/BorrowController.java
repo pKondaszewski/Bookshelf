@@ -1,6 +1,5 @@
 package com.globallogic.bookshelf.controller;
 
-
 import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.entity.Borrow;
 import com.globallogic.bookshelf.repository.BookRepository;
@@ -17,8 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
-import java.util.HashMap;
 
 /**
  * Client-server communication class that's processes /borrow requests

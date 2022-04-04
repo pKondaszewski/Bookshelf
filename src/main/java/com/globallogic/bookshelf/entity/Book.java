@@ -16,6 +16,7 @@ public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Integer id;
+
     protected String author;
     protected String name;
     protected boolean available;

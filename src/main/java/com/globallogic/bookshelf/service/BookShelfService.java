@@ -38,6 +38,17 @@ public class BookShelfService {
     }
 
     /**
+     * Get the specific book from the repository
+     *
+     * @param name name of the wanted book
+     * @return DTO of the wanted book
+     */
+    public BookSO get(String name) {
+        Book found = bookRepository.findByName(name);
+        return modelMapper.map(found, BookSO.class);
+    }
+
+    /**
      * Create a book with specified parameters
      *
      * @param so DTO body to specify the book parameters in repository
@@ -91,7 +102,6 @@ public class BookShelfService {
                 Boolean aBoolean = book.isAvailable();
                 bookMap.put(bookName, aBoolean);
             }
-
         }
         return bookMap;
     }
