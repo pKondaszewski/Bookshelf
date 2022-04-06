@@ -34,8 +34,8 @@ public class BookShelfController {
      */
     @ApiOperation(value = "Returns a DTO of the specified book entity")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Book found", response = BookSO.class),
-                            @ApiResponse(code = 404, message = "Book not found"),
-                            @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
+            @ApiResponse(code = 404, message = "Book not found"),
+            @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
     @GetMapping(path = "/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.OK)
     public BookSO get(@PathVariable(name = "name") String name) {
@@ -51,8 +51,8 @@ public class BookShelfController {
      */
     @ApiOperation(value = "Creates a book entity.")
     @ApiResponses(value = { @ApiResponse(code = 201, message = "Book entry created", response = Book.class),
-                            @ApiResponse(code = 400, message = "Bad Request"),
-                            @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.CREATED)
     public BookSO create(@RequestBody BookSO bookSO) {

@@ -21,11 +21,8 @@ public class BorrowSO {
     private Integer id;
     private Date borrowedDate;
     private Date returnedDate;
-    private String name;
+    private String username;
     private String surname;
-
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "book_id", referencedColumnName = "id")
-    protected Book book;
+    private Book book;
 
 }

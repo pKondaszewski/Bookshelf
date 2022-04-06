@@ -23,7 +23,7 @@ public class Borrow {
 
     protected Date borrowed;
     protected Date returned;
-    protected String name;
+    protected String username;
     protected String surname;
 
     @OneToOne

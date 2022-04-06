@@ -20,6 +20,7 @@ public class Book {
     protected String author;
     protected String name;
     protected String category;
+    protected boolean available;
 
 
 

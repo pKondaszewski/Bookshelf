@@ -13,6 +13,6 @@ public class BookSO {
     private Integer id;
     private String author;
     private String name;
+    private boolean available;
     private String category;
-    private Borrow borrow;
 }
