@@ -1,5 +1,6 @@
 package com.globallogic.bookshelf.controller;
 
+
 import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.entity.Borrow;
 import com.globallogic.bookshelf.repository.BookRepository;
@@ -16,6 +17,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
+import java.util.HashMap;
 
 /**
  * Client-server communication class that's processes /borrow requests
@@ -42,10 +45,10 @@ public class BorrowController {
      * @return ResponseEntity that informs about the borrowing of the book.
      */
     @ApiOperation(value = "Borrows a book based on the id")
-    @ApiResponses(value = {@ApiResponse(code = 201, message = "Book borrowed", response = Borrow.class),
-            @ApiResponse(code = 404, message = "Bad Request"),
-            @ApiResponse(code = 500, message = "Internal Bookshelf server error"),
-            @ApiResponse(code = 409, message = "Book is already borrowed")})
+    @ApiResponses(value = { @ApiResponse(code = 201, message = "Book borrowed", response = Borrow.class),
+                            @ApiResponse(code = 404, message = "Bad Request"),
+                            @ApiResponse(code = 500, message = "Internal Bookshelf server error"),
+                            @ApiResponse(code = 409, message = "Book is already borrowed")})
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> borrowBook(@RequestBody Borrow borrow) {
         Book book = bookRepository.findById(borrow.getBook().getId()).get();
@@ -61,10 +64,10 @@ public class BorrowController {
      * @return String that informs about the returning of the book.
      */
     @ApiOperation(value = "Returning a book.")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "Book returned", response = Book.class),
-            @ApiResponse(code = 400, message = "Bad Request"),
-            @ApiResponse(code = 500, message = "Internal Bookshelf server error"),
-            @ApiResponse(code = 404, message = "Book no found")})
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "Book returned", response = Book.class),
+                            @ApiResponse(code = 400, message = "Bad Request"),
+                            @ApiResponse(code = 500, message = "Internal Bookshelf server error"),
+                            @ApiResponse(code = 404, message = "Book no found")})
     @PutMapping
     public ResponseEntity<String> returnBorrow(@RequestBody Borrow borrow) {
         Book book = bookRepository.findById(borrow.getBook().getId()).get();
