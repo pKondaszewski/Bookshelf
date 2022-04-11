@@ -31,7 +31,6 @@ public class BookShelfController {
     @Autowired
     private BookShelfService bookShelfService;
 
-
     /**
      * POST Request to create a book
      *
@@ -43,11 +42,9 @@ public class BookShelfController {
                             @ApiResponse(code = 400, message = "Bad Request"),
                             @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(code = HttpStatus.CREATED)
     public ResponseEntity<BookSO> create(@RequestBody BookSO bookSO) {
         return new ResponseEntity<>(bookShelfService.create(bookSO),HttpStatus.CREATED);
     }
-
 
 
     /**
@@ -73,7 +70,6 @@ public class BookShelfController {
     public ResponseEntity<HashMap<String, Boolean>> getAllBooksAvailable() {
         HashMap<String, Boolean> booksAvailable = bookShelfService.getAllBooksAvailable();
         return new ResponseEntity<>(booksAvailable, HttpStatus.OK);
-
     }
 
     @GetMapping(path = "/listOfBooks", produces = MediaType.APPLICATION_JSON_VALUE)

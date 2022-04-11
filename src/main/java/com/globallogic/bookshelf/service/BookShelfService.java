@@ -4,9 +4,9 @@ import com.globallogic.bookshelf.controller.BookSO;
 import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.entity.Category;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
+import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.CategoryRepository;
-import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -38,17 +38,6 @@ public class BookShelfService {
     }
 
     /**
-     * Get the specific book from the repository
-     *
-     * @param name name of the wanted book
-     * @return DTO of the wanted book
-     */
-    public BookSO get(String name) {
-        Book found = bookRepository.findByName(name);
-        return modelMapper.map(found, BookSO.class);
-    }
-
-    /**
      * Create a book with specified parameters
      *
      * @param so DTO body to specify the book parameters in repository
@@ -66,7 +55,6 @@ public class BookShelfService {
         }
         return modelMapper.map(bookRepository.save(book),BookSO.class);
     }
-
 
     public void delete(Integer id) {
         Book found_book = bookRepository.getById(id);
@@ -104,6 +92,8 @@ public class BookShelfService {
             }
         }
         return bookMap;
+
+
     }
 }
 

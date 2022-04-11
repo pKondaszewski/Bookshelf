@@ -1,5 +1,7 @@
 package com.globallogic.bookshelf.service;
 
+
+import com.globallogic.bookshelf.controller.BorrowSO;
 import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.entity.Borrow;
 import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
@@ -12,6 +14,9 @@ import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Business logic of the /borrows request
