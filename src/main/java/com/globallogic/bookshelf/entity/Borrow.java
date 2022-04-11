@@ -20,7 +20,6 @@ public class Borrow {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Integer id;
 
-
     protected Date borrowed;
     protected Date returned;
     protected String username;
@@ -29,4 +28,5 @@ public class Borrow {
     @OneToOne
     @JoinColumn(name = "book_id",referencedColumnName = "id")
     protected Book book;
+
 }

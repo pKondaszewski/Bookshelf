@@ -23,5 +23,4 @@ public class Book {
     protected boolean available;
 
 
-
 }

@@ -2,10 +2,13 @@ package com.globallogic.bookshelf.service;
 
 import com.globallogic.bookshelf.controller.BookSO;
 import com.globallogic.bookshelf.entity.Book;
+import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 
 /**
@@ -50,4 +53,44 @@ public class BookShelfService {
         return modelMapper.map(bookRepository.save(book), BookSO.class);
     }
 
+    /**
+     * Get list of all available books
+     *
+     * @return list of all available books
+     *
+     */
+    public Book getAllBooksAvailable() {
+        Book booksAvailable = bookRepository.findByAvailable(true);
+
+        return booksAvailable;
+    }
+
+    /**
+     * Get list of all books
+     *
+     * @return list of all available books
+     *
+     */
+    public Book getAllBooks() {
+        Book book = (Book) bookRepository.findAll();
+
+
+        return book;
+    }
+    /**
+     * Delete a book
+     *
+     * @param id id to specify the book in the repository
+     * @return Integer value = 0 informing that deleting process went OK
+     * @throws BookshelfConflictException exception informing that book with given id is borrowed and cannot be deleted.
+     */
+    public Integer delete(Integer id) {
+        Book found_book = bookRepository.getById(id);
+        if (found_book.isAvailable() == false) {
+            throw new BookshelfConflictException(String.format("Can't delete %s. This book is borrowed", found_book.getName()));
+        }
+        bookRepository.delete(found_book);
+        return 0;
+    }
 }
+
