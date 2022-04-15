@@ -9,4 +9,5 @@ public class BookshelfResourceNotFoundException extends BookshelfException {
     public BookshelfResourceNotFoundException(String message) {
         super(message);
     }
+
 }

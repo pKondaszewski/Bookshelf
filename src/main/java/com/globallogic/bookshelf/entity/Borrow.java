@@ -27,7 +27,7 @@ public class Borrow {
     protected Date borrowed;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     protected Date returned;
-    protected String username;
+    protected String firstname;
     protected String surname;
     protected String comment;
 

@@ -13,4 +13,5 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     List<Book> findAllByCategory(Category category);
 
     List<Book> findByAvailableIsTrue();
+
 }

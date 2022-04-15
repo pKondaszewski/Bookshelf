@@ -46,7 +46,6 @@ public class BookShelfController {
         return new ResponseEntity<>(bookShelfService.create(bookSO),HttpStatus.CREATED);
     }
 
-
     /**
      * DELETE Request to remove one book based on the id.
      *

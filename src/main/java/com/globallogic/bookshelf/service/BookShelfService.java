@@ -64,18 +64,13 @@ public class BookShelfService {
         bookRepository.delete(found_book);
     }
 
-
     public HashMap<String, String> getAllBooks() {
         HashMap<String, String> bookMap = new HashMap<>();
         List<Book> bookList = bookRepository.findAll();
-
         for (Book book : bookList) {
-
                 String bookName = book.getName();
                 String bookAuthor= book.getAuthor();
                 bookMap.put(bookAuthor, bookName);
-
-
         }
         return bookMap;
     }
@@ -83,7 +78,6 @@ public class BookShelfService {
     public HashMap<String, Boolean> getAllBooksAvailable() {
         HashMap<String, Boolean> bookMap = new HashMap<>();
         List<Book> bookList = bookRepository.findAll();
-
         for (Book book : bookList) {
             if (book.isAvailable()) {
                 String bookName = book.getName();
@@ -92,8 +86,6 @@ public class BookShelfService {
             }
         }
         return bookMap;
-
-
     }
 }
 

@@ -37,7 +37,6 @@ public class BookShelfConfig implements WebMvcConfigurer {
 
     /**
      * Method that creates short description on top of the Swagger api.
-     *
      * @return ApiInfo object with selected options
      */
     private ApiInfo createApiInfo() {
