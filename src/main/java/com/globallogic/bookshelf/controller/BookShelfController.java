@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -77,5 +78,19 @@ public class BookShelfController {
     public ResponseEntity<HashMap<String, String>> getAllBooks() {
         HashMap<String, String> booksAvailable = bookShelfService.getAllBooks();
         return new ResponseEntity<>(booksAvailable, HttpStatus.OK);
+    }
+
+    /**
+     * GET Request to receive a map that shows every book availability.
+     *
+     * @return ResponseEntity that contains every book and it's availability (actual owner of the book and borrow date) HashMap
+     */
+    @GetMapping(path = "/booksAvailability", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "All books", response = HashMap.class),
+                            @ApiResponse(code = 500, message = "Internal BookShelf server error")})
+    public ResponseEntity<HashMap<Book, String>> getBooksAvailability() {
+        HashMap<Book, String> booksAvailability = bookShelfService.getBooksAvailability();
+        log.info("Books availability={}", booksAvailability);
+        return new ResponseEntity<>(booksAvailability, HttpStatus.OK);
     }
 }

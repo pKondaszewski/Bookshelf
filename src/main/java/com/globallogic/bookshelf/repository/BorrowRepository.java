@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BorrowRepository extends JpaRepository<Borrow, Integer> {
 
-
+    Borrow findBorrowByBook(Book book);
 }

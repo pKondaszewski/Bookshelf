@@ -2,15 +2,18 @@ package com.globallogic.bookshelf.service;
 
 import com.globallogic.bookshelf.controller.BookSO;
 import com.globallogic.bookshelf.entity.Book;
+import com.globallogic.bookshelf.entity.Borrow;
 import com.globallogic.bookshelf.entity.Category;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.repository.BookRepository;
+import com.globallogic.bookshelf.repository.BorrowRepository;
 import com.globallogic.bookshelf.repository.CategoryRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -28,12 +31,14 @@ public class BookShelfService {
     protected BookRepository bookRepository;
     @Autowired
     protected CategoryRepository categoryRepository;
+    protected BorrowRepository borrowRepository;
     @Autowired
     protected ModelMapper modelMapper;
 
 
-    public BookShelfService(BookRepository repository, ModelMapper model) {
-        bookRepository = repository;
+    public BookShelfService(BookRepository bkRepository, BorrowRepository bwRepository, ModelMapper model) {
+        bookRepository = bkRepository;
+        borrowRepository = bwRepository;
         modelMapper = model;
     }
 
@@ -86,6 +91,28 @@ public class BookShelfService {
             }
         }
         return bookMap;
+    }
+
+    /**
+     * Get information about every book availability
+     *
+     * @return Hashmap with book and information about the book availability (owner and date of the borrow)
+     */
+    public HashMap<Book, String> getBooksAvailability() {
+        HashMap<Book, String> booksAvailability = new HashMap<>();
+        List<Book> allBooks = bookRepository.findAll();
+        for (Book book : allBooks) {
+            if (book.isAvailable()) {
+                booksAvailability.put(book, "available");
+            } else {
+                Borrow booksBorrow = borrowRepository.findBorrowByBook(book);
+                Date dateOfTheBorrow = booksBorrow.getBorrowed();
+                String ownerOfTheBorrow = booksBorrow.getFirstname() + " " + booksBorrow.getSurname();
+                String infoAboutTheBorrow = ownerOfTheBorrow + " : " + dateOfTheBorrow;
+                booksAvailability.put(book, infoAboutTheBorrow);
+            }
+        }
+        return booksAvailability;
     }
 }
 

@@ -4,6 +4,7 @@ import com.globallogic.bookshelf.controller.BookSO;
 import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.entity.Category;
 import com.globallogic.bookshelf.repository.BookRepository;
+import com.globallogic.bookshelf.repository.BorrowRepository;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +24,10 @@ public class BookShelfServiceTests {
 
 
     @Mock
-    BookRepository repository;
+    BookRepository bookRepository;
+
+    @Mock
+    BorrowRepository borrowRepository;
 
     @InjectMocks
     BookShelfService service;
@@ -35,7 +39,7 @@ public class BookShelfServiceTests {
 
     @BeforeEach
     public void setBook(){
-        service = new BookShelfService(repository,model);
+        service = new BookShelfService(bookRepository, borrowRepository, model);
         bookTest = new Book();
         bookTest.setName("TestName");
         bookTest.setCategory(new Category(1, "testCategoryName"));
