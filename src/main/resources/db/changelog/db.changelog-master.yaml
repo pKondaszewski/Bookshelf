@@ -44,9 +44,12 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: category
-                  type: varchar(25)
+                  name: category_id
+                  type: int
                   constraints:
+                    nullable: false
+                    foreignKeyName: fk_category_id
+                    references: category(id)
         - createTable:
             tableName: borrow
             columns:
@@ -57,20 +60,8 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
                     nullable: false
-                    foreignKeyName: fk_category_id
-                    references: category(id)
               - column:
-                  name: username
-                  type: varchar(25)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: surname
-                  type: varchar(25)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: username
+                  name: firstname
                   type: varchar(25)
                   constraints:
                     nullable: false
@@ -102,5 +93,4 @@ databaseChangeLog:
                     foreignKeyName: fk_book_id
                     references: book(id)
   - include:
-      - file: /db/changelog/changes/database_categories_init.sql
-      - file: /db/changelog/changes/database_book_init.sql
+      - file: /db/changelog/changes/database_init.sql
