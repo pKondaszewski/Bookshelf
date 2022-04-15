@@ -9,10 +9,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Client-server communication class that's processes /bookshelf requests
@@ -31,23 +33,6 @@ public class BookShelfController {
     @Autowired
     private BookShelfService bookShelfService;
 
-    /**
-     * GET Request to find one book based on the name.
-     *
-     * @param name name of the book
-     * @return DTO of the selected book
-     */
-    @ApiOperation(value = "Returns a DTO of the specified book entity")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "Book found", response = BookSO.class),
-            @ApiResponse(code = 404, message = "Book not found"),
-            @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
-    @GetMapping(path = "/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(code = HttpStatus.OK)
-    public BookSO get(@PathVariable(name = "name") String name) {
-        BookSO bookSO = bookShelfService.get(name);
-        log.info("Returning book={}", bookSO);
-        return bookSO;
-    }
 
     /**
      * POST Request to create a book
@@ -61,57 +46,46 @@ public class BookShelfController {
             @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.CREATED)
-    public BookSO create(@RequestBody BookSO bookSO) {
-        return bookShelfService.create(bookSO);
+    public ResponseEntity<BookSO> create(@RequestBody BookSO bookSO) {
+        return new ResponseEntity<>(bookShelfService.create(bookSO),HttpStatus.CREATED);
     }
 
 
-    /**
-     * GET Request to receive a list of all books available
-     *
-     * @return String that contains all books available
-     */
-    @GetMapping(path = "/list_of_books_available", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "All books available found", response = List.class),
-            @ApiResponse(code = 500, message = "Internal BookShelf server error")})
-    @ResponseStatus(code = HttpStatus.OK)
-    public String getAllBooksAvailable() {
-        Book booksAvailable = bookShelfService.getAllBooksAvailable();
-        log.info("Books available found= {}", booksAvailable);
-        return String.format("Books available %s", booksAvailable);
-    }
-
-    /**
-     * GET Request to receive a list of all books
-     *
-     * @return String that contains all books available
-     */
-    @GetMapping(path = "/list_of_books", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "All books found", response = List.class),
-            @ApiResponse(code = 500, message = "Internal BookShelf server error")})
-    @ResponseStatus(code = HttpStatus.OK)
-    public String getAllBooks() {
-        Book books = bookShelfService.getAllBooks();
-        log.info("Books found={}", books);
-        return String.format("Books found %s", books);
-    }
 
     /**
      * DELETE Request to remove one book based on the id.
      *
      * @param id id of the book
-     * @return String that informs about the removal of the book
+     * @return ResponseEntity that informs about the removal of the book
      */
     @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Book deleted", response = String.class),
             @ApiResponse(code = 404, message = "Book not found"),
             @ApiResponse(code = 409, message = "Can't delete borrowed book"),
             @ApiResponse(code = 500, message = "Internal Category server error")})
-    @ResponseStatus(code = HttpStatus.OK)
-    public String delete(@PathVariable(name = "id") Integer id) {
+    public ResponseEntity<String> delete(@PathVariable(name = "id") Integer id) {
         Book found_book = bookRepository.getById(id);
         bookShelfService.delete(id);
-        log.info("Deleting Book={}", found_book.getName());
-        return String.format("Book %s deleted successfully", found_book.getName());
+        return ResponseEntity.status(HttpStatus.OK)
+                .body("Book deleted" + found_book.getName());
+
+    }
+
+    @GetMapping(path = "/listOfBooksAvailable", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "All books available", response = HashMap.class),
+            @ApiResponse(code = 500, message = "Internal BookShelf server error")})
+    public ResponseEntity<HashMap<String, Boolean>> getAllBooksAvailable() {
+        HashMap<String, Boolean> booksAvailable = bookShelfService.getAllBooksAvailable();
+        return new ResponseEntity<>(booksAvailable, HttpStatus.OK);
+
+    }
+
+    @GetMapping(path = "/listOfBooks", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "All books", response = HashMap.class),
+            @ApiResponse(code = 500, message = "Internal BookShelf server error")})
+    public ResponseEntity<HashMap<String, String>> getAllBooks() {
+        HashMap<String, String> booksAvailable = bookShelfService.getAllBooks();
+        return new ResponseEntity<>(booksAvailable, HttpStatus.OK);
+
     }
 }

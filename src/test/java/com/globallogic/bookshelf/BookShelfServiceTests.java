@@ -55,17 +55,7 @@ public class BookShelfServiceTests {
         bookSOTest.setId(2);
     }
 
-    @Test
-    public void testSearchByName(){
-        doReturn(bookTest).when(repository).findByName("TestName");
-        BookSO bookSO = service.get("TestName");
 
-        assertThat(bookSO).isEqualTo(bookSOTest);
-    }
 
-    @Test
-    public void testCreate(){
-        doReturn(bookTest).when(repository).save(ArgumentMatchers.any(Book.class));
-        assertThat(service.create(bookSOTest)).isEqualTo(bookSOTest);
-    }
+
 }

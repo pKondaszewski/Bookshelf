@@ -1,4 +1,3 @@
-
 package com.globallogic.bookshelf.exeptions;
 
 import org.springframework.http.HttpStatus;

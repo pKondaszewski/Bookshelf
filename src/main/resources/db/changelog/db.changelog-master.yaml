@@ -63,6 +63,11 @@ databaseChangeLog:
                   constraints:
                     nullable: true
               - column:
+                  name: comment
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
                   name: book_id
                   type: int
                   constraints:

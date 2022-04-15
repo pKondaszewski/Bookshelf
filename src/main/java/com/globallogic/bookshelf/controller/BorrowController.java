@@ -14,9 +14,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
+import java.util.HashMap;
 
 /**
  * Client-server communication class that's processes /borrow requests
@@ -36,43 +38,23 @@ public class BorrowController {
     @Autowired
     BookRepository bookRepository;
 
-
     /**
-     * GET Request to find one borrow based on the id.
-     *
-     * @param id id of the borrow.
-     * @return DTO of the selected borrow.
-     */
-    @ApiOperation(value = "Get borrow based on the id .")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "Borrows found", response = BorrowSO.class),
-            @ApiResponse(code = 404, message = "Borrows not found"),
-            @ApiResponse(code = 500, message = "Internal Borrows server error")})
-    @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(code = HttpStatus.OK)
-    public BorrowSO get(@PathVariable(name = "id") Integer id) {
-        BorrowSO borrowSO = borrowsService.get(id);
-        log.info("Returning Borrows={}", borrowSO);
-        return borrowSO;
-    }
-
-    /**
-     * POST Request to create one category based on the name.
+     * POST Request to borrow a book
      *
      * @param borrow borrow entity.
-     * @return String that informs about the borrowing of the book.
+     * @return ResponseEntity that informs about the borrowing of the book.
      */
     @ApiOperation(value = "Borrows a book based on the id")
     @ApiResponses(value = {@ApiResponse(code = 201, message = "Book borrowed", response = Borrow.class),
-            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 404, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Bookshelf server error"),
             @ApiResponse(code = 409, message = "Book is already borrowed")})
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(code = HttpStatus.CREATED)
-    public String borrowBook(@RequestBody Borrow borrow) {
+    public ResponseEntity<String> borrowBook(@RequestBody Borrow borrow) {
         Book book = bookRepository.findById(borrow.getBook().getId()).get();
         borrowsService.borrowBook(borrow);
-        log.info("Borrowing book ={}", borrow.getBook().getName());
-        return String.format("Book %s borrow successfully", book.getName());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body("Book borrowed" + book.getName());
     }
 
     /**
@@ -86,13 +68,12 @@ public class BorrowController {
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Bookshelf server error"),
             @ApiResponse(code = 404, message = "Book no found")})
-    @ResponseStatus(code = HttpStatus.OK)
     @PutMapping
-    public String returnBorrow(@RequestBody Borrow borrow) {
+    public ResponseEntity<String> returnBorrow(@RequestBody Borrow borrow) {
         Book book = bookRepository.findById(borrow.getBook().getId()).get();
         borrowsService.returnBook(borrow);
-        log.info("Deleting category={}", borrow);
-        return String.format("Book %s was returned", book.getName());
+        return ResponseEntity.status(HttpStatus.OK)
+                .body("Book returned" + book.getName());
 
     }
 }

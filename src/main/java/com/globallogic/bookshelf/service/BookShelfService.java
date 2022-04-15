@@ -1,13 +1,17 @@
 package com.globallogic.bookshelf.service;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.globallogic.bookshelf.controller.BookSO;
 import com.globallogic.bookshelf.entity.Book;
+import com.globallogic.bookshelf.entity.Borrow;
 import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.repository.BookRepository;
+import com.sun.source.tree.LambdaExpressionTree;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -32,17 +36,6 @@ public class BookShelfService {
     }
 
     /**
-     * Get the specific book from the repository
-     *
-     * @param name name of the wanted book
-     * @return DTO of the wanted book
-     */
-    public BookSO get(String name) {
-        Book found = bookRepository.findByName(name);
-        return modelMapper.map(found, BookSO.class);
-    }
-
-    /**
      * Create a book with specified parameters
      *
      * @param so DTO body to specify the book parameters in repository
@@ -53,44 +46,44 @@ public class BookShelfService {
         return modelMapper.map(bookRepository.save(book), BookSO.class);
     }
 
-    /**
-     * Get list of all available books
-     *
-     * @return list of all available books
-     *
-     */
-    public Book getAllBooksAvailable() {
-        Book booksAvailable = bookRepository.findByAvailable(true);
 
-        return booksAvailable;
-    }
-
-    /**
-     * Get list of all books
-     *
-     * @return list of all available books
-     *
-     */
-    public Book getAllBooks() {
-        Book book = (Book) bookRepository.findAll();
-
-
-        return book;
-    }
-    /**
-     * Delete a book
-     *
-     * @param id id to specify the book in the repository
-     * @return Integer value = 0 informing that deleting process went OK
-     * @throws BookshelfConflictException exception informing that book with given id is borrowed and cannot be deleted.
-     */
-    public Integer delete(Integer id) {
+    public void delete(Integer id) {
         Book found_book = bookRepository.getById(id);
         if (found_book.isAvailable() == false) {
             throw new BookshelfConflictException(String.format("Can't delete %s. This book is borrowed", found_book.getName()));
         }
         bookRepository.delete(found_book);
-        return 0;
+    }
+
+
+    public HashMap<String, String> getAllBooks() {
+        HashMap<String, String> bookMap = new HashMap<>();
+        List<Book> bookList = bookRepository.findAll();
+
+        for (Book book : bookList) {
+
+                String bookName = book.getName();
+                String bookAuthor= book.getAuthor();
+                bookMap.put(bookAuthor, bookName);
+
+
+        }
+        return bookMap;
+    }
+
+    public HashMap<String, Boolean> getAllBooksAvailable() {
+        HashMap<String, Boolean> bookMap = new HashMap<>();
+        List<Book> bookList = bookRepository.findAll();
+
+        for (Book book : bookList) {
+            if (book.isAvailable()) {
+                String bookName = book.getName();
+                Boolean aBoolean = book.isAvailable();
+                bookMap.put(bookName, aBoolean);
+            }
+
+        }
+        return bookMap;
     }
 }
 

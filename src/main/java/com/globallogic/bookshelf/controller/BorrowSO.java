@@ -23,6 +23,9 @@ public class BorrowSO {
     private Date returnedDate;
     private String username;
     private String surname;
+    private String comment;
+
+
     private Book book;
 
 }
