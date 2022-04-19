@@ -4,7 +4,9 @@ import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.entity.Borrow;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 public interface BorrowRepository extends JpaRepository<Borrow, Integer> {
 
-    Borrow findBorrowByBook(Book book);
+    List<Borrow> findBorrowsByBook(Book book);
 }

@@ -1,6 +1,8 @@
 package com.globallogic.bookshelf.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
@@ -10,6 +12,8 @@ import javax.persistence.*;
  *
  * @author Bartlomiej Chojnacki
  */
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 @Entity
 public class Book {

@@ -10,12 +10,9 @@ import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
 import com.globallogic.bookshelf.repository.CategoryRepository;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -27,12 +24,9 @@ import java.util.List;
 @Component
 public class BookShelfService {
 
-    @Autowired
     protected BookRepository bookRepository;
-    @Autowired
     protected CategoryRepository categoryRepository;
     protected BorrowRepository borrowRepository;
-    @Autowired
     protected ModelMapper modelMapper;
 
 
@@ -105,9 +99,10 @@ public class BookShelfService {
             if (book.isAvailable()) {
                 booksAvailability.put(book, "available");
             } else {
-                Borrow booksBorrow = borrowRepository.findBorrowByBook(book);
-                Date dateOfTheBorrow = booksBorrow.getBorrowed();
-                String ownerOfTheBorrow = booksBorrow.getFirstname() + " " + booksBorrow.getSurname();
+                List<Borrow> bookBorrows = borrowRepository.findBorrowsByBook(book);
+                Borrow activeBorrow = bookBorrows.get(bookBorrows.size()-1);
+                Date dateOfTheBorrow = activeBorrow.getBorrowed();
+                String ownerOfTheBorrow = activeBorrow.getFirstname() + " " + activeBorrow.getSurname();
                 String infoAboutTheBorrow = ownerOfTheBorrow + " : " + dateOfTheBorrow;
                 booksAvailability.put(book, infoAboutTheBorrow);
             }

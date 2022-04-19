@@ -4,6 +4,7 @@ package com.globallogic.bookshelf.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -17,6 +18,7 @@ import java.util.Date;
  *
  * @author Bartlomiej Chojnacki
  */
+@AllArgsConstructor
 @Data
 @Entity
 public class Borrow {
