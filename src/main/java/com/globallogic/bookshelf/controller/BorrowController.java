@@ -2,6 +2,8 @@ package com.globallogic.bookshelf.controller;
 
 import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.entity.Borrow;
+import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
+import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
 import com.globallogic.bookshelf.service.BorrowService;
@@ -89,9 +91,16 @@ public class BorrowController {
                             @ApiResponse(code = 409, message = "Borrow is still active"),
                             @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
     public ResponseEntity<String> deleteBorrow(@RequestBody Integer id) {
-        borrowsService.deleteBorrow(id);
-        log.info("Deleting borrow id={}", id);
-        return new ResponseEntity<>(String.format("Borrow id=%d deleted successfully", id), HttpStatus.OK);
+        try {
+            borrowsService.deleteBorrow(id);
+            log.info("Deleting borrow id={}", id);
+            return new ResponseEntity<>(String.format("Borrow id=%d deleted successfully", id), HttpStatus.OK);
+        } catch (BookshelfResourceNotFoundException b1) {
+            return new ResponseEntity<>(String.format("Borrow with id=%d doesn't exist", id), HttpStatus.NOT_FOUND);
+        } catch (BookshelfConflictException b2) {
+            return new ResponseEntity<>(String.format("Borrow with id=%d is still active. Can't delete",id),
+                    HttpStatus.CONFLICT);
+        }
     }
 
     /**
