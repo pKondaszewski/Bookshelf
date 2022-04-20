@@ -16,6 +16,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.print.attribute.standard.Media;
+import java.util.HashMap;
+import java.util.List;
+
 /**
  * Client-server communication class that's processes /borrow requests
  *
@@ -71,5 +75,32 @@ public class BorrowController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body("Book returned" + book.getName());
 
+    }
+
+    /**
+     * DELETE Request to remove one borrow based on the id.
+     *
+     * @param id id of the borrow
+     * @return ResponseEntity that informs about the removal of the borrow
+     */
+    @DeleteMapping(produces = "text/plain")
+    @ApiOperation(value = "Deleting specific borrow")
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "Borrow deleted"),
+                            @ApiResponse(code = 404, message = "Borrow not found"),
+                            @ApiResponse(code = 409, message = "Borrow is still active"),
+                            @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
+    public ResponseEntity<String> deleteBorrow(@RequestBody Integer id) {
+        borrowsService.deleteBorrow(id);
+        log.info("Deleting borrow id={}", id);
+        return new ResponseEntity<>(String.format("Borrow id=%d deleted successfully", id), HttpStatus.OK);
+    }
+
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Getting specific user borrow history")
+    public ResponseEntity<HashMap<List<Borrow>, String>> getUserBorrowHistory(@RequestParam String firstname,
+                                                                              @RequestParam String surname) {
+        HashMap<List<Borrow>, String> foundBorrows = borrowsService.getUserBorrowHistory(firstname, surname);
+        log.info("Showing borrow history of user={} {}", firstname, surname);
+        return new ResponseEntity<>(foundBorrows, HttpStatus.OK);
     }
 }

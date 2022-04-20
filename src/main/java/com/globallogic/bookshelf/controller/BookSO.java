@@ -1,7 +1,6 @@
 package com.globallogic.bookshelf.controller;
 
 import com.globallogic.bookshelf.entity.Category;
-import com.globallogic.bookshelf.entity.Borrow;
 import lombok.Data;
 
 /**
@@ -16,5 +15,5 @@ public class BookSO {
     private String name;
     private boolean available;
     private Category category;
-    private Borrow borrow;
+
 }

@@ -20,5 +20,5 @@ public class Category {
     @SequenceGenerator(name="seq", sequenceName="seq", initialValue = 5, allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="seq")
     private Integer id;
-    private String name;
+    private String name = "Default";
 }

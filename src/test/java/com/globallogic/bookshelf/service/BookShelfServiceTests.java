@@ -6,6 +6,7 @@ import com.globallogic.bookshelf.entity.Category;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
+import com.globallogic.bookshelf.repository.CategoryRepository;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,6 +41,9 @@ public class BookShelfServiceTests {
     @Mock
     private static BorrowRepository borrowRepository;
 
+    @Mock
+    private static CategoryRepository categoryRepository;
+
     @InjectMocks
     private static BookShelfService service;
 
@@ -49,7 +53,7 @@ public class BookShelfServiceTests {
     public static void setBook() {
         model.getConfiguration().setPropertyCondition(Conditions.isNotNull());
 
-        service = new BookShelfService(bookRepository, borrowRepository, model);
+        service = new BookShelfService(bookRepository, borrowRepository, categoryRepository, model);
         bookAvailableTest = new Book(
                 1,
                 "Adam Mickiewicz",

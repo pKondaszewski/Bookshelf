@@ -2,6 +2,7 @@ package com.globallogic.bookshelf.controller;
 
 
 import com.globallogic.bookshelf.entity.Book;
+import com.globallogic.bookshelf.entity.Borrow;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.service.BookShelfService;
 import io.swagger.annotations.*;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Client-server communication class that's processes /bookshelf requests
@@ -63,15 +65,25 @@ public class BookShelfController {
         bookShelfService.delete(id);
         return new ResponseEntity<>("Book deleted" + found_book.getName(), HttpStatus.OK);
     }
+    /**
+     * GET Request to receive a map that shows list of all books Available.
+     *
+     * @return ResponseEntity that contains history of every book and it's availability.
+     */
 
     @GetMapping(path = "/listOfBooksAvailable", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "All books available", response = HashMap.class),
                             @ApiResponse(code = 500, message = "Internal BookShelf server error")})
-    public ResponseEntity<HashMap<String, Boolean>> getAllBooksAvailable() {
-        HashMap<String, Boolean> booksAvailable = bookShelfService.getAllBooksAvailable();
+    public ResponseEntity<HashMap<Book, String>> getAllBooksAvailable() {
+        HashMap<Book, String> booksAvailable = bookShelfService.getAllBooksAvailable();
         return new ResponseEntity<>(booksAvailable, HttpStatus.OK);
     }
 
+    /**
+     * GET Request to receive a map that shows list of all books.
+     *
+     * @return ResponseEntity that contains history of every book and it's availability.
+     */
     @GetMapping(path = "/listOfBooks", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "All books", response = HashMap.class),
                             @ApiResponse(code = 500, message = "Internal BookShelf server error")})
@@ -92,5 +104,33 @@ public class BookShelfController {
         HashMap<Book, String> booksAvailability = bookShelfService.getBooksAvailability();
         log.info("Books availability={}", booksAvailability);
         return new ResponseEntity<>(booksAvailability, HttpStatus.OK);
+    }
+
+    /**
+     * GET Request to receive a map that shows history of all book.
+     *
+     * @return ResponseEntity that contains history of every book and it's availability.
+     */
+    @GetMapping(path = "/booksHistory", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Books History",response = HashMap.class),
+    @ApiResponse(code = 500,message = "Internal BookShelf server error")})
+    public ResponseEntity<HashMap<Book, List<String>>> getBookHistory(){
+        HashMap<Book,List<String>> bookHistoryHashMap = bookShelfService.getBooksHistory();
+        log.info("Books History={}",bookHistoryHashMap);
+        return new ResponseEntity<>(bookHistoryHashMap,HttpStatus.OK);
+    }
+
+    /**
+     * GET Request to receive a map that shows last borrow of book.
+     *
+     * @return ResponseEntity that contains book and information about who borrow book at the moment.
+     */
+    @GetMapping(path = "/getListOfBorrowedBooksWithNewestBorrow", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Books History",response = HashMap.class),
+            @ApiResponse(code = 500,message = "Internal BookShelf server error")})
+    public ResponseEntity<HashMap<Book, String>> getHashMapResponseEntity(){
+        HashMap<Book,String> bookHistoryHashMap = bookShelfService.getListOfBorrowedBooksWithNewestBorrow();
+        log.info("Books History={}",bookHistoryHashMap);
+        return new ResponseEntity<>(bookHistoryHashMap,HttpStatus.OK);
     }
 }
