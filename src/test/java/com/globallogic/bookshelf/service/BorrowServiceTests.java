@@ -1,6 +1,5 @@
 package com.globallogic.bookshelf.service;
 
-import com.globallogic.bookshelf.controller.BorrowSO;
 import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.entity.Borrow;
 import com.globallogic.bookshelf.entity.Category;
@@ -15,15 +14,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.sql.Date;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class BorrowServiceTests {
@@ -31,6 +27,9 @@ public class BorrowServiceTests {
     private static Borrow borrowTest, borrow2Test;
     private static Book bookTest;
     private static Category categoryTest;
+    private static String firstnameTest, surnameTest;
+    private static List<Borrow> borrowListTest;
+    private static List<Object> correctList;
 
     @Mock
     private static BorrowRepository borrowRepository;
@@ -45,13 +44,28 @@ public class BorrowServiceTests {
 
     @BeforeAll
     public static void setModel() {
-
         service = new BorrowService(borrowRepository, bookRepository);
 
-        bookTest = new Book(1,"Tadeusz","Arek",true, categoryTest);
-        borrowTest = new Borrow(3, new Date() ,new Date(),"Arek","Darek","awdawwda",bookTest);
-        borrow2Test = new Borrow(3, new Date() ,null,"Arek","Darek","awdawwda",bookTest);
+        Date testDate1 = Date.valueOf(LocalDate.of(1,1,1));
+        Date testDate2 = Date.valueOf(LocalDate.of(2,2,2));
 
+        bookTest = new Book(1,"BookauthorTest","BooknameTest",false, categoryTest);
+        borrowTest = new Borrow(3, testDate1, testDate2,"Arek","Darek","awdawwda",bookTest);
+        borrow2Test = new Borrow(3, testDate1,null,"Arek","Darek","awdawwda",bookTest);
+        borrowListTest = new ArrayList<>();
+        borrowListTest.add(borrowTest);
+        borrowListTest.add(borrow2Test);
+
+        firstnameTest = "Jan";
+        surnameTest = "Kowalski";
+
+        correctList = new ArrayList<>();
+        List<Borrow> foundBorrowsTest = new ArrayList<>();
+        foundBorrowsTest.add(borrowTest);
+
+        correctList.add(foundBorrowsTest);
+        correctList.add("Active borrow on books : 'BooknameTest' ");
+        correctList.add("Number of active borrowed books = 1");
     }
 
     @Test
@@ -87,5 +101,15 @@ public class BorrowServiceTests {
         String expectedMessage = String.format("Borrow with id=%d is still active. Can't delete", ID_TEST);
         String actualMessage = exception.getMessage();
         assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    public void testGetUserBorrowHistory() {
+        Mockito.doReturn(borrowListTest).when(borrowRepository)
+                .findBorrowsByFirstnameAndSurname(firstnameTest, surnameTest);
+
+        List<Object> testedList = service.getUserBorrowHistory(firstnameTest, surnameTest);
+
+        assertEquals(correctList, testedList);
     }
 }

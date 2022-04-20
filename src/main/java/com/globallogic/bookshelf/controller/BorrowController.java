@@ -16,7 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.print.attribute.standard.Media;
 import java.util.HashMap;
 import java.util.List;
 
@@ -95,12 +94,21 @@ public class BorrowController {
         return new ResponseEntity<>(String.format("Borrow id=%d deleted successfully", id), HttpStatus.OK);
     }
 
+    /**
+     * GET Request to get borrow history and additional information based by the specific user
+     *
+     * @param firstname String firstname of the user
+     * @param surname String surname of the user
+     * @return Response entity with list containing finished borrows, active holding books and amount of them.
+     */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Getting specific user borrow history")
-    public ResponseEntity<HashMap<List<Borrow>, String>> getUserBorrowHistory(@RequestParam String firstname,
-                                                                              @RequestParam String surname) {
-        HashMap<List<Borrow>, String> foundBorrows = borrowsService.getUserBorrowHistory(firstname, surname);
-        log.info("Showing borrow history of user={} {}", firstname, surname);
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "Borrow history returned"),
+                            @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
+    public ResponseEntity<List<Object>> getUserBorrowHistory(@RequestParam String firstname,
+                                                             @RequestParam String surname) {
+        List<Object> foundBorrows = borrowsService.getUserBorrowHistory(firstname, surname);
+        log.info("Showing borrow history of user={} {} : {}", firstname, surname, foundBorrows);
         return new ResponseEntity<>(foundBorrows, HttpStatus.OK);
     }
 }
