@@ -13,10 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -63,11 +60,22 @@ public class BookShelfService {
     }
 
     public void delete(Integer id) {
-        Book found_book = bookRepository.getById(id);
-        if (!found_book.isAvailable()) {
-            throw new BookshelfConflictException(String.format("Can't delete %s. This book is borrowed", found_book.getName()));
+        Optional<Book> foundBook = bookRepository.findById(id);
+        if (foundBook.isEmpty()) {
+            throw new BookshelfResourceNotFoundException(String.format("Book with id=%d doesn't exist",id));
+        } else {
+            Book book = foundBook.get();
+           List<Borrow> borrowList = borrowRepository.findBorrowsByBook(book);
+            if (book.isAvailable()) {
+                for(Borrow borrow : borrowList){
+                    borrowRepository.delete(borrow);
+                }
+                bookRepository.deleteById(id);
+
+            } else {
+                throw new BookshelfConflictException(String.format("Book with id=%d is still borrowed. Can't delete",id));
+            }
         }
-        bookRepository.delete(found_book);
     }
 
     /**
@@ -95,8 +103,8 @@ public class BookShelfService {
 
     public HashMap<Book, String> getAllBooksAvailable() {
         HashMap<Book, String> bookMap = new HashMap<>();
-        List<Book> bookList = bookRepository.findAll();
-        for (Book book : bookList) {
+        List<Book> allBooks = bookRepository.findAll();
+        for (Book book :  allBooks) {
             if (book.isAvailable()) {
                 bookMap.put(book, "Available");
             }
@@ -138,12 +146,12 @@ public class BookShelfService {
         for (Book book : allBooks) {
             if (!book.isAvailable()) {
                 List<Borrow> borrowList = borrowRepository.findBorrowsByBook(book);
-                if(!borrowList.isEmpty()) {
+                if (!borrowList.isEmpty()) {
                     if (borrowList != null && !borrowList.isEmpty()) {
-                        Borrow borrow = borrowList.get(borrowList.size()-1);
-                        Date dateOfTheBorrow = borrow.getBorrowed();
-                        String ownerOfTheBorrow = borrow.getFirstname() + " " + borrow.getSurname();
-                        String infoAboutTheBorrow = ownerOfTheBorrow + " : " + dateOfTheBorrow;
+                        Borrow borrow = borrowList.get(borrowList.size() - 1);
+                        Date dateOfTheBorrow =  borrow.getBorrowed();
+                        String ownerOfTheBorrow ="Name : "+ borrow.getFirstname()+ " " + borrow.getSurname();
+                        String infoAboutTheBorrow = ownerOfTheBorrow + " : Date of borrowing book "  + dateOfTheBorrow;
                         booksAvailability.put(book, infoAboutTheBorrow);
                     }
                 }
@@ -158,53 +166,48 @@ public class BookShelfService {
      *
      * @return Hashmap with book and information about the book borrow history
      */
-
-    public HashMap<Book, List<String>> getBooksHistory() {
+    public HashMap<Book, List<String>> getBooksHistory(String title) {
         HashMap<Book, List<String>> bookHistory = new HashMap<>();
-        List<Book> allBooks = bookRepository.findAll();
-        for (Book book : allBooks) {
+        Book book = bookRepository.findByName(title);
+        List<Borrow> booksBorrow = borrowRepository.findBorrowsByBook(book);
+        String available;
+        List<String> bookList = new ArrayList<>();
 
-            List<Borrow> booksBorrow = borrowRepository.findBorrowsByBook(book);
-            String available;
-            List<String> bookList = new ArrayList<>();
+        for (Borrow borrow : booksBorrow) {
+            String name ="Name: "+ borrow.getFirstname()+ " " + borrow.getSurname();
+            String comment;
+            String borrowDate ="Date of borrowing book: " + borrow.getBorrowed().toString();
+            String returnDate;
 
-            for (Borrow borrow : booksBorrow) {
-                String name = borrow.getFirstname() + " " + borrow.getSurname();
-                String comment;
-                String borrowDate = borrow.getBorrowed().toString();
-                String returnDate;
-
-                bookList.add(name);
-                bookList.add(borrowDate);
-                if (borrow.getReturned() == null) {
-                    returnDate = "No returned";
-                } else {
-                    returnDate = borrow.getReturned().toString();
-
-                }
-                bookList.add(returnDate);
-
-
-                if (borrow.getComment() == null) {
-                    comment = "No comment";
-                } else {
-                    comment = borrow.getComment();
-
-                }
-                bookList.add(comment);
-            }
-            if (book.isAvailable()) {
-                available = "available";
-
+            bookList.add(name);
+            bookList.add(borrowDate);
+            if (borrow.getReturned() == null) {
+                returnDate = "Book not returned";
             } else {
-                available = "No available";
+                returnDate = "Date of return book: "+borrow.getReturned().toString();
+
             }
-            bookList.add(available);
-            bookHistory.put(book, bookList);
+            bookList.add(returnDate);
+
+
+            if (borrow.getComment() == null) {
+                comment = "No comment";
+            } else {
+                comment ="Comment: "+ borrow.getComment();
+
+            }
+            bookList.add(comment);
         }
+        if (book.isAvailable()) {
+            available = "Book is available";
+
+        } else {
+            available = "Book is not available";
+        }
+        bookList.add(available);
+        bookHistory.put(book, bookList);
 
 
         return bookHistory;
     }
 }
-
