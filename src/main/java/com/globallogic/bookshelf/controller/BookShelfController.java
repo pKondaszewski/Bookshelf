@@ -2,6 +2,7 @@ package com.globallogic.bookshelf.controller;
 
 
 import com.globallogic.bookshelf.entity.Book;
+import com.globallogic.bookshelf.entity.Borrow;
 import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
@@ -63,11 +64,12 @@ public class BookShelfController {
                             @ApiResponse(code = 404, message = "Book not found"),
                             @ApiResponse(code = 409, message = "Can't delete borrowed book"),
                             @ApiResponse(code = 500, message = "Internal Category server error")})
-    public ResponseEntity<String> delete(@PathVariable(name = "id")@RequestBody Integer id) {
+    public ResponseEntity<String> delete(@PathVariable(name = "id") Integer id) {
+
         try {
-            Book found_book = bookRepository.getById(id);
+            Book foundBook = bookRepository.getById(id);
             bookShelfService.delete(id);
-            return new ResponseEntity<>(String.format("Book with id=%d delete", id), HttpStatus.OK);
+            return new ResponseEntity<>("Book deleted " + foundBook.getName(), HttpStatus.OK);
         } catch (BookshelfResourceNotFoundException b1) {
             return new ResponseEntity<>(String.format("Book with id=%d doesn't exist", id), HttpStatus.NOT_FOUND);
         } catch (BookshelfConflictException b2) {
@@ -128,7 +130,6 @@ public class BookShelfController {
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Book History",response = HashMap.class),
     @ApiResponse(code = 500,message = "Internal BookShelf server error")})
     public ResponseEntity<HashMap<Book, List<String>>> getBookHistory(@PathVariable(name = "name") String name) {
-
         HashMap bookHistoryHashMap = null;
         try {
             bookHistoryHashMap = bookShelfService.getBooksHistory(name);
@@ -136,7 +137,6 @@ public class BookShelfController {
             return new ResponseEntity<>(bookHistoryHashMap, HttpStatus.OK);
         } catch (NullPointerException b1) {
             return new ResponseEntity<>(bookHistoryHashMap, HttpStatus.NOT_FOUND);
-        
         }
     }
 

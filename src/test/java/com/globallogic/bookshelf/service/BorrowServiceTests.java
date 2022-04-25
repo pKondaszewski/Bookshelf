@@ -22,7 +22,6 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -231,7 +230,5 @@ public class BorrowServiceTests {
 
         assertThat(testedList).usingRecursiveComparison().isEqualTo(correctUserHistory);
     }
-
-
 
 }
