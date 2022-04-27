@@ -2,7 +2,6 @@ package com.globallogic.bookshelf.controller;
 
 
 import com.globallogic.bookshelf.entity.Book;
-import com.globallogic.bookshelf.entity.Borrow;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.service.BookShelfService;
 import io.swagger.annotations.*;
@@ -37,16 +36,16 @@ public class BookShelfController {
     /**
      * POST Request to create a book
      *
-     * @param bookSO DTO of the book entity
-     * @return DTO of the created book
      */
     @ApiOperation(value = "Creates a book entity.")
     @ApiResponses(value = { @ApiResponse(code = 201, message = "Book entry created", response = Book.class),
                             @ApiResponse(code = 400, message = "Bad Request"),
                             @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<BookSO> create(@RequestBody BookSO bookSO) {
-        return new ResponseEntity<>(bookShelfService.create(bookSO),HttpStatus.CREATED);
+    public ResponseEntity<String> create(@RequestBody Book book) {
+        bookShelfService.create(book);
+        log.info("Creating book={}", book);
+        return new ResponseEntity<>(String.format("Book %s created successfully", book.getName()), HttpStatus.CREATED);
     }
 
     /**

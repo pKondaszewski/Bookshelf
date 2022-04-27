@@ -1,6 +1,5 @@
 package com.globallogic.bookshelf.service;
 
-import com.globallogic.bookshelf.controller.BookSO;
 import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.entity.Borrow;
 import com.globallogic.bookshelf.entity.Category;
@@ -32,25 +31,21 @@ public class BookShelfService {
     protected BookRepository bookRepository;
     protected BorrowRepository borrowRepository;
     protected CategoryRepository categoryRepository;
-    protected ModelMapper modelMapper;
 
 
     public BookShelfService(BookRepository bkRepository, BorrowRepository bwRepository,
-                            CategoryRepository cRepository, ModelMapper model) {
+                            CategoryRepository cRepository) {
         bookRepository = bkRepository;
         borrowRepository = bwRepository;
         categoryRepository = cRepository;
-        modelMapper = model;
     }
 
     /**
      * Create a book with specified parameters
      *
-     * @param so DTO body to specify the book parameters in repository
-     * @return DTO of the created book
+     * @param book body of the book
      */
-    public BookSO create(BookSO so) {
-        Book book = modelMapper.map(so, Book.class);
+    public void create(Book book) {
         Category category = categoryRepository.findByName(book.getCategory().getName());
         if (category == null) {
             throw new BookshelfResourceNotFoundException("Category not found");
@@ -59,7 +54,6 @@ public class BookShelfService {
         } else {
             book.setCategory(categoryRepository.getById(category.getId()));
         }
-        return modelMapper.map(bookRepository.save(book), BookSO.class);
     }
 
     public void delete(Integer id) {
@@ -75,7 +69,6 @@ public class BookShelfService {
      *
      * @return Hashmap with book and information about the book available (name and available book)
      */
-
     public HashMap<String, String> getAllBooks() {
         HashMap<String, String> bookMap = new HashMap<>();
         List<Book> bookList = bookRepository.findAll();
@@ -92,7 +85,6 @@ public class BookShelfService {
      *
      * @return Hashmap with book and information about the book available (name and available book)
      */
-
     public HashMap<Book, String> getAllBooksAvailable() {
         HashMap<Book, String> bookMap = new HashMap<>();
         List<Book> bookList = bookRepository.findAll();
@@ -158,7 +150,6 @@ public class BookShelfService {
      *
      * @return Hashmap with book and information about the book borrow history
      */
-
     public HashMap<Book, List<String>> getBooksHistory() {
         HashMap<Book, List<String>> bookHistory = new HashMap<>();
         List<Book> allBooks = bookRepository.findAll();

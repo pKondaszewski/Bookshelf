@@ -7,6 +7,7 @@ import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
 import com.globallogic.bookshelf.service.BorrowService;
+import com.globallogic.bookshelf.utils.UserHistory;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -17,9 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * Client-server communication class that's processes /borrow requests
@@ -114,10 +112,10 @@ public class BorrowController {
     @ApiOperation(value = "Getting specific user borrow history")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Borrow history returned"),
                             @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
-    public ResponseEntity<List<Object>> getUserBorrowHistory(@RequestParam String firstname,
+    public ResponseEntity<UserHistory> getUserBorrowHistory(@RequestParam String firstname,
                                                              @RequestParam String surname) {
-        List<Object> foundBorrows = borrowsService.getUserBorrowHistory(firstname, surname);
-        log.info("Showing borrow history of user={} {} : {}", firstname, surname, foundBorrows);
-        return new ResponseEntity<>(foundBorrows, HttpStatus.OK);
+        UserHistory userHistory = borrowsService.getUserBorrowHistory(firstname, surname);
+        log.info("Showing borrow history of user={} {} : {}", firstname, surname, userHistory);
+        return new ResponseEntity<>(userHistory, HttpStatus.OK);
     }
 }

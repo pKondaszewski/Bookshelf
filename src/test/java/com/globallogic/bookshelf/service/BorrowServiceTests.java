@@ -7,6 +7,7 @@ import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
+import com.globallogic.bookshelf.utils.UserHistory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,17 +20,16 @@ import java.time.LocalDate;
 import java.sql.Date;
 import java.util.*;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class BorrowServiceTests {
 
     private static Borrow borrowTest, borrow2Test;
-    private static Book bookTest;
-    private static Category categoryTest;
     private static String firstnameTest, surnameTest;
     private static List<Borrow> borrowListTest;
-    private static List<Object> correctList;
+    private static UserHistory correctUserHistory;
 
     @Mock
     private static BorrowRepository borrowRepository;
@@ -49,9 +49,10 @@ public class BorrowServiceTests {
         Date testDate1 = Date.valueOf(LocalDate.of(1,1,1));
         Date testDate2 = Date.valueOf(LocalDate.of(2,2,2));
 
-        bookTest = new Book(1,"BookauthorTest","BooknameTest",false, categoryTest);
-        borrowTest = new Borrow(3, testDate1, testDate2,"Arek","Darek","awdawwda",bookTest);
-        borrow2Test = new Borrow(3, testDate1,null,"Arek","Darek","awdawwda",bookTest);
+        Book bookTest = new Book(1, "BookauthorTest", "BooknameTest", false,
+                new Category(1, "testCategory"));
+        borrowTest = new Borrow(3, testDate1, testDate2,"Arek","Darek","awdawwda", bookTest);
+        borrow2Test = new Borrow(3, testDate1,null,"Arek","Darek","awdawwda", bookTest);
         borrowListTest = new ArrayList<>();
         borrowListTest.add(borrowTest);
         borrowListTest.add(borrow2Test);
@@ -59,13 +60,12 @@ public class BorrowServiceTests {
         firstnameTest = "Jan";
         surnameTest = "Kowalski";
 
-        correctList = new ArrayList<>();
         List<Borrow> foundBorrowsTest = new ArrayList<>();
         foundBorrowsTest.add(borrowTest);
 
-        correctList.add(foundBorrowsTest);
-        correctList.add("Active borrow on books : 'BooknameTest' ");
-        correctList.add("Number of active borrowed books = 1");
+        correctUserHistory = new UserHistory(foundBorrowsTest,
+                "BooknameTest; ",
+                1);
     }
 
     @Test
@@ -108,8 +108,8 @@ public class BorrowServiceTests {
         Mockito.doReturn(borrowListTest).when(borrowRepository)
                 .findBorrowsByFirstnameAndSurname(firstnameTest, surnameTest);
 
-        List<Object> testedList = service.getUserBorrowHistory(firstnameTest, surnameTest);
+        UserHistory testedList = service.getUserBorrowHistory(firstnameTest, surnameTest);
 
-        assertEquals(correctList, testedList);
+        assertThat(testedList).usingRecursiveComparison().isEqualTo(correctUserHistory);
     }
 }

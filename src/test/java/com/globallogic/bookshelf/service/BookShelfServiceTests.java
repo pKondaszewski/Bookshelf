@@ -3,7 +3,6 @@ package com.globallogic.bookshelf.service;
 import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.entity.Borrow;
 import com.globallogic.bookshelf.entity.Category;
-import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
 import com.globallogic.bookshelf.repository.CategoryRepository;
@@ -27,12 +26,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 public class BookShelfServiceTests {
 
-    private static Book bookAvailableTest, bookNotAvailableTest;
+    private static Book bookNotAvailableTest;
     private static Borrow borrowTest;
     private static HashMap<Book, String> booksAvailabilityTest;
     private static final int ID_TEST = 1;
-
-    protected static ModelMapper model = new ModelMapper();
 
 
     @Mock
@@ -51,10 +48,9 @@ public class BookShelfServiceTests {
 
     @BeforeAll
     public static void setBook() {
-        model.getConfiguration().setPropertyCondition(Conditions.isNotNull());
 
-        service = new BookShelfService(bookRepository, borrowRepository, categoryRepository, model);
-        bookAvailableTest = new Book(
+        service = new BookShelfService(bookRepository, borrowRepository, categoryRepository);
+        Book bookAvailableTest = new Book(
                 1,
                 "Adam Mickiewicz",
                 "Dziady",
