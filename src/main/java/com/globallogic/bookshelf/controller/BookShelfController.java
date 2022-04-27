@@ -2,6 +2,8 @@ package com.globallogic.bookshelf.controller;
 
 
 import com.globallogic.bookshelf.entity.Book;
+import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
+import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.service.BookShelfService;
 import io.swagger.annotations.*;
@@ -36,6 +38,8 @@ public class BookShelfController {
     /**
      * POST Request to create a book
      *
+     * @param book body of the book
+     * @return ResponseEntity that informs about the creation of the book
      */
     @ApiOperation(value = "Creates a book entity.")
     @ApiResponses(value = { @ApiResponse(code = 201, message = "Book entry created", response = Book.class),
@@ -54,15 +58,22 @@ public class BookShelfController {
      * @param id id of the book
      * @return ResponseEntity that informs about the removal of the book
      */
-    @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(path = "/{id}", produces = "text/plain")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Book deleted", response = String.class),
                             @ApiResponse(code = 404, message = "Book not found"),
                             @ApiResponse(code = 409, message = "Can't delete borrowed book"),
                             @ApiResponse(code = 500, message = "Internal Category server error")})
     public ResponseEntity<String> delete(@PathVariable(name = "id") Integer id) {
-        Book found_book = bookRepository.getById(id);
-        bookShelfService.delete(id);
-        return new ResponseEntity<>("Book deleted" + found_book.getName(), HttpStatus.OK);
+        try {
+            Book found_book = bookRepository.getById(id);
+            bookShelfService.delete(id);
+            return new ResponseEntity<>("Book deleted " + found_book.getName(), HttpStatus.OK);
+        } catch (BookshelfResourceNotFoundException b1) {
+            return new ResponseEntity<>(String.format("Book with id=%d doesn't exist", id), HttpStatus.NOT_FOUND);
+        } catch (BookshelfConflictException b2) {
+            return new ResponseEntity<>(String.format("Book with id=%d is still borrowed. Can't delete",id),
+                    HttpStatus.CONFLICT);
+        }
     }
     /**
      * GET Request to receive a map that shows list of all books Available.
@@ -110,12 +121,12 @@ public class BookShelfController {
      *
      * @return ResponseEntity that contains history of every book and it's availability.
      */
-    @GetMapping(path = "/booksHistory", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "Books History",response = HashMap.class),
+    @GetMapping(path = "/bookHistory/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Book History",response = HashMap.class),
     @ApiResponse(code = 500,message = "Internal BookShelf server error")})
-    public ResponseEntity<HashMap<Book, List<String>>> getBookHistory(){
-        HashMap<Book,List<String>> bookHistoryHashMap = bookShelfService.getBooksHistory();
-        log.info("Books History={}",bookHistoryHashMap);
+    public ResponseEntity<HashMap<Book, List<String>>> getBookHistory(@PathVariable(name = "name") String name){
+        HashMap<Book,List<String>> bookHistoryHashMap = bookShelfService.getBooksHistory(name);
+        log.info("Book History={}",bookHistoryHashMap);
         return new ResponseEntity<>(bookHistoryHashMap,HttpStatus.OK);
     }
 

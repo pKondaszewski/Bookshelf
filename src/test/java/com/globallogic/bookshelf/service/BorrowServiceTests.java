@@ -112,4 +112,5 @@ public class BorrowServiceTests {
 
         assertThat(testedList).usingRecursiveComparison().isEqualTo(correctUserHistory);
     }
+
 }
