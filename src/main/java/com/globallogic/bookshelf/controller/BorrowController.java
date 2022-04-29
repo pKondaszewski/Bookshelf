@@ -19,6 +19,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.print.attribute.standard.Media;
+
 /**
  * Client-server communication class that's processes /borrow requests
  *
@@ -57,6 +59,41 @@ public class BorrowController {
     }
 
     /**
+     * POST Request to borrow a book
+     *
+     * @param borrow borrow entity.
+     * @return ResponseEntity that informs about the borrowing of the book.
+     */
+    @PostMapping(path = "/byAuthorAndTitle", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Borrows a book based on author and title")
+    @ApiResponses(value = { @ApiResponse(code = 201, message = "Book borrowed"),
+                            @ApiResponse(code = 404, message = "Bad Request"),
+                            @ApiResponse(code = 500, message = "Internal Bookshelf server error"),
+                            @ApiResponse(code = 409, message = "Book is already borrowed")})
+    public ResponseEntity<String> borrowBookByAuthorAndTitle(@RequestBody Borrow borrow) {
+        try {
+            borrowsService.borrowBookByAuthorAndTitle(borrow);
+            log.info("Borrow creation = {}", borrow);
+            return new ResponseEntity<>(
+                    String.format("Borrow id=%s created successfully", borrow.getId()),
+                    HttpStatus.CREATED);
+        } catch (BookshelfResourceNotFoundException b1) {
+            return new ResponseEntity<>(
+                    String.format("Book with author : %s and name : %s doesn't exist.",
+                            borrow.getBook().getAuthor(),
+                            borrow.getBook().getName()),
+                    HttpStatus.NOT_FOUND);
+        } catch (BookshelfConflictException b2) {
+            return new ResponseEntity<>(
+                    String.format("Book with author : %s and name : %s is already borrowed.",
+                            borrow.getBook().getAuthor(),
+                            borrow.getBook().getName()),
+                    HttpStatus.CONFLICT);
+        }
+    }
+
+
+    /**
      * PUT Request to return one book based on the id of borrow and book id.
      *
      * @param borrow borrow entity.
@@ -82,7 +119,7 @@ public class BorrowController {
      * @param id id of the borrow
      * @return ResponseEntity that informs about the removal of the borrow
      */
-    @DeleteMapping(path = "/{id}", produces = "text/plain")
+    @DeleteMapping(path = "/{id}", produces = MediaType.TEXT_PLAIN_VALUE)
     @ApiOperation(value = "Deleting specific borrow")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Borrow deleted"),
                             @ApiResponse(code = 404, message = "Borrow not found"),

@@ -54,6 +54,37 @@ public class BorrowService {
     }
 
     /**
+     * Create a borrow by author and book title
+     *
+     * @param borrowBody body of the book to borrow
+     * @throws BookshelfConflictException exception informing that book is already borrowed
+     */
+    @Transactional
+    public void borrowBookByAuthorAndTitle(Borrow borrowBody) {
+        String bookAuthor = borrowBody.getBook().getAuthor();
+        String bookName = borrowBody.getBook().getName();
+        Book book = bookRepository.findBookByAuthorAndName(bookAuthor, bookName);
+        if (book == null) {
+            throw new BookshelfResourceNotFoundException(
+                    String.format("Book with author : %s and name : %s doesn't exist.", bookAuthor, bookName)
+            );
+        } else {
+            if (book.isAvailable()) {
+                book.setAvailable(false);
+                bookRepository.save(book);
+                if (borrowBody.getBorrowed() == null) {
+                    borrowBody.setBorrowed(new Date());
+                }
+                borrowRepository.save(borrowBody);
+            } else {
+                throw new BookshelfConflictException(
+                        String.format("Book with author : %s and name : %s is already borrowed.", bookAuthor, bookName)
+                );
+            }
+        }
+    }
+
+    /**
      * Return a book
      *
      * @param borrowBody
