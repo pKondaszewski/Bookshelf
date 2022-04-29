@@ -50,6 +50,7 @@ public class BookShelfService {
         } else {
             book.setCategory(categoryRepository.getById(category.getId()));
         }
+        bookRepository.save(book);
     }
 
     public void delete(Integer id) {

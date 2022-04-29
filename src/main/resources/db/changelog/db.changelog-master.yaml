@@ -2,6 +2,7 @@ databaseChangeLog:
   - changeSet:
       id: create_book_table
       author: gl
+      context: prod, test
       changes:
         - createTable:
             tableName: category
@@ -93,4 +94,8 @@ databaseChangeLog:
                     foreignKeyName: fk_book_id
                     references: book(id)
   - include:
-      - file: /db/changelog/changes/database_init.sql
+      - context: prod, test
+      - file: /db/changelog/changes/category_init.sql
+  - include:
+      - context: test
+      - file: /db/changelog/changes/test_data_init.sql
