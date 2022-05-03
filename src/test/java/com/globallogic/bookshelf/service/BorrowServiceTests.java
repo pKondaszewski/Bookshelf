@@ -1,5 +1,6 @@
 package com.globallogic.bookshelf.service;
 
+import com.globallogic.bookshelf.controller.BorrowController;
 import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.entity.Borrow;
 import com.globallogic.bookshelf.entity.Category;
@@ -7,6 +8,7 @@ import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
+import com.globallogic.bookshelf.repository.CategoryRepository;
 import com.globallogic.bookshelf.utils.UserHistory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -16,39 +18,49 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
 import java.sql.Date;
-import java.util.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 public class BorrowServiceTests {
 
-    private static Book availableBookTest, notAvailableBookTest, available2BookTest;
-    private static Borrow borrow3Test, borrow1Test, borrow2Test;
+    private static Book availableBookTest, notAvailableBookTest, available2BookTest, available3BookTest,notAvailableBookTest2;
+    private static Borrow borrow3Test, borrow1Test, borrow2Test,borrow4test,borrow5test,borrow6test;
     private static String firstnameTest, surnameTest, bookAuthorTest, bookNameTest;
     private static List<Borrow> borrowListTest;
     private static UserHistory correctUserHistory;
+
+
+    @Mock
+    private static BookRepository bookRepository;
 
     @Mock
     private static BorrowRepository borrowRepository;
 
     @Mock
-    private static BookRepository bookRepository;
+    private static CategoryRepository categoryRepository;
 
     @InjectMocks
     private static BorrowService service;
 
     private static final int ID_TEST = 1;
 
+
+
     @BeforeAll
     public static void setModel() {
         service = new BorrowService(borrowRepository, bookRepository);
 
-        Date testDate1 = Date.valueOf(LocalDate.of(1,1,1));
-        Date testDate2 = Date.valueOf(LocalDate.of(2,2,2));
+        Date testDate1 = Date.valueOf(LocalDate.of(1, 1, 1));
+        Date testDate2 = Date.valueOf(LocalDate.of(2, 2, 2));
 
         bookAuthorTest = "BookAuthorTest";
         bookNameTest = "BookNameTest";
@@ -56,16 +68,26 @@ public class BorrowServiceTests {
                 new Category(1, "testCategory"));
         availableBookTest = new Book(2, bookAuthorTest, bookNameTest, true,
                 new Category(2, "testCategory"));
-        available2BookTest = new Book(2, bookAuthorTest, bookNameTest, true,
+        available2BookTest = new Book(3, bookAuthorTest, bookNameTest, true,
+                new Category(2, "testCategory"));
+        available3BookTest = new Book(4, bookAuthorTest, bookNameTest, true,
+                new Category(2, "testCategory"));
+        notAvailableBookTest2 = new Book(1, bookAuthorTest, bookNameTest, false,
                 new Category(2, "testCategory"));
 
-        borrow1Test = new Borrow(1, testDate1, testDate2,"Arek","Darek","awdawwda", availableBookTest);
-        borrow2Test = new Borrow(2, testDate1,null,"Arek","Darek","awdawwda", notAvailableBookTest);
-        borrow3Test = new Borrow(3, null, null,"Arek","Darek","awdawwda", availableBookTest);
+
+
+        borrow1Test = new Borrow(1, testDate1, testDate2, "Arek", "Darek", "awdawwda", availableBookTest);
+        borrow2Test = new Borrow(2, testDate1, null, "Arek", "Darek", "awdawwda", notAvailableBookTest);
+        borrow3Test = new Borrow(3, null, null, "Arek", "Darek", "awdawwda", availableBookTest);
+        borrow4test = new Borrow(4, null, null, "Arek", "Darek", "awdawwda", available3BookTest);
+        borrow5test = new Borrow(4, null, null, "Arek", "Darek", "awdawwda", notAvailableBookTest);
+        borrow6test = new Borrow(4, testDate1, null, "Arek", "Darek", "awdawwda", notAvailableBookTest2);
 
         borrowListTest = new ArrayList<>();
         borrowListTest.add(borrow1Test);
         borrowListTest.add(borrow2Test);
+
 
         List<Borrow> foundBorrowsTest = new ArrayList<>();
         foundBorrowsTest.add(borrow1Test);
@@ -77,6 +99,43 @@ public class BorrowServiceTests {
         firstnameTest = "Jan";
         surnameTest = "Kowalski";
     }
+
+    @Test
+    public void testBorrowByIdSuccess() {
+        Mockito.doReturn(Optional.of(available3BookTest)).when(bookRepository).findById(available3BookTest.getId());
+
+        service.borrowBook(borrow4test);
+
+        Mockito.verify(borrowRepository).save(borrow4test);
+
+    }
+
+    @Test
+    public void testBorrowBookByIdResourceBookshelfConflictException() {
+        Mockito.doReturn(Optional.of(notAvailableBookTest)).when(bookRepository).findById(notAvailableBookTest.getId());
+
+
+        Exception exception = assertThrows(BookshelfConflictException.class, () ->
+                service.borrowBook(borrow5test)
+        );
+
+        String expectedMessage = String.format(
+                "Book with name : %s is already borrowed.", notAvailableBookTest.getName()
+        );
+        String actualMessage = exception.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    public void testReturnBook(){
+        Mockito.doReturn(Optional.of(borrow6test)).when(borrowRepository).findById(borrow6test.getId());
+        Mockito.doReturn(Optional.of(notAvailableBookTest2)).when(bookRepository).findById(ID_TEST);
+
+        service.returnBook(borrow6test);
+
+        Mockito.verify(borrowRepository).save(borrow6test);
+    }
+
 
     @Test
     public void testBorrowBookByAuthorAndTitleSuccess() {
@@ -172,5 +231,7 @@ public class BorrowServiceTests {
 
         assertThat(testedList).usingRecursiveComparison().isEqualTo(correctUserHistory);
     }
+
+
 
 }

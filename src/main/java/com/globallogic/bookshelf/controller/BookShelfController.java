@@ -58,16 +58,16 @@ public class BookShelfController {
      * @param id id of the book
      * @return ResponseEntity that informs about the removal of the book
      */
-    @DeleteMapping(path = "/{id}", produces = "text/plain")
+    @DeleteMapping(path = "/{id}")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Book deleted", response = String.class),
                             @ApiResponse(code = 404, message = "Book not found"),
                             @ApiResponse(code = 409, message = "Can't delete borrowed book"),
                             @ApiResponse(code = 500, message = "Internal Category server error")})
-    public ResponseEntity<String> delete(@PathVariable(name = "id") Integer id) {
+    public ResponseEntity<String> delete(@PathVariable(name = "id")@RequestBody Integer id) {
         try {
             Book found_book = bookRepository.getById(id);
             bookShelfService.delete(id);
-            return new ResponseEntity<>("Book deleted " + found_book.getName(), HttpStatus.OK);
+            return new ResponseEntity<>(String.format("Book with id=%d delete", id), HttpStatus.OK);
         } catch (BookshelfResourceNotFoundException b1) {
             return new ResponseEntity<>(String.format("Book with id=%d doesn't exist", id), HttpStatus.NOT_FOUND);
         } catch (BookshelfConflictException b2) {
@@ -81,11 +81,13 @@ public class BookShelfController {
      * @return ResponseEntity that contains history of every book and it's availability.
      */
 
-    @GetMapping(path = "/listOfBooksAvailable", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "All books available", response = HashMap.class),
+    @GetMapping(path = "/booksPerCategoryMap", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Show available books")
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "All books available"),
                             @ApiResponse(code = 500, message = "Internal BookShelf server error")})
     public ResponseEntity<HashMap<Book, String>> getAllBooksAvailable() {
         HashMap<Book, String> booksAvailable = bookShelfService.getAllBooksAvailable();
+        log.info("Books available = {}", booksAvailable);
         return new ResponseEntity<>(booksAvailable, HttpStatus.OK);
     }
 
@@ -125,11 +127,19 @@ public class BookShelfController {
     @GetMapping(path = "/bookHistory/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Book History",response = HashMap.class),
     @ApiResponse(code = 500,message = "Internal BookShelf server error")})
-    public ResponseEntity<HashMap<Book, List<String>>> getBookHistory(@PathVariable(name = "name") String name){
-        HashMap<Book,List<String>> bookHistoryHashMap = bookShelfService.getBooksHistory(name);
-        log.info("Book History={}",bookHistoryHashMap);
-        return new ResponseEntity<>(bookHistoryHashMap,HttpStatus.OK);
+    public ResponseEntity<HashMap<Book, List<String>>> getBookHistory(@PathVariable(name = "name") String name) {
+
+        HashMap bookHistoryHashMap = null;
+        try {
+            bookHistoryHashMap = bookShelfService.getBooksHistory(name);
+            log.info("Book History={}", bookHistoryHashMap);
+            return new ResponseEntity<>(bookHistoryHashMap, HttpStatus.OK);
+        } catch (NullPointerException b1) {
+            return new ResponseEntity<>(bookHistoryHashMap, HttpStatus.NOT_FOUND);
+        
+        }
     }
+
 
     /**
      * GET Request to receive a map that shows last borrow of book.
@@ -140,7 +150,7 @@ public class BookShelfController {
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Books History",response = HashMap.class),
             @ApiResponse(code = 500,message = "Internal BookShelf server error")})
     public ResponseEntity<HashMap<Book, String>> getHashMapResponseEntity(){
-        HashMap<Book,String> bookHistoryHashMap = bookShelfService.getListOfBorrowedBooksWithNewestBorrow();
+        HashMap<Book,String> bookHistoryHashMap = bookShelfService.getListOfBorrowedBooksSort();
         log.info("Books History={}",bookHistoryHashMap);
         return new ResponseEntity<>(bookHistoryHashMap,HttpStatus.OK);
     }

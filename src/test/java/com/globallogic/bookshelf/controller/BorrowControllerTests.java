@@ -1,7 +1,16 @@
 package com.globallogic.bookshelf.controller;
 
+import com.globallogic.bookshelf.entity.Book;
+import com.globallogic.bookshelf.entity.Borrow;
+import com.globallogic.bookshelf.entity.Category;
+import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
+import com.globallogic.bookshelf.repository.BookRepository;
+import com.globallogic.bookshelf.repository.BorrowRepository;
 import com.globallogic.bookshelf.repository.CategoryRepository;
+import com.globallogic.bookshelf.service.BorrowService;
+import com.globallogic.bookshelf.service.BorrowServiceTests;
 import com.globallogic.bookshelf.service.CategoryService;
+import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -16,32 +25,42 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.Optional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
-@WebMvcTest(controllers = CategoryController.class)
+@WebMvcTest(controllers = BorrowController.class)
 @AutoConfigureMockMvc
-public class CategoryControllerTests {
+public class BorrowControllerTests {
+
+    private static int id;
+    @MockBean
+    private BorrowRepository borrowRepository;
 
     @MockBean
-    private CategoryRepository categoryRepository;
+    private BorrowService borrowService;
 
     @MockBean
-    private CategoryService categoryService;
+    private BookRepository bookRepository;
 
     @Autowired
     private MockMvc mockMvc;
 
+
     private static String name, mapCategoryTestName1, mapCategoryTestName2;
     private static HashMap<String, Integer> booksPerCategoryMap;
 
+
     @BeforeAll
     public static void setModel() {
-        name = "testName";
+        name = "1";
 
         mapCategoryTestName1 = "TestCategory1";
         mapCategoryTestName2 = "TestCategory2";
@@ -50,39 +69,6 @@ public class CategoryControllerTests {
         booksPerCategoryMap.put(mapCategoryTestName2, 10);
     }
 
-    @Test
-    public void testPostRequestSuccess() throws Exception {
-        mockMvc
-                .perform(post("/category").content(name).contentType(MediaType.TEXT_PLAIN))
-                .andDo(print())
-                .andExpect(status().isCreated())
-                .andExpect(content().string(String.format("Category %s created successfully", name)));
-    }
 
 
-    @Test
-    public void testDeleteRequestSuccess() throws Exception {
-        mockMvc
-                .perform(delete("/category").content(name).contentType(MediaType.TEXT_PLAIN))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().string(String.format("Category %s deleted successfully", name)));
-    }
-
-    @Test
-    public void testGetAllRequestSuccess() throws Exception {
-        Mockito.doReturn(booksPerCategoryMap).when(categoryService).getAmountOfBooksPerCategory();
-
-        mockMvc
-                .perform(get("/category/amountOfBooksPerCategory"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath(
-                        String.format("$.%s",mapCategoryTestName1),
-                        Matchers.is(booksPerCategoryMap.get(mapCategoryTestName1))))
-                .andExpect(jsonPath(
-                        String.format("$.%s",mapCategoryTestName2),
-                        Matchers.is(booksPerCategoryMap.get(mapCategoryTestName2))));
-    }
 }

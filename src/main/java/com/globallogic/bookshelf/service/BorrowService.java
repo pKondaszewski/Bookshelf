@@ -10,7 +10,10 @@ import com.globallogic.bookshelf.utils.UserHistory;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 /**
  * Business logic of the /borrow request
@@ -84,6 +87,7 @@ public class BorrowService {
         }
     }
 
+
     /**
      * Return a book
      *
@@ -92,18 +96,15 @@ public class BorrowService {
      */
     @Transactional
     public void returnBook(Borrow borrowBody) {
-
-        Integer id = borrowBody.getId();
-        Borrow borrow = borrowRepository.findById(id).get();
-        Book book = bookRepository.findById(borrow.getId()).get();
-
+        Borrow borrow = borrowRepository.findById(borrowBody.getId()).get();
+        Book book = bookRepository.findById(borrow.getBook().getId()).get();
         if (!book.isAvailable()) {
             book.setAvailable(true);
             bookRepository.save(book);
             borrow.setReturned(new Date());
             borrowRepository.save(borrow);
         } else {
-            throw new BookshelfResourceNotFoundException(String.format("Book with name : %s is not borrowed.", book.getName()));
+            throw new NoSuchElementException(String.format("Book with name : %s is not borrowed.", book.getName()));
         }
     }
 
@@ -112,17 +113,17 @@ public class BorrowService {
      *
      * @param id id of the specific borrow
      * @throws BookshelfResourceNotFoundException exception informing that borrow doesn't exist
-     * @throws BookshelfConflictException exception informing that borrow is still active
+     * @throws BookshelfConflictException         exception informing that borrow is still active
      */
     @Transactional
     public void deleteBorrow(Integer id) {
         Optional<Borrow> foundBorrow = borrowRepository.findById(id);
         if (foundBorrow.isEmpty()) {
-            throw new BookshelfResourceNotFoundException(String.format("Borrow with id=%d doesn't exist",id));
+            throw new BookshelfResourceNotFoundException(String.format("Borrow with id=%d doesn't exist", id));
         } else {
             Borrow borrow = foundBorrow.get();
             if (borrow.getReturned() == null) {
-                throw new BookshelfConflictException(String.format("Borrow with id=%d is still active. Can't delete",id));
+                throw new BookshelfConflictException(String.format("Borrow with id=%d is still active. Can't delete", id));
             } else {
                 borrowRepository.deleteById(id);
             }
@@ -133,7 +134,7 @@ public class BorrowService {
      * Get a borrow history and actual borrowed books info of the specific user based by firstname and surname
      *
      * @param firstname String represents firstname of the user
-     * @param surname String represents surname of the user
+     * @param surname   String represents surname of the user
      * @return List with every finished borrow of the user and active borrowed books with the number of them.
      */
     public UserHistory getUserBorrowHistory(String firstname, String surname) {

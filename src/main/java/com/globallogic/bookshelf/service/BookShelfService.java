@@ -9,6 +9,8 @@ import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
 import com.globallogic.bookshelf.repository.CategoryRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -27,6 +29,7 @@ public class BookShelfService {
     protected BookRepository bookRepository;
     protected BorrowRepository borrowRepository;
     protected CategoryRepository categoryRepository;
+    protected ModelMapper modelMapper;
 
 
     public BookShelfService(BookRepository bkRepository, BorrowRepository bwRepository,
@@ -56,18 +59,18 @@ public class BookShelfService {
     public void delete(Integer id) {
         Optional<Book> foundBook = bookRepository.findById(id);
         if (foundBook.isEmpty()) {
-            throw new BookshelfResourceNotFoundException(String.format("Book with id=%d doesn't exist",id));
+            throw new BookshelfResourceNotFoundException(String.format("Book with id=%d doesn't exist", id));
         } else {
             Book book = foundBook.get();
-           List<Borrow> borrowList = borrowRepository.findBorrowsByBook(book);
+            List<Borrow> borrowList = borrowRepository.findBorrowsByBook(book);
             if (book.isAvailable()) {
-                for(Borrow borrow : borrowList){
+                for (Borrow borrow : borrowList) {
                     borrowRepository.delete(borrow);
                 }
                 bookRepository.deleteById(id);
 
             } else {
-                throw new BookshelfConflictException(String.format("Book with id=%d is still borrowed. Can't delete",id));
+                throw new BookshelfConflictException(String.format("Book with id=%d is still borrowed. Can't delete", id));
             }
         }
     }
@@ -77,6 +80,7 @@ public class BookShelfService {
      *
      * @return Hashmap with book and information about the book available (name and available book)
      */
+
     public HashMap<String, String> getAllBooks() {
         HashMap<String, String> bookMap = new HashMap<>();
         List<Book> bookList = bookRepository.findAll();
@@ -93,10 +97,11 @@ public class BookShelfService {
      *
      * @return Hashmap with book and information about the book available (name and available book)
      */
+
     public HashMap<Book, String> getAllBooksAvailable() {
         HashMap<Book, String> bookMap = new HashMap<>();
         List<Book> allBooks = bookRepository.findAll();
-        for (Book book :  allBooks) {
+        for (Book book : allBooks) {
             if (book.isAvailable()) {
                 bookMap.put(book, "Available");
             }
@@ -132,20 +137,18 @@ public class BookShelfService {
      *
      * @return Hashmap with book and information about the book availability (owner and date of the borrow)
      */
-    public HashMap<Book, String> getListOfBorrowedBooksWithNewestBorrow() {
+    public HashMap<Book, String> getListOfBorrowedBooksSort() {
         HashMap<Book, String> booksAvailability = new HashMap<>();
         List<Book> allBooks = bookRepository.findAll();
         for (Book book : allBooks) {
             if (!book.isAvailable()) {
                 List<Borrow> borrowList = borrowRepository.findBorrowsByBook(book);
-                if (!borrowList.isEmpty()) {
-                    if (borrowList != null && !borrowList.isEmpty()) {
-                        Borrow borrow = borrowList.get(borrowList.size() - 1);
-                        Date dateOfTheBorrow =  borrow.getBorrowed();
-                        String ownerOfTheBorrow ="Name : "+ borrow.getFirstname()+ " " + borrow.getSurname();
-                        String infoAboutTheBorrow = ownerOfTheBorrow + " : Date of borrowing book "  + dateOfTheBorrow;
-                        booksAvailability.put(book, infoAboutTheBorrow);
-                    }
+                if (CollectionUtils.isNotEmpty(borrowList)) {
+                    Borrow borrow = borrowList.get(borrowList.size() - 1);
+                    Date dateOfTheBorrow = borrow.getBorrowed();
+                    String ownerOfTheBorrow = "Name : " + borrow.getFirstname() + " " + borrow.getSurname();
+                    String infoAboutTheBorrow = ownerOfTheBorrow + " : Date of borrowing book " + dateOfTheBorrow;
+                    booksAvailability.put(book, infoAboutTheBorrow);
                 }
             }
         }
@@ -156,20 +159,19 @@ public class BookShelfService {
     /**
      * Get information about every book history
      *
-     * @param title title of the book
      * @return Hashmap with book and information about the book borrow history
      */
     public HashMap<Book, List<String>> getBooksHistory(String title) {
         HashMap<Book, List<String>> bookHistory = new HashMap<>();
         Book book = bookRepository.findByName(title);
         List<Borrow> booksBorrow = borrowRepository.findBorrowsByBook(book);
-        String available;
+
         List<String> bookList = new ArrayList<>();
 
         for (Borrow borrow : booksBorrow) {
-            String name ="Name: "+ borrow.getFirstname()+ " " + borrow.getSurname();
+            String name = "Name: " + borrow.getFirstname() + " " + borrow.getSurname();
             String comment;
-            String borrowDate ="Date of borrowing book: " + borrow.getBorrowed().toString();
+            String borrowDate = "Date of borrowing book: " + borrow.getBorrowed().toString();
             String returnDate;
 
             bookList.add(name);
@@ -177,7 +179,7 @@ public class BookShelfService {
             if (borrow.getReturned() == null) {
                 returnDate = "Book not returned";
             } else {
-                returnDate = "Date of return book: "+borrow.getReturned().toString();
+                returnDate = "Date of return book: " + borrow.getReturned().toString();
 
             }
             bookList.add(returnDate);
@@ -186,11 +188,12 @@ public class BookShelfService {
             if (borrow.getComment() == null) {
                 comment = "No comment";
             } else {
-                comment ="Comment: "+ borrow.getComment();
+                comment = "Comment: " + borrow.getComment();
 
             }
             bookList.add(comment);
         }
+        String available;
         if (book.isAvailable()) {
             available = "Book is available";
 
