@@ -77,7 +77,7 @@ public class BorrowController {
     }
 
     /**
-     * POST Request to borrow a book
+     * POST Request to borrow a book based on book's author and title
      *
      * @param borrow borrow entity.
      * @return ResponseEntity that informs about the borrowing of the book.
@@ -152,13 +152,13 @@ public class BorrowController {
      * @param id id of the borrow
      * @return ResponseEntity that informs about the removal of the borrow
      */
-    @DeleteMapping(path = "/{id}", produces = MediaType.TEXT_PLAIN_VALUE)
+    @DeleteMapping( produces = MediaType.TEXT_PLAIN_VALUE)
     @ApiOperation(value = "Deleting specific borrow")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Borrow deleted"),
                             @ApiResponse(code = 404, message = "Borrow not found"),
                             @ApiResponse(code = 409, message = "Borrow is still active"),
                             @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
-    public ResponseEntity<String> deleteBorrow(@PathVariable(name = "id") Integer id) {
+    public ResponseEntity<String> deleteBorrow(@RequestBody Integer id) {
         try {
             borrowsService.deleteBorrow(id);
             log.info("Deleting borrow id={}", id);

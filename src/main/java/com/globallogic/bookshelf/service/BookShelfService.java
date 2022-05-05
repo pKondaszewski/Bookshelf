@@ -78,6 +78,7 @@ public class BookShelfService {
      *
      * @return Hashmap with book and information about the book available (name and available book)
      */
+
     public HashMap<String, String> getAllBooks() {
         HashMap<String, String> bookMap = new HashMap<>();
         List<Book> bookList = bookRepository.findAll();
@@ -94,6 +95,7 @@ public class BookShelfService {
      *
      * @return Hashmap with book and information about the book available (name and available book)
      */
+
     public HashMap<Book, String> getAllBooksAvailable() {
         HashMap<Book, String> bookMap = new HashMap<>();
         List<Book> allBooks = bookRepository.findAll();
@@ -155,7 +157,6 @@ public class BookShelfService {
     /**
      * Get information about every book history
      *
-     * @param title title of the book
      * @return Hashmap with book and information about the book borrow history
      */
     public HashMap<Book, List<String>> getBooksHistory(String title) {

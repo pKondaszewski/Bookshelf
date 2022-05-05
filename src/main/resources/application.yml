@@ -14,5 +14,6 @@ spring:
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   liquibase:
-    contexts: test
-    dropFirst: true
+    contexts: prod
+    # contexts: test
+    dropFirst: false

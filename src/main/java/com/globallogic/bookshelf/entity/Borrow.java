@@ -34,7 +34,7 @@ public class Borrow {
     protected String surname;
     protected String comment;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "book_id",referencedColumnName = "id")
     protected Book book;
 

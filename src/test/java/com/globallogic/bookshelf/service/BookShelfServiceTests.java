@@ -48,6 +48,7 @@ public class BookShelfServiceTests {
 
 
     private static List<Book> allBooksTest;
+
     @BeforeAll
     public static void setBook() {
 
@@ -122,7 +123,6 @@ public class BookShelfServiceTests {
         Mockito.verify(bookRepository).deleteById(ID_TEST);
     }
 
-
     @Test
     public void testDeleteBookResourceNotFoundException() {
         Mockito.doReturn(Optional.empty()).when(bookRepository).findById(ID_TEST);
@@ -135,7 +135,6 @@ public class BookShelfServiceTests {
         String actualMessage = exception.getMessage();
         assertTrue(actualMessage.contains(expectedMessage));
     }
-
 
     @Test
     public void testDeleteBookConflictException() {
@@ -152,7 +151,6 @@ public class BookShelfServiceTests {
 
     @Test
     void testGetAllBooks() {
-
         Mockito.doReturn(allBooksTest).when(bookRepository).findAll();
 
         HashMap<String, String> booksAvailabilityReturn = bookShelfService.getAllBooks();
@@ -172,7 +170,6 @@ public class BookShelfServiceTests {
 
     }
 
-
     @Test
     public void testGetListOfBorrowedBooksSort() {
 
@@ -183,6 +180,7 @@ public class BookShelfServiceTests {
         Mockito.doReturn(bookBorrows).when(borrowRepository).findBorrowsByBook(bookNotAvailableTest);
 
         HashMap<Book, String> booksAvailabilityReturn = bookShelfService.getListOfBorrowedBooksSort();
+
         assertEquals(booksAvailabilityReturn, booksWithNewestBorrow);
     }
 
@@ -254,7 +252,6 @@ public class BookShelfServiceTests {
 
     @Test
     public void testCreateBookshelfResourceNotFoundException() {
-
         Exception exception = assertThrows(BookshelfResourceNotFoundException.class, () ->
                 bookShelfService.create(bookNotAvailableTest)
         );

@@ -65,11 +65,10 @@ public class BookShelfController {
                             @ApiResponse(code = 409, message = "Can't delete borrowed book"),
                             @ApiResponse(code = 500, message = "Internal Category server error")})
     public ResponseEntity<String> delete(@PathVariable(name = "id") Integer id) {
-
         try {
             Book foundBook = bookRepository.getById(id);
             bookShelfService.delete(id);
-            return new ResponseEntity<>("Book deleted " + foundBook.getName(), HttpStatus.OK);
+            return new ResponseEntity<>(String.format("Book with id=%d delete", id), HttpStatus.OK);
         } catch (BookshelfResourceNotFoundException b1) {
             return new ResponseEntity<>(String.format("Book with id=%d doesn't exist", id), HttpStatus.NOT_FOUND);
         } catch (BookshelfConflictException b2) {

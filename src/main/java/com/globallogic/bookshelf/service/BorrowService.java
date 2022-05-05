@@ -57,9 +57,10 @@ public class BorrowService {
     }
 
     /**
-     * Create a borrow by author and book title
+     * Create a borrow by book author and book title
      *
      * @param borrowBody body of the book to borrow
+     * @throws BookshelfResourceNotFoundException exception informing that book with given author and title doesn't exist
      * @throws BookshelfConflictException exception informing that book is already borrowed
      */
     @Transactional
@@ -78,6 +79,7 @@ public class BorrowService {
                 if (borrowBody.getBorrowed() == null) {
                     borrowBody.setBorrowed(new Date());
                 }
+                borrowBody.setBook(book);
                 borrowRepository.save(borrowBody);
             } else {
                 throw new BookshelfConflictException(
