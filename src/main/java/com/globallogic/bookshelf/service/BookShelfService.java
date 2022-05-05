@@ -10,7 +10,6 @@ import com.globallogic.bookshelf.repository.BorrowRepository;
 import com.globallogic.bookshelf.repository.CategoryRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -83,7 +82,7 @@ public class BookShelfService {
         HashMap<String, String> bookMap = new HashMap<>();
         List<Book> bookList = bookRepository.findAll();
         for (Book book : bookList) {
-            String bookName = book.getName();
+            String bookName = book.getTitle();
             String bookAuthor = book.getAuthor();
             bookMap.put(bookAuthor, bookName);
         }
@@ -161,7 +160,7 @@ public class BookShelfService {
      */
     public HashMap<Book, List<String>> getBooksHistory(String title) {
         HashMap<Book, List<String>> bookHistory = new HashMap<>();
-        Book book = bookRepository.findByName(title);
+        Book book = bookRepository.findByTitle(title);
         List<Borrow> booksBorrow = borrowRepository.findBorrowsByBook(book);
 
         List<String> bookList = new ArrayList<>();

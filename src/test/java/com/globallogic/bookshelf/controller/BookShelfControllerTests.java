@@ -6,7 +6,6 @@ import com.globallogic.bookshelf.entity.Category;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.service.BookShelfService;
 import com.google.gson.Gson;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,15 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import javax.print.attribute.standard.Media;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -71,7 +65,7 @@ public class BookShelfControllerTests {
         allBooksAvailableHashMap.put(testBook2, "Not Available");
 
         allBooksHashMap = new HashMap<>();
-        allBooksHashMap.put(testBook.getAuthor(), testBook.getName());
+        allBooksHashMap.put(testBook.getAuthor(), testBook.getTitle());
 
 
     }
@@ -86,12 +80,12 @@ public class BookShelfControllerTests {
                 .perform(post("/bookshelf").content(json).contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(content().string(String.format("Book %s created successfully", testBook.getName())));
+                .andExpect(content().string(String.format("Book %s created successfully", testBook.getTitle())));
     }
 
     @Test
     public void testDeleteBookRequestSuccess() throws Exception {
-        Mockito.doReturn(testBook).when(bookRepository).findByName(bookName);
+        Mockito.doReturn(testBook).when(bookRepository).findByTitle(bookName);
         mockMvc
                 .perform(delete("/bookshelf/{id}", testBook.getId().intValue()))
                 .andDo(print())

@@ -2,7 +2,6 @@ package com.globallogic.bookshelf.controller;
 
 
 import com.globallogic.bookshelf.entity.Book;
-import com.globallogic.bookshelf.entity.Borrow;
 import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
@@ -50,7 +49,7 @@ public class BookShelfController {
     public ResponseEntity<String> create(@RequestBody Book book) {
         bookShelfService.create(book);
         log.info("Creating book={}", book);
-        return new ResponseEntity<>(String.format("Book %s created successfully", book.getName()), HttpStatus.CREATED);
+        return new ResponseEntity<>(String.format("Book %s created successfully", book.getTitle()), HttpStatus.CREATED);
     }
 
     /**

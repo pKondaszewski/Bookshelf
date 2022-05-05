@@ -19,9 +19,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.print.attribute.standard.Media;
-import java.util.NoSuchElementException;
-
 /**
  * Client-server communication class that's processes /borrow requests
  *
@@ -65,13 +62,13 @@ public class BorrowController {
             return new ResponseEntity<>(
                     String.format("Book with author : %s and name : %s doesn't exist.",
                             borrow.getBook().getAuthor(),
-                            borrow.getBook().getName()),
+                            borrow.getBook().getTitle()),
                     HttpStatus.NOT_FOUND);
         } catch (BookshelfConflictException b2) {
             return new ResponseEntity<>(
                     String.format("Book with author : %s and name : %s is already borrowed.",
                             book.getAuthor(),
-                            book.getName()),
+                            book.getTitle()),
                     HttpStatus.CONFLICT);
         }
     }
@@ -99,13 +96,13 @@ public class BorrowController {
             return new ResponseEntity<>(
                     String.format("Book with author : %s and name : %s doesn't exist.",
                             borrow.getBook().getAuthor(),
-                            borrow.getBook().getName()),
+                            borrow.getBook().getTitle()),
                     HttpStatus.NOT_FOUND);
         } catch (BookshelfConflictException b2) {
             return new ResponseEntity<>(
                     String.format("Book with author : %s and name : %s is already borrowed.",
                             borrow.getBook().getAuthor(),
-                            borrow.getBook().getName()),
+                            borrow.getBook().getTitle()),
                     HttpStatus.CONFLICT);
         }
     }
@@ -135,13 +132,13 @@ public class BorrowController {
             return new ResponseEntity<>(
                     String.format("Book with author : %s and name : %s doesn't exist.",
                             borrow.getBook().getAuthor(),
-                            borrow.getBook().getName()),
+                            borrow.getBook().getTitle()),
                     HttpStatus.NOT_FOUND);
         } catch (BookshelfConflictException b2) {
             return new ResponseEntity<>(
                     String.format("Book with author : %s and name : %s is not borrowed.",
                             borrow.getBook().getAuthor(),
-                            borrow.getBook().getName()),
+                            borrow.getBook().getTitle()),
                     HttpStatus.CONFLICT);
         }
     }
@@ -178,14 +175,19 @@ public class BorrowController {
      * @param surname String surname of the user
      * @return Response entity with list containing finished borrows, active holding books and amount of them.
      */
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/userHistory", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Getting specific user borrow history")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Borrow history returned"),
                             @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
     public ResponseEntity<UserHistory> getUserBorrowHistory(@RequestParam String firstname,
-                                                             @RequestParam String surname) {
+                                                            @RequestParam String surname) {
         UserHistory userHistory = borrowsService.getUserBorrowHistory(firstname, surname);
-        log.info("Showing borrow history of user={} {} : {}", firstname, surname, userHistory);
+        log.info("Showing borrow history of user={} {} : {} {} {}",
+                firstname,
+                surname,
+                userHistory.getReturnedBooks(),
+                userHistory.getCurrentlyBorrowedBooks(),
+                userHistory.getNumberOfCurrentlyBorrowedBooks());
         return new ResponseEntity<>(userHistory, HttpStatus.OK);
 
     }

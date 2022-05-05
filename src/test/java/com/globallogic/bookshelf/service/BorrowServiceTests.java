@@ -1,6 +1,5 @@
 package com.globallogic.bookshelf.service;
 
-import com.globallogic.bookshelf.controller.BorrowController;
 import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.entity.Borrow;
 import com.globallogic.bookshelf.entity.Category;
@@ -91,9 +90,9 @@ public class BorrowServiceTests {
         List<Borrow> foundBorrowsTest = new ArrayList<>();
         foundBorrowsTest.add(borrow1Test);
 
-        correctUserHistory = new UserHistory(foundBorrowsTest,
-                "BookNameTest; ",
-                1);
+        //correctUserHistory = new UserHistory(foundBorrowsTest,
+        //"BookNameTest; ",
+        //        1);
 
         firstnameTest = "Jan";
         surnameTest = "Kowalski";
@@ -119,7 +118,7 @@ public class BorrowServiceTests {
         );
 
         String expectedMessage = String.format(
-                "Book with name : %s is already borrowed.", notAvailableBookTest.getName()
+                "Book with name : %s is already borrowed.", notAvailableBookTest.getTitle()
         );
         String actualMessage = exception.getMessage();
         assertTrue(actualMessage.contains(expectedMessage));
@@ -138,7 +137,7 @@ public class BorrowServiceTests {
 
     @Test
     public void testBorrowBookByAuthorAndTitleSuccess() {
-        Mockito.doReturn(availableBookTest).when(bookRepository).findBookByAuthorAndName(bookAuthorTest, bookNameTest);
+        Mockito.doReturn(availableBookTest).when(bookRepository).findByAuthorAndTitle(bookAuthorTest, bookNameTest);
 
         service.borrowBookByAuthorAndTitle(borrow3Test);
 
@@ -147,7 +146,7 @@ public class BorrowServiceTests {
 
     @Test
     public void testBorrowBookByAuthorAndTitleSuccessWithNullReturnDate() {
-        Mockito.doReturn(available2BookTest).when(bookRepository).findBookByAuthorAndName(bookAuthorTest, bookNameTest);
+        Mockito.doReturn(available2BookTest).when(bookRepository).findByAuthorAndTitle(bookAuthorTest, bookNameTest);
 
         service.borrowBookByAuthorAndTitle(borrow3Test);
 
@@ -156,7 +155,7 @@ public class BorrowServiceTests {
 
     @Test
     public void testBorrowBookByAuthorAndTitleResourceNotFoundException() {
-        Mockito.doReturn(null).when(bookRepository).findBookByAuthorAndName(bookAuthorTest, bookNameTest);
+        Mockito.doReturn(null).when(bookRepository).findByAuthorAndTitle(bookAuthorTest, bookNameTest);
 
 
         Exception exception = assertThrows(BookshelfResourceNotFoundException.class, () ->
@@ -172,7 +171,7 @@ public class BorrowServiceTests {
 
     @Test
     public void testBorrowBookByAuthorAndTitleConflictException() {
-        Mockito.doReturn(notAvailableBookTest).when(bookRepository).findBookByAuthorAndName(bookAuthorTest, bookNameTest);
+        Mockito.doReturn(notAvailableBookTest).when(bookRepository).findByAuthorAndTitle(bookAuthorTest, bookNameTest);
 
 
         Exception exception = assertThrows(BookshelfConflictException.class, () ->

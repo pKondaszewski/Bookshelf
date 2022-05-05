@@ -6,14 +6,12 @@ import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
+import com.globallogic.bookshelf.utils.StringRepresentationOfTheBorrow;
 import com.globallogic.bookshelf.utils.UserHistory;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
-import java.util.Date;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Business logic of the /borrow request
@@ -52,7 +50,7 @@ public class BorrowService {
             }
             borrowRepository.save(borrowBody);
         } else {
-            throw new BookshelfConflictException(String.format("Book with name : %s is already borrowed.", book.getName()));
+            throw new BookshelfConflictException(String.format("Book with name : %s is already borrowed.", book.getTitle()));
         }
     }
 
@@ -66,8 +64,8 @@ public class BorrowService {
     @Transactional
     public void borrowBookByAuthorAndTitle(Borrow borrowBody) {
         String bookAuthor = borrowBody.getBook().getAuthor();
-        String bookName = borrowBody.getBook().getName();
-        Book book = bookRepository.findBookByAuthorAndName(bookAuthor, bookName);
+        String bookName = borrowBody.getBook().getTitle();
+        Book book = bookRepository.findByAuthorAndTitle(bookAuthor, bookName);
         if (book == null) {
             throw new BookshelfResourceNotFoundException(
                     String.format("Book with author : %s and name : %s doesn't exist.", bookAuthor, bookName)
@@ -106,7 +104,7 @@ public class BorrowService {
             borrow.setReturned(new Date());
             borrowRepository.save(borrow);
         } else {
-            throw new NoSuchElementException(String.format("Book with name : %s is not borrowed.", book.getName()));
+            throw new NoSuchElementException(String.format("Book with name : %s is not borrowed.", book.getTitle()));
         }
     }
 
@@ -140,19 +138,27 @@ public class BorrowService {
      * @return List with every finished borrow of the user and active borrowed books with the number of them.
      */
     public UserHistory getUserBorrowHistory(String firstname, String surname) {
-        StringBuilder activeBooksInfo = new StringBuilder();
+        List<String> completedBorrows = new ArrayList<>();
+        List<String> uncompletedBorrows = new ArrayList<>();
         int numberOfBorrowedBooks = 0;
-        List<Borrow> foundBorrows = borrowRepository.findBorrowsByFirstnameAndSurname(firstname, surname);
-        for (Borrow borrow : foundBorrows) {
+        StringRepresentationOfTheBorrow userFriendlyLook = new StringRepresentationOfTheBorrow();
+        List<Borrow> borrowsOfTheUser = borrowRepository.findBorrowsByFirstnameAndSurname(firstname, surname);
+        for (Borrow borrow : borrowsOfTheUser) {
             Book book = borrow.getBook();
             if (!book.isAvailable() && borrow.getReturned() == null) {
-                activeBooksInfo.append(book.getName()).append("; ");
+                String borrowUserFriendlyLook = userFriendlyLook.stringRepresentationOfUncompletedBorrow(book, borrow);
+                uncompletedBorrows.add(borrowUserFriendlyLook);
                 numberOfBorrowedBooks += 1;
             }
         }
-        foundBorrows.removeIf(
+        borrowsOfTheUser.removeIf(
                 borrow -> (borrow.getReturned() == null)
         );
-        return new UserHistory(foundBorrows, activeBooksInfo.toString(), numberOfBorrowedBooks);
+        for (Borrow borrow : borrowsOfTheUser) {
+            Book book = borrow.getBook();
+            String borrowUserFriendlyLook = userFriendlyLook.stringRepresentationOfCompletedBorrow(book, borrow);
+            completedBorrows.add(borrowUserFriendlyLook);
+        }
+        return new UserHistory(completedBorrows, uncompletedBorrows, numberOfBorrowedBooks);
     }
 }

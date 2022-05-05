@@ -22,7 +22,7 @@ public class Book {
     protected Integer id;
 
     protected String author;
-    protected String name;
+    protected String title;
     protected boolean available;
 
     @OneToOne(cascade = CascadeType.MERGE)

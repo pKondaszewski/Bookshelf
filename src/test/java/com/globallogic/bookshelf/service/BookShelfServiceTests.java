@@ -90,8 +90,8 @@ public class BookShelfServiceTests {
                 bookAvailableTest);
 
         books = new HashMap<>();
-        books.put(bookAvailableTest.getAuthor(), bookAvailableTest.getName());
-        books.put(bookNotAvailableTest.getAuthor(), bookNotAvailableTest.getName());
+        books.put(bookAvailableTest.getAuthor(), bookAvailableTest.getTitle());
+        books.put(bookNotAvailableTest.getAuthor(), bookNotAvailableTest.getTitle());
 
         booksWithNewestBorrow = new HashMap<>();
         booksWithNewestBorrow.put(bookNotAvailableTest,
@@ -211,10 +211,10 @@ public class BookShelfServiceTests {
 
         HashMap<Book, List<String>> bookListHashMap = new HashMap<>();
         bookListHashMap.put(bookAvailableTest, borrowInfo);
-        Mockito.doReturn(bookAvailableTest).when(bookRepository).findByName(bookAvailableTest.getName());
+        Mockito.doReturn(bookAvailableTest).when(bookRepository).findByTitle(bookAvailableTest.getTitle());
         Mockito.doReturn(bookBorrows).when(borrowRepository).findBorrowsByBook(bookAvailableTest);
 
-        HashMap<Book, List<String>> bookHistory = bookShelfService.getBooksHistory(bookAvailableTest.getName());
+        HashMap<Book, List<String>> bookHistory = bookShelfService.getBooksHistory(bookAvailableTest.getTitle());
 
         assertEquals(bookListHashMap, bookHistory);
     }
@@ -232,10 +232,10 @@ public class BookShelfServiceTests {
 
         HashMap<Book, List<String>> bookListHashMap = new HashMap<>();
         bookListHashMap.put(bookNotAvailableTest, borrowInfo);
-        Mockito.doReturn(bookNotAvailableTest).when(bookRepository).findByName(bookNotAvailableTest.getName());
+        Mockito.doReturn(bookNotAvailableTest).when(bookRepository).findByTitle(bookNotAvailableTest.getTitle());
         Mockito.doReturn(bookBorrows).when(borrowRepository).findBorrowsByBook(bookNotAvailableTest);
 
-        HashMap<Book, List<String>> bookHistory = bookShelfService.getBooksHistory(bookNotAvailableTest.getName());
+        HashMap<Book, List<String>> bookHistory = bookShelfService.getBooksHistory(bookNotAvailableTest.getTitle());
 
         assertEquals(bookListHashMap, bookHistory);
 
