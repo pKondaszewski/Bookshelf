@@ -23,8 +23,8 @@ import java.util.Date;
 @Entity
 public class Borrow {
     @Id
-    @SequenceGenerator(name="test", sequenceName="test", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="test")
+    @SequenceGenerator(name="borrowSeq", sequenceName="borrowSeq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="borrowSeq")
     protected Integer id;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     protected Date borrowed;

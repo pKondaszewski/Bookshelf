@@ -38,17 +38,17 @@ public class CategoryController {
      * @param name name of the category
      * @return ResponseEntity that informs about the creation of the category
      */
-    @PostMapping(consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
+    @PostMapping(produces = MediaType.TEXT_PLAIN_VALUE)
     @ApiOperation(value = "Create a category with given name")
     @ApiResponses(value = { @ApiResponse(code = 201, message = "Category created"),
                             @ApiResponse(code = 409, message = "Category with given name already exists"),
                             @ApiResponse(code = 500, message = "Internal Category server error")})
-    public ResponseEntity<String> create(@RequestBody String name) {
+    public ResponseEntity<String> create(@RequestParam String name) {
         try {
             categoryService.create(name);
             log.info("Creating category={}", name);
             return new ResponseEntity<>(String.format("Category %s created successfully", name), HttpStatus.CREATED);
-        } catch (BookshelfConflictException b1) {
+        } catch (BookshelfConflictException exception) {
             return new ResponseEntity<>(String.format("Category with name %s already exists.", name),
                     HttpStatus.CONFLICT);
         }
@@ -60,21 +60,21 @@ public class CategoryController {
      * @param name name of the category
      * @return ResponseEntity that informs about the removal of the category
      */
-    @DeleteMapping(consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
+    @DeleteMapping(produces = MediaType.TEXT_PLAIN_VALUE)
     @ApiOperation(value = "Delete a category based by the name")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Category deleted"),
                             @ApiResponse(code = 404, message = "Category not found"),
                             @ApiResponse(code = 409, message = "Can't delete starting category"),
                             @ApiResponse(code = 500, message = "Internal Category server error")})
-    public ResponseEntity<String> delete(@RequestBody String name) {
+    public ResponseEntity<String> delete(@RequestParam String name) {
         try {
             categoryService.delete(name);
             log.info("Deleting category={}", name);
             return new ResponseEntity<>(String.format("Category %s deleted successfully", name), HttpStatus.OK);
-        } catch (BookshelfConflictException b1) {
+        } catch (BookshelfConflictException exception) {
             return new ResponseEntity<>(String.format("Can't delete %s. It's a starting category", name),
                     HttpStatus.CONFLICT);
-        } catch (BookshelfResourceNotFoundException b2) {
+        } catch (BookshelfResourceNotFoundException exception) {
             return new ResponseEntity<>(String.format("Category with name %s doesn't exist.", name),
                     HttpStatus.NOT_FOUND);
         }

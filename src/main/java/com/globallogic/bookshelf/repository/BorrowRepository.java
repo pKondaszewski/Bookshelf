@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface BorrowRepository extends JpaRepository<Borrow, Integer> {
 
-    List<Borrow> findBorrowsByBook(Book book);
-    List<Borrow> findBorrowsByFirstnameAndSurname(String firstname, String surname);
+    List<Borrow> findAllByBook(Book book);
+    List<Borrow> findAllByFirstnameAndSurname(String firstname, String surname);
 }

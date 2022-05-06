@@ -75,12 +75,12 @@ public class BookShelfController {
                     HttpStatus.CONFLICT);
         }
     }
+    
     /**
      * GET Request to receive a map that shows list of all books Available.
      *
      * @return ResponseEntity that contains history of every book and it's availability.
      */
-
     @GetMapping(path = "/booksPerCategoryMap", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Show available books")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "All books available"),

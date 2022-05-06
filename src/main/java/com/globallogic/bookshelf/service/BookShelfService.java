@@ -60,7 +60,7 @@ public class BookShelfService {
             throw new BookshelfResourceNotFoundException(String.format("Book with id=%d doesn't exist", id));
         } else {
             Book book = foundBook.get();
-            List<Borrow> borrowList = borrowRepository.findBorrowsByBook(book);
+            List<Borrow> borrowList = borrowRepository.findAllByBook(book);
             if (book.isAvailable()) {
                 for (Borrow borrow : borrowList) {
                     borrowRepository.delete(borrow);
@@ -77,7 +77,6 @@ public class BookShelfService {
      *
      * @return Hashmap with book and information about the book available (name and available book)
      */
-
     public HashMap<String, String> getAllBooks() {
         HashMap<String, String> bookMap = new HashMap<>();
         List<Book> bookList = bookRepository.findAll();
@@ -94,7 +93,6 @@ public class BookShelfService {
      *
      * @return Hashmap with book and information about the book available (name and available book)
      */
-
     public HashMap<Book, String> getAllBooksAvailable() {
         HashMap<Book, String> bookMap = new HashMap<>();
         List<Book> allBooks = bookRepository.findAll();
@@ -118,7 +116,7 @@ public class BookShelfService {
             if (book.isAvailable()) {
                 booksAvailability.put(book, "available");
             } else {
-                List<Borrow> bookBorrows = borrowRepository.findBorrowsByBook(book);
+                List<Borrow> bookBorrows = borrowRepository.findAllByBook(book);
                 Borrow activeBorrow = bookBorrows.get(bookBorrows.size() - 1);
                 Date dateOfTheBorrow = activeBorrow.getBorrowed();
                 String ownerOfTheBorrow = activeBorrow.getFirstname() + " " + activeBorrow.getSurname();
@@ -139,7 +137,7 @@ public class BookShelfService {
         List<Book> allBooks = bookRepository.findAll();
         for (Book book : allBooks) {
             if (!book.isAvailable()) {
-                List<Borrow> borrowList = borrowRepository.findBorrowsByBook(book);
+                List<Borrow> borrowList = borrowRepository.findAllByBook(book);
                 if (CollectionUtils.isNotEmpty(borrowList)) {
                     Borrow borrow = borrowList.get(borrowList.size() - 1);
                     Date dateOfTheBorrow = borrow.getBorrowed();
@@ -161,7 +159,7 @@ public class BookShelfService {
     public HashMap<Book, List<String>> getBooksHistory(String title) {
         HashMap<Book, List<String>> bookHistory = new HashMap<>();
         Book book = bookRepository.findByTitle(title);
-        List<Borrow> booksBorrow = borrowRepository.findBorrowsByBook(book);
+        List<Borrow> booksBorrow = borrowRepository.findAllByBook(book);
 
         List<String> bookList = new ArrayList<>();
 

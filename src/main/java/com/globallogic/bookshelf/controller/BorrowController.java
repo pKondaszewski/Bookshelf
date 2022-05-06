@@ -14,10 +14,13 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
 
 /**
  * Client-server communication class that's processes /borrow requests
@@ -31,11 +34,11 @@ import org.springframework.web.bind.annotation.*;
 @Api("Management Api")
 public class BorrowController {
     @Autowired
-    BorrowService borrowsService;
+    private BorrowService borrowsService;
     @Autowired
-    BorrowRepository borrowsRepository;
+    private BorrowRepository borrowsRepository;
     @Autowired
-    BookRepository bookRepository;
+    private BookRepository bookRepository;
 
     /**
      * POST Request to borrow a book
@@ -76,33 +79,40 @@ public class BorrowController {
     /**
      * POST Request to borrow a book based on book's author and title
      *
-     * @param borrow borrow entity.
-     * @return ResponseEntity that informs about the borrowing of the book.
+     * @param author author of the book
+     * @param title title of the book
+     * @param firstname firstname of the person that is borrowing the book
+     * @param surname surname of the person that is borrowing the book
+     * @param borrowDate date of the borrow
+     * @param comment additional comment for the borrow
+     * @return @return ResponseEntity that informs about the borrowing of the book.
      */
-    @PostMapping(path = "/byAuthorAndTitle", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/byAuthorAndTitle")
     @ApiOperation(value = "Borrows a book based on author and title")
     @ApiResponses(value = { @ApiResponse(code = 201, message = "Book borrowed"),
                             @ApiResponse(code = 404, message = "Bad Request"),
                             @ApiResponse(code = 500, message = "Internal Bookshelf server error"),
                             @ApiResponse(code = 409, message = "Book is already borrowed")})
-    public ResponseEntity<String> borrowBookByAuthorAndTitle(@RequestBody Borrow borrow) {
+    public ResponseEntity<String> borrowBookByAuthorAndTitle(@RequestParam String author,
+                                                             @RequestParam String title,
+                                                             @RequestParam String firstname,
+                                                             @RequestParam String surname,
+                                                             @RequestParam(required = false)
+                                                                 @DateTimeFormat(pattern = "yyyy-MM-dd") Date borrowDate,
+                                                             @RequestParam(required = false) String comment) {
         try {
-            borrowsService.borrowBookByAuthorAndTitle(borrow);
-            log.info("Borrow creation = {}", borrow);
+            borrowsService.borrowBookByAuthorAndTitle(author, title, firstname, surname, borrowDate, comment);
+            log.info("Borrow creation with author : {} and title : {}", author, title);
             return new ResponseEntity<>(
-                    String.format("Borrow id=%s created successfully", borrow.getId()),
+                    String.format("Borrow with author : %s and title : %s created successfully", firstname, surname),
                     HttpStatus.CREATED);
-        } catch (BookshelfResourceNotFoundException b1) {
+        } catch (BookshelfResourceNotFoundException exception) {
             return new ResponseEntity<>(
-                    String.format("Book with author : %s and name : %s doesn't exist.",
-                            borrow.getBook().getAuthor(),
-                            borrow.getBook().getTitle()),
+                    String.format("Book with author : %s and title : %s doesn't exist.", firstname, surname),
                     HttpStatus.NOT_FOUND);
-        } catch (BookshelfConflictException b2) {
+        } catch (BookshelfConflictException exception) {
             return new ResponseEntity<>(
-                    String.format("Book with author : %s and name : %s is already borrowed.",
-                            borrow.getBook().getAuthor(),
-                            borrow.getBook().getTitle()),
+                    String.format("Book with author : %s and title : %s is already borrowed.", firstname, surname),
                     HttpStatus.CONFLICT);
         }
     }
@@ -149,20 +159,20 @@ public class BorrowController {
      * @param id id of the borrow
      * @return ResponseEntity that informs about the removal of the borrow
      */
-    @DeleteMapping( produces = MediaType.TEXT_PLAIN_VALUE)
-    @ApiOperation(value = "Deleting specific borrow")
+    @DeleteMapping(produces = MediaType.TEXT_PLAIN_VALUE)
+    @ApiOperation(value = "Deleting specific borrow by id")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Borrow deleted"),
                             @ApiResponse(code = 404, message = "Borrow not found"),
                             @ApiResponse(code = 409, message = "Borrow is still active"),
                             @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
-    public ResponseEntity<String> deleteBorrow(@RequestBody Integer id) {
+    public ResponseEntity<String> deleteBorrow(@RequestParam Integer id) {
         try {
             borrowsService.deleteBorrow(id);
             log.info("Deleting borrow id={}", id);
             return new ResponseEntity<>(String.format("Borrow id=%d deleted successfully", id), HttpStatus.OK);
-        } catch (BookshelfResourceNotFoundException b1) {
+        } catch (BookshelfResourceNotFoundException exception) {
             return new ResponseEntity<>(String.format("Borrow with id=%d doesn't exist", id), HttpStatus.NOT_FOUND);
-        } catch (BookshelfConflictException b2) {
+        } catch (BookshelfConflictException exception) {
             return new ResponseEntity<>(String.format("Borrow with id=%d is still active. Can't delete",id),
                     HttpStatus.CONFLICT);
         }

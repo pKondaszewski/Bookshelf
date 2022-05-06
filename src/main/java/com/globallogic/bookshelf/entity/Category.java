@@ -17,8 +17,8 @@ import javax.persistence.*;
 @Entity
 public class Category {
     @Id
-    @SequenceGenerator(name="seq", sequenceName="seq", initialValue = 5, allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="seq")
+    @SequenceGenerator(name="categorySeq", sequenceName="categorySeq", initialValue = 5, allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="categorySeq")
     private Integer id;
     private String name = "Default";
 }
