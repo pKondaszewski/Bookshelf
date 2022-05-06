@@ -150,7 +150,7 @@ public class BorrowService {
         for (Borrow borrow : borrowsOfTheUser) {
             Book book = borrow.getBook();
             if (!book.isAvailable() && borrow.getReturned() == null) {
-                String borrowUserFriendlyLook = userFriendlyLook.stringRepresentationOfUncompletedBorrow(book, borrow);
+                String borrowUserFriendlyLook = userFriendlyLook.stringRepresentationOfUncompletedBorrow(borrow);
                 uncompletedBorrows.add(borrowUserFriendlyLook);
                 numberOfBorrowedBooks += 1;
             }
@@ -159,8 +159,7 @@ public class BorrowService {
                 borrow -> (borrow.getReturned() == null)
         );
         for (Borrow borrow : borrowsOfTheUser) {
-            Book book = borrow.getBook();
-            String borrowUserFriendlyLook = userFriendlyLook.stringRepresentationOfCompletedBorrow(book, borrow);
+            String borrowUserFriendlyLook = userFriendlyLook.stringRepresentationOfCompletedBorrow(borrow);
             completedBorrows.add(borrowUserFriendlyLook);
         }
         return new UserHistory(completedBorrows, uncompletedBorrows, numberOfBorrowedBooks);

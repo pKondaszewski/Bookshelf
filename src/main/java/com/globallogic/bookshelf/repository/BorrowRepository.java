@@ -10,4 +10,5 @@ public interface BorrowRepository extends JpaRepository<Borrow, Integer> {
 
     List<Borrow> findAllByBook(Book book);
     List<Borrow> findAllByFirstnameAndSurname(String firstname, String surname);
+
 }

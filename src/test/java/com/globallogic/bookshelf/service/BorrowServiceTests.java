@@ -7,7 +7,7 @@ import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
-import com.globallogic.bookshelf.repository.CategoryRepository;
+import com.globallogic.bookshelf.utils.StringRepresentationOfTheBorrow;
 import com.globallogic.bookshelf.utils.UserHistory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -30,11 +30,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(MockitoExtension.class)
 public class BorrowServiceTests {
 
-    private static Book availableBookTest, notAvailableBookTest, available2BookTest, available3BookTest,notAvailableBookTest2;
-    private static Borrow borrow3Test, borrow1Test, borrow2Test,borrow4test,borrow5test,borrow6test;
-    private static String firstnameTest, surnameTest, bookAuthorTest, bookNameTest;
-    private static List<Borrow> borrowListTest;
+    private static Book availableBook, availableBook2, notAvailableBook, notAvailableBook2;
+    private static Borrow borrow3, borrow1, borrow2, borrow4, borrow5, borrow6;
+    private static String firstname, surname, author, title;
+    private static List<Borrow> borrowList;
     private static UserHistory correctUserHistory;
+    private static Date date1;
 
 
     @Mock
@@ -43,13 +44,10 @@ public class BorrowServiceTests {
     @Mock
     private static BorrowRepository borrowRepository;
 
-    @Mock
-    private static CategoryRepository categoryRepository;
-
     @InjectMocks
     private static BorrowService service;
 
-    private static final int ID_TEST = 1;
+    private static final int id = 1;
 
 
 
@@ -57,179 +55,170 @@ public class BorrowServiceTests {
     public static void setModel() {
         service = new BorrowService(borrowRepository, bookRepository);
 
-        Date testDate1 = Date.valueOf(LocalDate.of(1, 1, 1));
+        date1 = Date.valueOf(LocalDate.of(1, 1, 1));
         Date testDate2 = Date.valueOf(LocalDate.of(2, 2, 2));
 
-        bookAuthorTest = "BookAuthorTest";
-        bookNameTest = "BookNameTest";
-        notAvailableBookTest = new Book(1, bookAuthorTest, bookNameTest, false,
-                new Category(1, "testCategory"));
-        availableBookTest = new Book(2, bookAuthorTest, bookNameTest, true,
-                new Category(2, "testCategory"));
-        available2BookTest = new Book(3, bookAuthorTest, bookNameTest, true,
-                new Category(2, "testCategory"));
-        available3BookTest = new Book(4, bookAuthorTest, bookNameTest, true,
-                new Category(2, "testCategory"));
-        notAvailableBookTest2 = new Book(1, bookAuthorTest, bookNameTest, false,
-                new Category(2, "testCategory"));
+        String bookAuthor = "bookAuthor";
+        String bookName = "bookName";
 
+        notAvailableBook = new Book(1, bookAuthor, bookName, false,
+                new Category(1, "category"));
+        notAvailableBook2 = new Book(1, bookAuthor, bookName, false,
+                new Category(2, "category"));
+        availableBook = new Book(2, bookAuthor, bookName, true,
+                new Category(2, "category"));
+        availableBook2 = new Book(4, bookAuthor, bookName, true,
+                new Category(2, "category"));
 
+        firstname = "Jan";
+        surname = "Kowalski";
+        author = "Author";
+        title = "Title";
+        String comment = "Comment";
 
-        borrow1Test = new Borrow(1, testDate1, testDate2, "Arek", "Darek", "awdawwda", availableBookTest);
-        borrow2Test = new Borrow(2, testDate1, null, "Arek", "Darek", "awdawwda", notAvailableBookTest);
-        borrow3Test = new Borrow(3, null, null, "Arek", "Darek", "awdawwda", availableBookTest);
-        borrow4test = new Borrow(4, null, null, "Arek", "Darek", "awdawwda", available3BookTest);
-        borrow5test = new Borrow(4, null, null, "Arek", "Darek", "awdawwda", notAvailableBookTest);
-        borrow6test = new Borrow(4, testDate1, null, "Arek", "Darek", "awdawwda", notAvailableBookTest2);
+        borrow1 = new Borrow(1, date1, testDate2, firstname, surname, comment, availableBook);
+        borrow2 = new Borrow(2, date1, null, firstname, surname, comment, notAvailableBook);
+        borrow3 = new Borrow(null, date1, null, firstname, surname, null, availableBook);
+        borrow4 = new Borrow(4, null, null, firstname, surname, comment, availableBook2);
+        borrow5 = new Borrow(4, null, null, firstname, surname, comment, notAvailableBook);
+        borrow6 = new Borrow(4, date1, null, firstname, surname, comment, notAvailableBook2);
 
-        borrowListTest = new ArrayList<>();
-        borrowListTest.add(borrow1Test);
-        borrowListTest.add(borrow2Test);
+        borrowList = new ArrayList<>();
+        borrowList.add(borrow1);
+        borrowList.add(borrow2);
 
+        StringRepresentationOfTheBorrow userFriendlyBorrow = new StringRepresentationOfTheBorrow();
 
-        List<Borrow> foundBorrowsTest = new ArrayList<>();
-        foundBorrowsTest.add(borrow1Test);
+        List<String> completedBorrows = new ArrayList<>();
+        completedBorrows.add(userFriendlyBorrow.stringRepresentationOfCompletedBorrow(borrow1));
 
-        //correctUserHistory = new UserHistory(foundBorrowsTest,
-        //"BookNameTest; ",
-        //        1);
+        List<String> uncompletedBorrows = new ArrayList<>();
+        uncompletedBorrows.add(userFriendlyBorrow.stringRepresentationOfUncompletedBorrow(borrow2));
 
-        firstnameTest = "Jan";
-        surnameTest = "Kowalski";
+        correctUserHistory = new UserHistory(completedBorrows, uncompletedBorrows, 1);
     }
 
     @Test
     public void testBorrowByIdSuccess() {
-        Mockito.doReturn(Optional.of(available3BookTest)).when(bookRepository).findById(available3BookTest.getId());
+        Mockito.doReturn(Optional.of(availableBook2)).when(bookRepository).findById(availableBook2.getId());
 
-        service.borrowBook(borrow4test);
+        service.borrowBook(borrow4);
 
-        Mockito.verify(borrowRepository).save(borrow4test);
+        Mockito.verify(borrowRepository).save(borrow4);
 
     }
 
     @Test
     public void testBorrowBookByIdResourceBookshelfConflictException() {
-        Mockito.doReturn(Optional.of(notAvailableBookTest)).when(bookRepository).findById(notAvailableBookTest.getId());
+        Mockito.doReturn(Optional.of(notAvailableBook)).when(bookRepository).findById(notAvailableBook.getId());
 
 
         Exception exception = assertThrows(BookshelfConflictException.class, () ->
-                service.borrowBook(borrow5test)
+                service.borrowBook(borrow5)
         );
 
         String expectedMessage = String.format(
-                "Book with name : %s is already borrowed.", notAvailableBookTest.getTitle()
+                "Book with name : %s is already borrowed.", notAvailableBook.getTitle()
         );
         String actualMessage = exception.getMessage();
         assertTrue(actualMessage.contains(expectedMessage));
     }
 
     @Test
-    public void testReturnBook(){
-        Mockito.doReturn(Optional.of(borrow6test)).when(borrowRepository).findById(borrow6test.getId());
-        Mockito.doReturn(Optional.of(notAvailableBookTest2)).when(bookRepository).findById(ID_TEST);
+    public void testReturnBook() {
+        Mockito.doReturn(Optional.of(borrow6)).when(borrowRepository).findById(borrow6.getId());
+        Mockito.doReturn(Optional.of(notAvailableBook2)).when(bookRepository).findById(id);
 
-        service.returnBook(borrow6test);
+        service.returnBook(borrow6);
 
-        Mockito.verify(borrowRepository).save(borrow6test);
+        Mockito.verify(borrowRepository).save(borrow6);
     }
 
 
-//    @Test
-//    public void testBorrowBookByAuthorAndTitleSuccess() {
-//        Mockito.doReturn(availableBookTest).when(bookRepository).findByAuthorAndTitle(bookAuthorTest, bookNameTest);
-//
-//        service.borrowBookByAuthorAndTitle(borrow3Test);
-//
-//        Mockito.verify(borrowRepository).save(borrow3Test);
-//    }
-//
-//    @Test
-//    public void testBorrowBookByAuthorAndTitleSuccessWithNullReturnDate() {
-//        Mockito.doReturn(available2BookTest).when(bookRepository).findByAuthorAndTitle(bookAuthorTest, bookNameTest);
-//
-//        service.borrowBookByAuthorAndTitle(borrow3Test);
-//
-//        Mockito.verify(borrowRepository).save(borrow3Test);
-//    }
-//
-//    @Test
-//    public void testBorrowBookByAuthorAndTitleResourceNotFoundException() {
-//        Mockito.doReturn(null).when(bookRepository).findByAuthorAndTitle(bookAuthorTest, bookNameTest);
-//
-//
-//        Exception exception = assertThrows(BookshelfResourceNotFoundException.class, () ->
-//                service.borrowBookByAuthorAndTitle(borrow3Test)
-//        );
-//
-//        String expectedMessage = String.format(
-//                "Book with author : %s and name : %s doesn't exist.", bookAuthorTest, bookNameTest
-//        );
-//        String actualMessage = exception.getMessage();
-//        assertTrue(actualMessage.contains(expectedMessage));
-//    }
-//
-//    @Test
-//    public void testBorrowBookByAuthorAndTitleConflictException() {
-//        Mockito.doReturn(notAvailableBookTest).when(bookRepository).findByAuthorAndTitle(bookAuthorTest, bookNameTest);
-//
-//
-//        Exception exception = assertThrows(BookshelfConflictException.class, () ->
-//                service.borrowBookByAuthorAndTitle(borrow3Test)
-//        );
-//
-//        String expectedMessage = String.format(
-//                "Book with author : %s and name : %s is already borrowed.", bookAuthorTest, bookNameTest
-//        );
-//        String actualMessage = exception.getMessage();
-//        assertTrue(actualMessage.contains(expectedMessage));
-//    }
-
     @Test
-    public void testDeleteBorrowSuccess() {
-        Mockito.doReturn(Optional.of(borrow1Test)).when(borrowRepository).findById(ID_TEST);
+    public void borrowBookByAuthorAndTitleSuccessTest() {
+        Mockito.doReturn(availableBook).when(bookRepository).findByAuthorAndTitle(author, title);
 
-        service.deleteBorrow(ID_TEST);
+        service.borrowBookByAuthorAndTitle(author, title, firstname, surname, date1, null);
 
-        Mockito.verify(borrowRepository).deleteById(ID_TEST);
+        Mockito.verify(borrowRepository).save(borrow3);
     }
 
     @Test
-    public void testDeleteBorrowResourceNotFoundException() {
-        Mockito.doReturn(Optional.empty()).when(borrowRepository).findById(ID_TEST);
+    public void borrowBookByAuthorAndTitleResourceNotFoundExceptionTest() {
+        Mockito.doReturn(null).when(bookRepository).findByAuthorAndTitle(author, title);
+
 
         Exception exception = assertThrows(BookshelfResourceNotFoundException.class, () ->
-                service.deleteBorrow(ID_TEST)
+                service.borrowBookByAuthorAndTitle(author, title, firstname, surname, date1, null)
         );
 
-        String expectedMessage = String.format("Borrow with id=%d doesn't exist", ID_TEST);
+        String expectedMessage = String.format(
+                "Book with author : %s and title : %s doesn't exist.", author, title
+        );
         String actualMessage = exception.getMessage();
         assertTrue(actualMessage.contains(expectedMessage));
     }
 
     @Test
-    public void testDeleteBorrowConflictException() {
-        Mockito.doReturn(Optional.of(borrow2Test)).when(borrowRepository).findById(ID_TEST);
+    public void borrowBookByAuthorAndTitleConflictExceptionTest() {
+        Mockito.doReturn(notAvailableBook).when(bookRepository).findByAuthorAndTitle(author, title);
+
 
         Exception exception = assertThrows(BookshelfConflictException.class, () ->
-                service.deleteBorrow(ID_TEST)
+                service.borrowBookByAuthorAndTitle(author, title, firstname, surname, date1, null)
         );
 
-        String expectedMessage = String.format("Borrow with id=%d is still active. Can't delete", ID_TEST);
+        String expectedMessage = String.format(
+                "Book with author : %s and title : %s is already borrowed.", author, title
+        );
         String actualMessage = exception.getMessage();
         assertTrue(actualMessage.contains(expectedMessage));
     }
 
     @Test
-    public void testGetUserBorrowHistory() {
-        Mockito.doReturn(borrowListTest).when(borrowRepository)
-                .findAllByFirstnameAndSurname(firstnameTest, surnameTest);
+    public void deleteBorrowSuccessTest() {
+        Mockito.doReturn(Optional.of(borrow1)).when(borrowRepository).findById(id);
 
-        UserHistory testedList = service.getUserBorrowHistory(firstnameTest, surnameTest);
+        service.deleteBorrow(id);
+
+        Mockito.verify(borrowRepository).deleteById(id);
+    }
+
+    @Test
+    public void deleteBorrowResourceNotFoundExceptionTest() {
+        Mockito.doReturn(Optional.empty()).when(borrowRepository).findById(id);
+
+        Exception exception = assertThrows(BookshelfResourceNotFoundException.class, () ->
+                service.deleteBorrow(id)
+        );
+
+        String expectedMessage = String.format("Borrow with id=%d doesn't exist", id);
+        String actualMessage = exception.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    public void deleteBorrowConflictExceptionTest() {
+        Mockito.doReturn(Optional.of(borrow2)).when(borrowRepository).findById(id);
+
+        Exception exception = assertThrows(BookshelfConflictException.class, () ->
+                service.deleteBorrow(id)
+        );
+
+        String expectedMessage = String.format("Borrow with id=%d is still active. Can't delete", id);
+        String actualMessage = exception.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    public void getUserBorrowHistoryTest() {
+        Mockito.doReturn(borrowList).when(borrowRepository)
+                .findAllByFirstnameAndSurname(firstname, surname);
+
+        UserHistory testedList = service.getUserBorrowHistory(firstname, surname);
 
         assertThat(testedList).usingRecursiveComparison().isEqualTo(correctUserHistory);
     }
-
-
 
 }
