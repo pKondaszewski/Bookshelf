@@ -10,11 +10,13 @@ import com.globallogic.bookshelf.repository.CategoryRepository;
 import com.globallogic.bookshelf.service.BorrowService;
 import com.globallogic.bookshelf.service.BorrowServiceTests;
 import com.globallogic.bookshelf.service.CategoryService;
+import com.google.gson.Gson;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +27,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.sql.Date;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -50,25 +52,36 @@ public class BorrowControllerTests {
     @MockBean
     private BookRepository bookRepository;
 
+    @InjectMocks
+    private BorrowController borrowController;
+
     @Autowired
     private MockMvc mockMvc;
 
 
-    private static String name, mapCategoryTestName1, mapCategoryTestName2;
-    private static HashMap<String, Integer> booksPerCategoryMap;
+    private static Borrow testBorrow1,testBorrow2;
+    private static Book testBook1,testBook2;
 
 
     @BeforeAll
     public static void setModel() {
-        name = "1";
+        testBook1 = new Book(1, "Author", "bookName", true, new Category(1, "test"));
+        testBook2 = new Book(1, "a", "bookName", true, new Category(1, "test"));
 
-        mapCategoryTestName1 = "TestCategory1";
-        mapCategoryTestName2 = "TestCategory2";
-        booksPerCategoryMap = new HashMap<>();
-        booksPerCategoryMap.put(mapCategoryTestName1, 5);
-        booksPerCategoryMap.put(mapCategoryTestName2, 10);
+
+       testBorrow1 = new Borrow(1,new Date(),null,"TestName","TestSurname","Test comment",testBook1);
+       testBorrow2 = new Borrow(1,new Date(),new Date(),"TestName","TestSurname","Test comment",testBook2);
     }
 
-
+//    @Test
+//    public void testBorrowByIdSuccess() throws Exception {
+//        Gson gson = new Gson();
+//        String json = gson.toJson(testBorrow1);
+//        mockMvc
+//                .perform(post("/borrow/byId").contentType(MediaType.APPLICATION_JSON_VALUE)
+//                        .content(String.valueOf((json))))
+//                .andDo(print())
+//                .andExpect(status().isBadRequest());
+//    }
 
 }

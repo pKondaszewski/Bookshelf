@@ -40,20 +40,25 @@ public class BookShelfService {
     /**
      * Create a book with specified parameters
      *
-     * @param book body of the book
+     * @param title body of the book
      */
-    public void create(Book book) {
-        Category category = categoryRepository.findByName(book.getCategory().getName());
-        if (category == null) {
-            throw new BookshelfResourceNotFoundException("Category not found");
+    public void create(String title,String author,boolean available,Category category) {
+        Book book = new Book(author,title,available,category);
+        if (category.getName() == null) {
+            book.setCategory(categoryRepository.getById(4));
         } else if (category.getName().equals("Default")) {
             book.setCategory(categoryRepository.getById(4));
         } else {
-            book.setCategory(categoryRepository.getById(category.getId()));
+
+            throw new BookshelfResourceNotFoundException("Category not found");
         }
         bookRepository.save(book);
     }
-
+    /**
+     * Delete a book with specified id
+     *
+     * @param id of book
+     */
     public void delete(Integer id) {
         Optional<Book> foundBook = bookRepository.findById(id);
         if (foundBook.isEmpty()) {
@@ -130,9 +135,30 @@ public class BookShelfService {
     /**
      * Get information about every book availability
      *
+     * @return List with borrow and information about the book sort by date
+     */
+    public List<Borrow> getListOfBorrowedBooksSort() {
+        List<Borrow> booksAvailability = new ArrayList<>();
+        List<Book> allBooks = bookRepository.findAll();
+        for (Book book : allBooks) {
+            if (!book.isAvailable()) {
+                List<Borrow> borrowList = borrowRepository.findAllByBook(book);
+                if (CollectionUtils.isNotEmpty(borrowList)) {
+                    Borrow borrow = borrowList.get(borrowList.size() - 1);
+                    booksAvailability.add(borrow);
+                }
+            }
+            booksAvailability.sort(Comparator.comparing(Borrow::getBorrowed));
+
+        }
+        return booksAvailability;
+    }
+    /**
+     * Get information about every book availability
+     *
      * @return Hashmap with book and information about the book availability (owner and date of the borrow)
      */
-    public HashMap<Book, String> getListOfBorrowedBooksSort() {
+    public HashMap<Book, String> getListOfBorrowedBooks() {
         HashMap<Book, String> booksAvailability = new HashMap<>();
         List<Book> allBooks = bookRepository.findAll();
         for (Book book : allBooks) {
@@ -149,7 +175,6 @@ public class BookShelfService {
         }
         return booksAvailability;
     }
-
 
     /**
      * Get information about every book history

@@ -1,5 +1,6 @@
 package com.globallogic.bookshelf.service;
 
+import com.globallogic.bookshelf.controller.BorrowController;
 import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.entity.Borrow;
 import com.globallogic.bookshelf.entity.Category;
@@ -21,6 +22,7 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -34,8 +36,8 @@ public class BorrowServiceTests {
     private static Borrow borrow3, borrow1, borrow2, borrow4, borrow5, borrow6;
     private static String firstname, surname, author, title;
     private static List<Borrow> borrowList;
+    private static Book availableBookTest, notAvailableBookTest, available2BookTest, available3BookTest, notAvailableBookTest2;
     private static UserHistory correctUserHistory;
-    private static Date date1;
 
 
     @Mock
@@ -48,7 +50,7 @@ public class BorrowServiceTests {
     private static BorrowService service;
 
     private static final int id = 1;
-
+    private static Date date1,date2;
 
 
     @BeforeAll
@@ -56,7 +58,7 @@ public class BorrowServiceTests {
         service = new BorrowService(borrowRepository, bookRepository);
 
         date1 = Date.valueOf(LocalDate.of(1, 1, 1));
-        Date testDate2 = Date.valueOf(LocalDate.of(2, 2, 2));
+        date2 = Date.valueOf(LocalDate.of(2, 2, 2));
 
         String bookAuthor = "bookAuthor";
         String bookName = "bookName";
@@ -76,12 +78,13 @@ public class BorrowServiceTests {
         title = "Title";
         String comment = "Comment";
 
-        borrow1 = new Borrow(1, date1, testDate2, firstname, surname, comment, availableBook);
+        borrow1 = new Borrow(1, date1, date2, firstname, surname, comment, availableBook);
         borrow2 = new Borrow(2, date1, null, firstname, surname, comment, notAvailableBook);
         borrow3 = new Borrow(null, date1, null, firstname, surname, null, availableBook);
         borrow4 = new Borrow(4, null, null, firstname, surname, comment, availableBook2);
         borrow5 = new Borrow(4, null, null, firstname, surname, comment, notAvailableBook);
         borrow6 = new Borrow(4, date1, null, firstname, surname, comment, notAvailableBook2);
+
 
         borrowList = new ArrayList<>();
         borrowList.add(borrow1);
@@ -99,7 +102,7 @@ public class BorrowServiceTests {
     }
 
     @Test
-    public void testBorrowByIdSuccess() {
+    public void borrowByIdSuccessTest() {
         Mockito.doReturn(Optional.of(availableBook2)).when(bookRepository).findById(availableBook2.getId());
 
         service.borrowBook(borrow4);
@@ -109,7 +112,7 @@ public class BorrowServiceTests {
     }
 
     @Test
-    public void testBorrowBookByIdResourceBookshelfConflictException() {
+    public void borrowBookByIdResourceBookshelfConflictExceptionTest() {
         Mockito.doReturn(Optional.of(notAvailableBook)).when(bookRepository).findById(notAvailableBook.getId());
 
 
@@ -124,15 +127,15 @@ public class BorrowServiceTests {
         assertTrue(actualMessage.contains(expectedMessage));
     }
 
-    @Test
-    public void testReturnBook() {
-        Mockito.doReturn(Optional.of(borrow6)).when(borrowRepository).findById(borrow6.getId());
-        Mockito.doReturn(Optional.of(notAvailableBook2)).when(bookRepository).findById(id);
-
-        service.returnBook(borrow6);
-
-        Mockito.verify(borrowRepository).save(borrow6);
-    }
+//    @Test
+//    public void returnBookTest() {
+//        Mockito.doReturn(Optional.of(borrow6)).when(borrowRepository).findById(borrow6.getId());
+//        Mockito.doReturn(Optional.of(notAvailableBook2)).when(bookRepository).findById(id);
+//
+//        service.returnBook(borrow6);
+//
+//        Mockito.verify(borrowRepository).save(borrow6);
+//    }
 
 
     @Test

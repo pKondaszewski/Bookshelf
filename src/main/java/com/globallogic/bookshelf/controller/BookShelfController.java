@@ -2,6 +2,8 @@ package com.globallogic.bookshelf.controller;
 
 
 import com.globallogic.bookshelf.entity.Book;
+import com.globallogic.bookshelf.entity.Borrow;
+import com.globallogic.bookshelf.entity.Category;
 import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
@@ -38,18 +40,18 @@ public class BookShelfController {
     /**
      * POST Request to create a book
      *
-     * @param book body of the book
+     * @param author,title,availability,category - Author of book,title, availability and category of book
      * @return ResponseEntity that informs about the creation of the book
      */
     @ApiOperation(value = "Creates a book entity.")
     @ApiResponses(value = { @ApiResponse(code = 201, message = "Book entry created", response = Book.class),
                             @ApiResponse(code = 400, message = "Bad Request"),
                             @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> create(@RequestBody Book book) {
-        bookShelfService.create(book);
-        log.info("Creating book={}", book);
-        return new ResponseEntity<>(String.format("Book %s created successfully", book.getTitle()), HttpStatus.CREATED);
+    @PostMapping(path = "/bookCreate",produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> create(@RequestParam String author, @RequestParam String title, @RequestParam boolean availability,
+                                         @RequestParam(required = false) Integer idCategory,@RequestParam(required = false) String categoryName) {
+        bookShelfService.create(title,author,availability,new Category(idCategory,categoryName));
+        return new ResponseEntity<>(String.format("Book %s created",title),HttpStatus.CREATED);
     }
 
     /**
@@ -68,9 +70,9 @@ public class BookShelfController {
             Book foundBook = bookRepository.getById(id);
             bookShelfService.delete(id);
             return new ResponseEntity<>(String.format("Book with id=%d delete", id), HttpStatus.OK);
-        } catch (BookshelfResourceNotFoundException b1) {
+        } catch (BookshelfResourceNotFoundException exception) {
             return new ResponseEntity<>(String.format("Book with id=%d doesn't exist", id), HttpStatus.NOT_FOUND);
-        } catch (BookshelfConflictException b2) {
+        } catch (BookshelfConflictException exception) {
             return new ResponseEntity<>(String.format("Book with id=%d is still borrowed. Can't delete",id),
                     HttpStatus.CONFLICT);
         }
@@ -133,22 +135,36 @@ public class BookShelfController {
             bookHistoryHashMap = bookShelfService.getBooksHistory(name);
             log.info("Book History={}", bookHistoryHashMap);
             return new ResponseEntity<>(bookHistoryHashMap, HttpStatus.OK);
-        } catch (NullPointerException b1) {
+        } catch (NullPointerException exception) {
             return new ResponseEntity<>(bookHistoryHashMap, HttpStatus.NOT_FOUND);
         }
     }
 
 
     /**
-     * GET Request to receive a map that shows last borrow of book.
+     * GET Request to receive a Hashmap that shows last borrow of book sort by date.
+     *
+     * @return ResponseEntity that contains book and information about who borrow book at the moment.
+     */
+    @GetMapping(path = "/getListOfBorrowedBooksWithNewestBorrowSort", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Books History",response = HashMap.class),
+            @ApiResponse(code = 500,message = "Internal BookShelf server error")})
+    public ResponseEntity<List<Borrow>> getNewestActiveBorrowSort(){
+        List<Borrow> bookHistoryHashMap = bookShelfService.getListOfBorrowedBooksSort();
+        log.info("Books History={}",bookHistoryHashMap);
+        return new ResponseEntity<>(bookHistoryHashMap,HttpStatus.OK);
+    }
+
+    /**
+     * GET Request to receive a Hashmap that shows last borrow of book.
      *
      * @return ResponseEntity that contains book and information about who borrow book at the moment.
      */
     @GetMapping(path = "/getListOfBorrowedBooksWithNewestBorrow", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Books History",response = HashMap.class),
             @ApiResponse(code = 500,message = "Internal BookShelf server error")})
-    public ResponseEntity<HashMap<Book, String>> getHashMapResponseEntity(){
-        HashMap<Book,String> bookHistoryHashMap = bookShelfService.getListOfBorrowedBooksSort();
+    public ResponseEntity<HashMap<Book, String>> getNewestActiveBorrow(){
+        HashMap<Book,String> bookHistoryHashMap = bookShelfService.getListOfBorrowedBooks();
         log.info("Books History={}",bookHistoryHashMap);
         return new ResponseEntity<>(bookHistoryHashMap,HttpStatus.OK);
     }

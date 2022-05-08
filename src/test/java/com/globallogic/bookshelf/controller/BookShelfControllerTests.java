@@ -22,17 +22,17 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.HashMap;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
 @WebMvcTest(controllers = BookShelfController.class)
 @AutoConfigureMockMvc
 public class BookShelfControllerTests {
 
-    private static String mapCategoryTestName1, Ave;
+    private static String mapCategoryTestName1, Available;
     @MockBean
     private BookRepository bookRepository;
 
@@ -54,14 +54,14 @@ public class BookShelfControllerTests {
 
     @BeforeAll
     public static void setModel() {
-        Ave = "Available";
+        Available = "Available";
         bookName = "test";
 
         testBook = new Book(1, "Author", bookName, true, new Category(1, "test"));
         testBook2 = new Book(1, "a", bookName, true, new Category(1, "test"));
 
         allBooksAvailableHashMap = new HashMap<>();
-        allBooksAvailableHashMap.put(testBook, Ave);
+        allBooksAvailableHashMap.put(testBook, Available);
         allBooksAvailableHashMap.put(testBook2, "Not Available");
 
         allBooksHashMap = new HashMap<>();
@@ -72,7 +72,7 @@ public class BookShelfControllerTests {
 
 
     @Test
-    public void testCreateBookPost() throws Exception {
+    public void createBookTest() throws Exception {
         Gson gson = new Gson();
         String json = gson.toJson(testBook);
 
@@ -119,7 +119,6 @@ public class BookShelfControllerTests {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(content().json(json));
-
     }
 
     @Test
@@ -133,7 +132,6 @@ public class BookShelfControllerTests {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
-
     }
 
 }

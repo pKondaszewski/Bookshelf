@@ -38,7 +38,7 @@ public class CategoryController {
      * @param name name of the category
      * @return ResponseEntity that informs about the creation of the category
      */
-    @PostMapping(produces = MediaType.TEXT_PLAIN_VALUE)
+    @PostMapping(path = "/categoryCreate",produces = MediaType.TEXT_PLAIN_VALUE)
     @ApiOperation(value = "Create a category with given name")
     @ApiResponses(value = { @ApiResponse(code = 201, message = "Category created"),
                             @ApiResponse(code = 409, message = "Category with given name already exists"),
@@ -60,7 +60,7 @@ public class CategoryController {
      * @param name name of the category
      * @return ResponseEntity that informs about the removal of the category
      */
-    @DeleteMapping(produces = MediaType.TEXT_PLAIN_VALUE)
+    @DeleteMapping(path = "/categoryDelete",produces = MediaType.TEXT_PLAIN_VALUE)
     @ApiOperation(value = "Delete a category based by the name")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Category deleted"),
                             @ApiResponse(code = 404, message = "Category not found"),
