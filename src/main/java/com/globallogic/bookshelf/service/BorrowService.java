@@ -12,7 +12,10 @@ import com.globallogic.bookshelf.utils.UserHistory;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Business logic of the /borrow request
@@ -33,40 +36,55 @@ public class BorrowService {
 
 
     /**
-     * Create a borrow
+     * Create a borrow with book id, personal information (firstname, surname) and
+     * additional information (date of the borrow, comment)
      *
-     * @param borrowBody
-     * @return String.format informing that book was borrowed
-     * @throws BookshelfConflictException exception informing that book is already borrowed
+     * @param id         author of the book
+     * @param firstname  firstname of the person that is borrowing the book
+     * @param surname    surname of the person that is borrowing the book
+     * @param borrowDate date of the borrow
+     * @param comment    additional comment for the borrow
+     * @throws BookshelfResourceNotFoundException exception informing that book with given author and title doesn't exist
+     * @throws BookshelfConflictException         exception informing that book with given author and title is already borrowed
      */
     @Transactional
-    public void borrowBook(Borrow borrowBody) {
-        Book book = bookRepository.findById(borrowBody.getBook().getId()).get();
-        if (book.isAvailable()) {
-            book.setAvailable(false);
-            bookRepository.save(book);
-            if (borrowBody.getBorrowed() == null) {
+    public void borrowBookById(Integer id, String firstname,
+                               String surname, Date borrowDate, String comment) {
+        Optional<Book> book = bookRepository.findById(id);
 
-                borrowBody.setBorrowed(new Date());
-            }
-            borrowRepository.save(borrowBody);
+        if (book.isEmpty()) {
+            throw new BookshelfResourceNotFoundException(
+                    String.format("Book with id : %s doesn't exist.", id)
+            );
         } else {
-            throw new BookshelfConflictException(String.format("Book with name : %s is already borrowed.", book.getTitle()));
+            if (book.get().isAvailable()) {
+                book.get().setAvailable(false);
+                bookRepository.save(book.get());
+                borrowDate = DateVerification.checkNullDate(borrowDate);
+                Borrow borrow = new Borrow(null, borrowDate, null, firstname, surname, comment, book.get());
+                borrowRepository.save(borrow);
+            } else {
+                throw new BookshelfConflictException(
+                        String.format("Book with id : %s is already borrowed.", id)
+                );
+            }
+
         }
     }
+
 
     /**
      * Create a borrow with book information (author, title), personal information (firstname, surname) and
      * additional information (date of the borrow, comment)
      *
-     * @param author author of the book
-     * @param title title of the book
-     * @param firstname firstname of the person that is borrowing the book
-     * @param surname surname of the person that is borrowing the book
+     * @param author     author of the book
+     * @param title      title of the book
+     * @param firstname  firstname of the person that is borrowing the book
+     * @param surname    surname of the person that is borrowing the book
      * @param borrowDate date of the borrow
-     * @param comment additional comment for the borrow
+     * @param comment    additional comment for the borrow
      * @throws BookshelfResourceNotFoundException exception informing that book with given author and title doesn't exist
-     * @throws BookshelfConflictException exception informing that book with given author and title is already borrowed
+     * @throws BookshelfConflictException         exception informing that book with given author and title is already borrowed
      */
     @Transactional
     public void borrowBookByAuthorAndTitle(String author, String title, String firstname,
@@ -93,22 +111,28 @@ public class BorrowService {
 
 
     /**
-     * Return a book
+     * Return a book by borrow id.
      *
-     * @param borrowBody
+     * @param id of borrow
      * @throws com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException exception informing that book was not borrowed
      */
     @Transactional
-    public void returnBook(Borrow borrowBody) {
-        Borrow borrow = borrowRepository.findById(borrowBody.getId()).get();
-        Book book = bookRepository.findById(borrow.getBook().getId()).get();
-        if (!book.isAvailable()) {
-            book.setAvailable(true);
-            bookRepository.save(book);
-            borrow.setReturned(new Date());
-            borrowRepository.save(borrow);
+    public void returnBook(Integer id) {
+        Optional<Borrow> borrow = borrowRepository.findById(id);
+        if (borrow.isEmpty()) {
+            throw new BookshelfResourceNotFoundException(
+                    String.format("Borrow with id= %s not found", id)
+            );
         } else {
-            throw new NoSuchElementException(String.format("Book with name : %s is not borrowed.", book.getTitle()));
+            Book book = bookRepository.findById(borrow.get().getBook().getId()).get();
+            if (!book.isAvailable()) {
+                book.setAvailable(true);
+                bookRepository.save(book);
+                borrow.get().setReturned(new Date());
+                borrowRepository.save(borrow.get());
+            } else {
+                throw new BookshelfConflictException(String.format("Borrow with id : %s is ended.", borrow.get().getId()));
+            }
         }
     }
 

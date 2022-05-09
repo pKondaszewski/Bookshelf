@@ -7,6 +7,8 @@ import com.globallogic.bookshelf.entity.Category;
 import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
+import com.globallogic.bookshelf.repository.BorrowRepository;
+import com.globallogic.bookshelf.repository.CategoryRepository;
 import com.globallogic.bookshelf.service.BookShelfService;
 import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +39,7 @@ public class BookShelfController {
     @Autowired
     private BookShelfService bookShelfService;
 
+
     /**
      * POST Request to create a book
      *
@@ -47,11 +50,16 @@ public class BookShelfController {
     @ApiResponses(value = { @ApiResponse(code = 201, message = "Book entry created", response = Book.class),
                             @ApiResponse(code = 400, message = "Bad Request"),
                             @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
-    @PostMapping(path = "/bookCreate",produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/bookCreate",produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> create(@RequestParam String author, @RequestParam String title, @RequestParam boolean availability,
-                                         @RequestParam(required = false) Integer idCategory,@RequestParam(required = false) String categoryName) {
-        bookShelfService.create(title,author,availability,new Category(idCategory,categoryName));
-        return new ResponseEntity<>(String.format("Book %s created",title),HttpStatus.CREATED);
+                                        @RequestParam(required = false) String categoryName) {
+
+        try {
+            bookShelfService.create(title, author, availability, categoryName);
+            return new ResponseEntity<>(String.format("Book %s created", title), HttpStatus.CREATED);
+        }catch (BookshelfResourceNotFoundException exception){
+            return new ResponseEntity<>(String.format("Category %s not found", categoryName), HttpStatus.NOT_FOUND);
+        }
     }
 
     /**

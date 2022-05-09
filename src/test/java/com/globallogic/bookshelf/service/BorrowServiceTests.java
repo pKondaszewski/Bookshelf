@@ -101,31 +101,31 @@ public class BorrowServiceTests {
         correctUserHistory = new UserHistory(completedBorrows, uncompletedBorrows, 1);
     }
 
-    @Test
-    public void borrowByIdSuccessTest() {
-        Mockito.doReturn(Optional.of(availableBook2)).when(bookRepository).findById(availableBook2.getId());
-
-        service.borrowBook(borrow4);
-
-        Mockito.verify(borrowRepository).save(borrow4);
-
-    }
-
-    @Test
-    public void borrowBookByIdResourceBookshelfConflictExceptionTest() {
-        Mockito.doReturn(Optional.of(notAvailableBook)).when(bookRepository).findById(notAvailableBook.getId());
-
-
-        Exception exception = assertThrows(BookshelfConflictException.class, () ->
-                service.borrowBook(borrow5)
-        );
-
-        String expectedMessage = String.format(
-                "Book with name : %s is already borrowed.", notAvailableBook.getTitle()
-        );
-        String actualMessage = exception.getMessage();
-        assertTrue(actualMessage.contains(expectedMessage));
-    }
+//    @Test
+//    public void borrowByIdSuccessTest() {
+//        Mockito.doReturn(Optional.of(availableBook2)).when(bookRepository).findById(availableBook2.getId());
+//
+//        service.borrowBook(borrow4);
+//
+//        Mockito.verify(borrowRepository).save(borrow4);
+//
+//    }
+//
+//    @Test
+//    public void borrowBookByIdResourceBookshelfConflictExceptionTest() {
+//        Mockito.doReturn(Optional.of(notAvailableBook)).when(bookRepository).findById(notAvailableBook.getId());
+//
+//
+//        Exception exception = assertThrows(BookshelfConflictException.class, () ->
+//                service.borrowBook(borrow5)
+//        );
+//
+//        String expectedMessage = String.format(
+//                "Book with name : %s is already borrowed.", notAvailableBook.getTitle()
+//        );
+//        String actualMessage = exception.getMessage();
+//        assertTrue(actualMessage.contains(expectedMessage));
+//    }
 
 //    @Test
 //    public void returnBookTest() {

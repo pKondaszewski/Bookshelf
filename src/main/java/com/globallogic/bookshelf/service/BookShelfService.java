@@ -8,6 +8,7 @@ import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
 import com.globallogic.bookshelf.repository.CategoryRepository;
+import com.globallogic.bookshelf.utils.CategoryVerification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
@@ -42,18 +43,18 @@ public class BookShelfService {
      *
      * @param title body of the book
      */
-    public void create(String title,String author,boolean available,Category category) {
-        Book book = new Book(author,title,available,category);
-        if (category.getName() == null) {
-            book.setCategory(categoryRepository.getById(4));
-        } else if (category.getName().equals("Default")) {
-            book.setCategory(categoryRepository.getById(4));
-        } else {
+    public void create(String title, String author, boolean available, String categoryName) {
+     Category category =categoryRepository.findByName(categoryName);
+     Book book = new Book(author, title, available, category);
 
-            throw new BookshelfResourceNotFoundException("Category not found");
+        if (category == null) {
+            book.setCategory(categoryRepository.getById(4));
         }
+
         bookRepository.save(book);
     }
+
+
     /**
      * Delete a book with specified id
      *
@@ -153,6 +154,7 @@ public class BookShelfService {
         }
         return booksAvailability;
     }
+
     /**
      * Get information about every book availability
      *
