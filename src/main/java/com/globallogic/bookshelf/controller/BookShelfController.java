@@ -3,12 +3,9 @@ package com.globallogic.bookshelf.controller;
 
 import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.entity.Borrow;
-import com.globallogic.bookshelf.entity.Category;
 import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
-import com.globallogic.bookshelf.repository.BorrowRepository;
-import com.globallogic.bookshelf.repository.CategoryRepository;
 import com.globallogic.bookshelf.service.BookShelfService;
 import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;

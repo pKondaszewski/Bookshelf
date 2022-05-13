@@ -8,7 +8,6 @@ import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
 import com.globallogic.bookshelf.repository.CategoryRepository;
-import com.globallogic.bookshelf.utils.CategoryVerification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
@@ -125,7 +124,7 @@ public class BookShelfService {
                 List<Borrow> bookBorrows = borrowRepository.findAllByBook(book);
                 Borrow activeBorrow = bookBorrows.get(bookBorrows.size() - 1);
                 Date dateOfTheBorrow = activeBorrow.getBorrowed();
-                String ownerOfTheBorrow = activeBorrow.getFirstname() + " " + activeBorrow.getSurname();
+                String ownerOfTheBorrow = activeBorrow.getFirstname() + " " + activeBorrow.getLastname();
                 String infoAboutTheBorrow = ownerOfTheBorrow + " : " + dateOfTheBorrow;
                 booksAvailability.put(book, infoAboutTheBorrow);
             }
@@ -169,7 +168,7 @@ public class BookShelfService {
                 if (CollectionUtils.isNotEmpty(borrowList)) {
                     Borrow borrow = borrowList.get(borrowList.size() - 1);
                     Date dateOfTheBorrow = borrow.getBorrowed();
-                    String ownerOfTheBorrow = "Name : " + borrow.getFirstname() + " " + borrow.getSurname();
+                    String ownerOfTheBorrow = "Name : " + borrow.getFirstname() + " " + borrow.getLastname();
                     String infoAboutTheBorrow = ownerOfTheBorrow + " : Date of borrowing book " + dateOfTheBorrow;
                     booksAvailability.put(book, infoAboutTheBorrow);
                 }
@@ -191,7 +190,7 @@ public class BookShelfService {
         List<String> bookList = new ArrayList<>();
 
         for (Borrow borrow : booksBorrow) {
-            String name = "Name: " + borrow.getFirstname() + " " + borrow.getSurname();
+            String name = "Name: " + borrow.getFirstname() + " " + borrow.getLastname();
             String comment;
             String borrowDate = "Date of borrowing book: " + borrow.getBorrowed().toString();
             String returnDate;

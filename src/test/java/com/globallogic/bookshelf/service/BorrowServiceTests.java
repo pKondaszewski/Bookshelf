@@ -1,6 +1,5 @@
 package com.globallogic.bookshelf.service;
 
-import com.globallogic.bookshelf.controller.BorrowController;
 import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.entity.Borrow;
 import com.globallogic.bookshelf.entity.Category;
@@ -8,7 +7,7 @@ import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
-import com.globallogic.bookshelf.utils.StringRepresentationOfTheBorrow;
+import com.globallogic.bookshelf.utils.StringRepresentation;
 import com.globallogic.bookshelf.utils.UserHistory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -22,7 +21,6 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -90,13 +88,11 @@ public class BorrowServiceTests {
         borrowList.add(borrow1);
         borrowList.add(borrow2);
 
-        StringRepresentationOfTheBorrow userFriendlyBorrow = new StringRepresentationOfTheBorrow();
-
         List<String> completedBorrows = new ArrayList<>();
-        completedBorrows.add(userFriendlyBorrow.stringRepresentationOfCompletedBorrow(borrow1));
+        completedBorrows.add(StringRepresentation.ofTheBorrow(borrow1));
 
         List<String> uncompletedBorrows = new ArrayList<>();
-        uncompletedBorrows.add(userFriendlyBorrow.stringRepresentationOfUncompletedBorrow(borrow2));
+        uncompletedBorrows.add(StringRepresentation.ofTheBorrow(borrow2));
 
         correctUserHistory = new UserHistory(completedBorrows, uncompletedBorrows, 1);
     }
@@ -217,7 +213,7 @@ public class BorrowServiceTests {
     @Test
     public void getUserBorrowHistoryTest() {
         Mockito.doReturn(borrowList).when(borrowRepository)
-                .findAllByFirstnameAndSurname(firstname, surname);
+                .findAllByFirstnameAndLastname(firstname, surname);
 
         UserHistory testedList = service.getUserBorrowHistory(firstname, surname);
 

@@ -3,7 +3,6 @@ package com.globallogic.bookshelf.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -15,7 +14,6 @@ import java.util.Date;
  * @author Bartlomiej Chojnacki
  */
 @AllArgsConstructor
-@NoArgsConstructor
 @Data
 @Entity
 public class Borrow {
@@ -28,10 +26,10 @@ public class Borrow {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     protected Date returned;
     protected String firstname;
-    protected String surname;
+    protected String lastname;
     protected String comment;
 
-    @OneToOne()
+    @OneToOne
     @JoinColumn(name = "book_id",referencedColumnName = "id")
     protected Book book;
 

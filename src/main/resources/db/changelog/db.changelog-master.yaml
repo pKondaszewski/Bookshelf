@@ -67,7 +67,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: surname
+                  name: lastname
                   type: varchar(25)
                   constraints:
                     nullable: false

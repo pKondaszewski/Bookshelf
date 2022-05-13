@@ -102,7 +102,7 @@ public class BookShelfServiceTests {
         booksWithNewestBorrow.put(bookNotAvailable,
                 String.format("Name : %s %s : Date of borrowing book %s",
                         borrow.getFirstname(),
-                        borrow.getSurname(),
+                        borrow.getLastname(),
                         borrow.getBorrowed()));
         booksAllAvailability = new HashMap<>();
         booksAllAvailability.put(bookAvailable, "Available");
@@ -111,7 +111,7 @@ public class BookShelfServiceTests {
         booksAvailability.put(bookNotAvailable,
                 String.format("%s %s : %s",
                         borrow.getFirstname(),
-                        borrow.getSurname(),
+                        borrow.getLastname(),
                         borrow.getBorrowed()));
 
 
@@ -222,7 +222,7 @@ public class BookShelfServiceTests {
         bookBorrows.add(borrow);
         List<String> borrowInfo = new ArrayList<>();
 
-        borrowInfo.add("Name: " + borrow.getFirstname() + " " + borrow.getSurname());
+        borrowInfo.add("Name: " + borrow.getFirstname() + " " + borrow.getLastname());
         borrowInfo.add("Date of borrowing book: " + borrow.getBorrowed().toString());
         borrowInfo.add("Date of return book: " + borrow.getReturned().toString());
         borrowInfo.add("Comment: " + borrow.getComment());
@@ -243,7 +243,7 @@ public class BookShelfServiceTests {
         ArrayList<Borrow> bookBorrows = new ArrayList<>();
         bookBorrows.add(borrowTestNoCommentNoReturn);
         List<String> borrowInfo = new ArrayList<>();
-        borrowInfo.add("Name: " + borrowTestNoCommentNoReturn.getFirstname() + " " + borrowTestNoCommentNoReturn.getSurname());
+        borrowInfo.add("Name: " + borrowTestNoCommentNoReturn.getFirstname() + " " + borrowTestNoCommentNoReturn.getLastname());
         borrowInfo.add("Date of borrowing book: " + borrowTestNoCommentNoReturn.getBorrowed().toString());
         borrowInfo.add("Book not returned");
         borrowInfo.add("No comment");

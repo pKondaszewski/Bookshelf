@@ -7,8 +7,9 @@ import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
 import com.globallogic.bookshelf.utils.DateVerification;
-import com.globallogic.bookshelf.utils.StringRepresentationOfTheBorrow;
+import com.globallogic.bookshelf.utils.StringRepresentation;
 import com.globallogic.bookshelf.utils.UserHistory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
@@ -23,6 +24,7 @@ import java.util.Optional;
  * @author Bartłomiej Chojnacki
  */
 
+@Slf4j
 @Component
 public class BorrowService {
 
@@ -36,12 +38,12 @@ public class BorrowService {
 
 
     /**
-     * Create a borrow with book id, personal information (firstname, surname) and
+     * Create a borrow with book id, personal information (firstname, lastname) and
      * additional information (date of the borrow, comment)
      *
      * @param id         author of the book
      * @param firstname  firstname of the person that is borrowing the book
-     * @param surname    surname of the person that is borrowing the book
+     * @param lastname   lastname of the person that is borrowing the book
      * @param borrowDate date of the borrow
      * @param comment    additional comment for the borrow
      * @throws BookshelfResourceNotFoundException exception informing that book with given author and title doesn't exist
@@ -49,7 +51,7 @@ public class BorrowService {
      */
     @Transactional
     public void borrowBookById(Integer id, String firstname,
-                               String surname, Date borrowDate, String comment) {
+                               String lastname, Date borrowDate, String comment) {
         Optional<Book> book = bookRepository.findById(id);
 
         if (book.isEmpty()) {
@@ -60,27 +62,26 @@ public class BorrowService {
             if (book.get().isAvailable()) {
                 book.get().setAvailable(false);
                 bookRepository.save(book.get());
-                borrowDate = DateVerification.checkNullDate(borrowDate);
-                Borrow borrow = new Borrow(null, borrowDate, null, firstname, surname, comment, book.get());
+                borrowDate = DateVerification.nullHandling(borrowDate);
+                Borrow borrow = new Borrow(null, borrowDate, null, firstname, lastname, comment, book.get());
                 borrowRepository.save(borrow);
             } else {
                 throw new BookshelfConflictException(
                         String.format("Book with id : %s is already borrowed.", id)
                 );
             }
-
         }
     }
 
 
     /**
-     * Create a borrow with book information (author, title), personal information (firstname, surname) and
+     * Create a borrow with book information (author, title), personal information (firstname, lastname) and
      * additional information (date of the borrow, comment)
      *
      * @param author     author of the book
      * @param title      title of the book
      * @param firstname  firstname of the person that is borrowing the book
-     * @param surname    surname of the person that is borrowing the book
+     * @param lastname   lastname of the person that is borrowing the book
      * @param borrowDate date of the borrow
      * @param comment    additional comment for the borrow
      * @throws BookshelfResourceNotFoundException exception informing that book with given author and title doesn't exist
@@ -88,7 +89,7 @@ public class BorrowService {
      */
     @Transactional
     public void borrowBookByAuthorAndTitle(String author, String title, String firstname,
-                                           String surname, Date borrowDate, String comment) {
+                                           String lastname, Date borrowDate, String comment) {
         Book book = bookRepository.findByAuthorAndTitle(author, title);
         if (book == null) {
             throw new BookshelfResourceNotFoundException(
@@ -98,8 +99,8 @@ public class BorrowService {
             if (book.isAvailable()) {
                 book.setAvailable(false);
                 bookRepository.save(book);
-                borrowDate = DateVerification.checkNullDate(borrowDate);
-                Borrow borrow = new Borrow(null, borrowDate, null, firstname, surname, comment, book);
+                borrowDate = DateVerification.nullHandling(borrowDate);
+                Borrow borrow = new Borrow(null, borrowDate, null, firstname, lastname, comment, book);
                 borrowRepository.save(borrow);
             } else {
                 throw new BookshelfConflictException(
@@ -160,32 +161,29 @@ public class BorrowService {
     }
 
     /**
-     * Get a borrow history and actual borrowed books info of the specific user based by firstname and surname
+     * Get a borrow history and actual borrowed books info of the specific user based by firstname and lastname
      *
      * @param firstname String represents firstname of the user
-     * @param surname   String represents surname of the user
+     * @param lastname  String represents lastname of the user
      * @return List with every finished borrow of the user and active borrowed books with the number of them.
      */
-    public UserHistory getUserBorrowHistory(String firstname, String surname) {
+    public UserHistory getUserBorrowHistory(String firstname, String lastname) {
         List<String> completedBorrows = new ArrayList<>();
         List<String> uncompletedBorrows = new ArrayList<>();
         int numberOfBorrowedBooks = 0;
-        StringRepresentationOfTheBorrow userFriendlyLook = new StringRepresentationOfTheBorrow();
-        List<Borrow> borrowsOfTheUser = borrowRepository.findAllByFirstnameAndSurname(firstname, surname);
+        List<Borrow> borrowsOfTheUser = borrowRepository.findAllByFirstnameAndLastname(firstname, lastname);
         for (Borrow borrow : borrowsOfTheUser) {
             Book book = borrow.getBook();
             if (!book.isAvailable() && borrow.getReturned() == null) {
-                String borrowUserFriendlyLook = userFriendlyLook.stringRepresentationOfUncompletedBorrow(borrow);
-                uncompletedBorrows.add(borrowUserFriendlyLook);
+                String borrowAsString = StringRepresentation.ofTheBorrow(borrow);
+                uncompletedBorrows.add(borrowAsString);
                 numberOfBorrowedBooks += 1;
+            } else if (book.isAvailable() && borrow.getReturned() != null) {
+                String borrowUserFriendlyLook = StringRepresentation.ofTheBorrow(borrow);
+                completedBorrows.add(borrowUserFriendlyLook);
+            } else {
+                log.error("There is something wrong with book : {} and borrow {}", book, borrow);
             }
-        }
-        borrowsOfTheUser.removeIf(
-                borrow -> (borrow.getReturned() == null)
-        );
-        for (Borrow borrow : borrowsOfTheUser) {
-            String borrowUserFriendlyLook = userFriendlyLook.stringRepresentationOfCompletedBorrow(borrow);
-            completedBorrows.add(borrowUserFriendlyLook);
         }
         return new UserHistory(completedBorrows, uncompletedBorrows, numberOfBorrowedBooks);
     }
