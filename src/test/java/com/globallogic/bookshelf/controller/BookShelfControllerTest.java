@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
-public class BookShelfControllerTests {
+public class BookShelfControllerTest {
 
     @MockBean
     private BookRepository bookRepository;
@@ -51,7 +51,7 @@ public class BookShelfControllerTests {
     }
 
     @BeforeAll
-    public static void setModel() {
+    public static void initVariables() {
         String available = "Available";
         bookName = "bookname";
 
@@ -64,8 +64,6 @@ public class BookShelfControllerTests {
 
         allBooksHashMap = new HashMap<>();
         allBooksHashMap.put(book1.getAuthor(), book1.getTitle());
-
-
     }
 
 
@@ -82,7 +80,7 @@ public class BookShelfControllerTests {
     }
 
     @Test
-    public void testDeleteBookRequestSuccess() throws Exception {
+    public void deleteBookRequestSuccessTest() throws Exception {
         Mockito.doReturn(book1).when(bookRepository).findByTitle(bookName);
         mockMvc
                 .perform(delete("/bookshelf/{id}", book1.getId()))
@@ -92,7 +90,7 @@ public class BookShelfControllerTests {
     }
 
     @Test
-    public void testGetListOfBooksAvailableSuccess() throws Exception {
+    public void getListOfBooksAvailableSuccessTest() throws Exception {
         Mockito.doReturn(allBooksAvailableHashMap).when(bookShelfService).getAllBooksAvailable();
         Gson gson = new Gson();
         String json = gson.toJson(allBooksAvailableHashMap);
@@ -106,7 +104,7 @@ public class BookShelfControllerTests {
     }
 
     @Test
-    public void testGetListOfBooksSuccess() throws Exception {
+    public void getListOfBooksSuccessTest() throws Exception {
         Mockito.doReturn(allBooksHashMap).when(bookShelfService).getAllBooks();
 //
 //        Gson gson = new Gson();
@@ -128,7 +126,7 @@ public class BookShelfControllerTests {
     }
 
     @Test
-    public void testGetListOfBooksAvailabilitySuccess() throws Exception {
+    public void getListOfBooksAvailabilitySuccessTest() throws Exception {
         Mockito.doReturn(allBooksHashMap).when(bookShelfService).getBooksAvailability();
 
         Gson gson = new Gson();
@@ -139,5 +137,4 @@ public class BookShelfControllerTests {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
     }
-
 }

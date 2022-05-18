@@ -8,6 +8,7 @@ import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
 import com.globallogic.bookshelf.repository.CategoryRepository;
+import com.globallogic.bookshelf.utils.Verification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
@@ -43,13 +44,12 @@ public class BookShelfService {
      * @param title body of the book
      */
     public void create(String title, String author, boolean available, String categoryName) {
-     Category category =categoryRepository.findByName(categoryName);
-     Book book = new Book(author, title, available, category);
-
-        if (category == null) {
-            book.setCategory(categoryRepository.getById(4));
+        Category category = new Category();
+        if (categoryName != null) {
+            category = categoryRepository.findByName(categoryName);
         }
-
+        Book book = new Book(author, title, available, category);
+        Verification.ofTheCategory(category, book, categoryRepository);
         bookRepository.save(book);
     }
 

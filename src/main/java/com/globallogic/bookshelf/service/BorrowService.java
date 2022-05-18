@@ -6,9 +6,9 @@ import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
-import com.globallogic.bookshelf.utils.DateVerification;
 import com.globallogic.bookshelf.utils.StringRepresentation;
 import com.globallogic.bookshelf.utils.UserHistory;
+import com.globallogic.bookshelf.utils.Verification;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -62,7 +62,7 @@ public class BorrowService {
             if (book.get().isAvailable()) {
                 book.get().setAvailable(false);
                 bookRepository.save(book.get());
-                borrowDate = DateVerification.nullHandling(borrowDate);
+                borrowDate = Verification.ofTheDate(borrowDate);
                 Borrow borrow = new Borrow(null, borrowDate, null, firstname, lastname, comment, book.get());
                 borrowRepository.save(borrow);
             } else {
@@ -99,7 +99,7 @@ public class BorrowService {
             if (book.isAvailable()) {
                 book.setAvailable(false);
                 bookRepository.save(book);
-                borrowDate = DateVerification.nullHandling(borrowDate);
+                borrowDate = Verification.ofTheDate(borrowDate);
                 Borrow borrow = new Borrow(null, borrowDate, null, firstname, lastname, comment, book);
                 borrowRepository.save(borrow);
             } else {

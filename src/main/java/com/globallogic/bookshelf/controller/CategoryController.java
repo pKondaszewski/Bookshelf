@@ -38,12 +38,12 @@ public class CategoryController {
      * @param name name of the category
      * @return ResponseEntity that informs about the creation of the category
      */
-    @PostMapping(path = "/categoryCreate",produces = MediaType.TEXT_PLAIN_VALUE)
+    @PostMapping(path = "/categoryCreate")
     @ApiOperation(value = "Create a category with given name")
     @ApiResponses(value = { @ApiResponse(code = 201, message = "Category created"),
                             @ApiResponse(code = 409, message = "Category with given name already exists"),
                             @ApiResponse(code = 500, message = "Internal Category server error")})
-    public ResponseEntity<String> create(@RequestParam String name) {
+    public ResponseEntity<String> create(@RequestParam(name = "name") String name) {
         try {
             categoryService.create(name);
             log.info("Creating category={}", name);

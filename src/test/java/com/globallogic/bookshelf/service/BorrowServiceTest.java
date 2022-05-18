@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class BorrowServiceTests {
+public class BorrowServiceTest {
 
     private static Book availableBook, availableBook2, notAvailableBook, notAvailableBook2;
     private static Borrow borrow3, borrow1, borrow2, borrow4, borrow5, borrow6;
@@ -48,15 +48,15 @@ public class BorrowServiceTests {
     private static BorrowService service;
 
     private static final int id = 1;
-    private static Date date1,date2;
+    private static Date date1;
 
 
     @BeforeAll
-    public static void setModel() {
+    public static void initVariables() {
         service = new BorrowService(borrowRepository, bookRepository);
 
         date1 = Date.valueOf(LocalDate.of(1, 1, 1));
-        date2 = Date.valueOf(LocalDate.of(2, 2, 2));
+        Date date2 = Date.valueOf(LocalDate.of(2, 2, 2));
 
         String bookAuthor = "bookAuthor";
         String bookName = "bookName";
@@ -82,7 +82,6 @@ public class BorrowServiceTests {
         borrow4 = new Borrow(4, null, null, firstname, surname, comment, availableBook2);
         borrow5 = new Borrow(4, null, null, firstname, surname, comment, notAvailableBook);
         borrow6 = new Borrow(4, date1, null, firstname, surname, comment, notAvailableBook2);
-
 
         borrowList = new ArrayList<>();
         borrowList.add(borrow1);
@@ -219,5 +218,4 @@ public class BorrowServiceTests {
 
         assertThat(testedList).usingRecursiveComparison().isEqualTo(correctUserHistory);
     }
-
 }

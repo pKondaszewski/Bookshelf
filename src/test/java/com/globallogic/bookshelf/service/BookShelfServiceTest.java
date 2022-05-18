@@ -21,18 +21,18 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-public class BookShelfServiceTests {
+public class BookShelfServiceTest {
 
     private static Book bookAvailable, bookNotAvailable;
     private static Borrow borrow;
-    private static Borrow borrowTestNoCommentNoReturn;
+    private static Borrow borrow1;
+    private static Category category;
     private static HashMap<Book, String> booksWithNewestBorrow;
     private static HashMap<Book, String> booksAvailability;
     private static HashMap<Book, String> booksAllAvailability;
     private static HashMap<String, String> books;
-    private static final int ID_TEST = 1;
-    private static final String name = "Default";
-    private static Category Category;
+    private static String author, title, firstname, lastname;
+    private static final int id = 1;
 
     @Mock
     private static BookRepository bookRepository;
@@ -51,42 +51,32 @@ public class BookShelfServiceTests {
     private static ArrayList<Object> booksWithNewestBorrowSort;
 
     @BeforeAll
-    public static void setBook() {
+    public static void initVariables() {
+        author = "Adam Mickiewicz";
+        title = "Dziady";
+        category = new Category(4, "Default");
 
         bookShelfService = new BookShelfService(bookRepository, borrowRepository, categoryRepository);
         bookAvailable = new Book(
-                1,
-                "Adam Mickiewicz",
-                "Dziady",
-                true,
-                new Category(1, "testCategoryName"));
+                null, author, title, true, category);
         bookNotAvailable = new Book(
-                2,
-                "Adam Mickiewicz",
-                "Dziady",
-                false,
-                new Category(2, "testCategoryName"));
+                2,author,title,false,
+                new Category(2, "categoryName"));
 
         allBooks = new ArrayList<>();
         allBooks.add(bookAvailable);
         allBooks.add(bookNotAvailable);
 
+        firstname = "Andrzej";
+        lastname = "Kowalski";
 
         Date date = new Date();
         borrow = new Borrow(
-                1,
-                date,
-                date,
-                "Andrzej",
-                "Kowalski",
+                1, date, date, firstname, lastname,
                 "random comment",
                 bookNotAvailable);
-        borrowTestNoCommentNoReturn = new Borrow(
-                1,
-                date,
-                null,
-                "Andrzej",
-                "Kowalski",
+        borrow1 = new Borrow(
+                1, date,null, firstname, lastname,
                 null,
                 bookAvailable);
 
@@ -95,7 +85,7 @@ public class BookShelfServiceTests {
         books.put(bookNotAvailable.getAuthor(), bookNotAvailable.getTitle());
 
         booksWithNewestBorrowSort = new ArrayList<>();
-        booksWithNewestBorrowSort.add(borrowTestNoCommentNoReturn);
+        booksWithNewestBorrowSort.add(borrow1);
 
 
         booksWithNewestBorrow = new HashMap<>();
@@ -113,43 +103,49 @@ public class BookShelfServiceTests {
                         borrow.getFirstname(),
                         borrow.getLastname(),
                         borrow.getBorrowed()));
+    }
 
+    @Test
+    public void createSuccessTest(){
+        Mockito.doReturn(category).when(categoryRepository).findByName(bookAvailable.getCategory().getName());
 
-       Category = new Category(1, name);
+        bookShelfService.create(title, author, true, category.getName());
+
+        Mockito.verify(bookRepository).save(bookAvailable);
     }
 
     @Test
     public void deleteBookSuccessTest() {
-        Mockito.doReturn(Optional.of(bookAvailable)).when(bookRepository).findById(ID_TEST);
+        Mockito.doReturn(Optional.of(bookAvailable)).when(bookRepository).findById(id);
         Mockito.doReturn(List.of(borrow)).when(borrowRepository).findAllByBook(bookAvailable);
 
-        bookShelfService.delete(ID_TEST);
+        bookShelfService.delete(id);
         Mockito.verify(borrowRepository).delete(borrow);
-        Mockito.verify(bookRepository).deleteById(ID_TEST);
+        Mockito.verify(bookRepository).deleteById(id);
     }
 
     @Test
     public void deleteBookResourceNotFoundExceptionTest() {
-        Mockito.doReturn(Optional.empty()).when(bookRepository).findById(ID_TEST);
+        Mockito.doReturn(Optional.empty()).when(bookRepository).findById(id);
 
         Exception exception = assertThrows(BookshelfResourceNotFoundException.class, () ->
-                bookShelfService.delete(ID_TEST)
+                bookShelfService.delete(id)
         );
 
-        String expectedMessage = String.format("Book with id=%d doesn't exist", ID_TEST);
+        String expectedMessage = String.format("Book with id=%d doesn't exist", id);
         String actualMessage = exception.getMessage();
         assertTrue(actualMessage.contains(expectedMessage));
     }
 
     @Test
     public void deleteBookConflictExceptionTest() {
-        Mockito.doReturn(Optional.of(bookNotAvailable)).when(bookRepository).findById(ID_TEST);
+        Mockito.doReturn(Optional.of(bookNotAvailable)).when(bookRepository).findById(id);
 
         Exception exception = assertThrows(BookshelfConflictException.class, () ->
-                bookShelfService.delete(ID_TEST)
+                bookShelfService.delete(id)
         );
 
-        String expectedMessage = String.format("Book with id=%d is still borrowed. Can't delete", ID_TEST);
+        String expectedMessage = String.format("Book with id=%d is still borrowed. Can't delete", id);
         String actualMessage = exception.getMessage();
         assertTrue(actualMessage.contains(expectedMessage));
     }
@@ -172,14 +168,13 @@ public class BookShelfServiceTests {
         HashMap<Book, String> booksAvailabilityReturn = bookShelfService.getAllBooksAvailable();
 
         assertEquals(booksAllAvailability, booksAvailabilityReturn);
-
     }
 
     @Test
     public void getListOfBorrowedBooksSortTest() {
 
         ArrayList<Borrow> bookBorrows = new ArrayList<>();
-        bookBorrows.add(borrowTestNoCommentNoReturn);
+        bookBorrows.add(borrow1);
 
         Mockito.doReturn(allBooks).when(bookRepository).findAll();
         Mockito.doReturn(bookBorrows).when(borrowRepository).findAllByBook(bookNotAvailable);
@@ -241,10 +236,10 @@ public class BookShelfServiceTests {
     @Test
     public void getBookHistoryWithNoCommentAndNotReturnTest() {
         ArrayList<Borrow> bookBorrows = new ArrayList<>();
-        bookBorrows.add(borrowTestNoCommentNoReturn);
+        bookBorrows.add(borrow1);
         List<String> borrowInfo = new ArrayList<>();
-        borrowInfo.add("Name: " + borrowTestNoCommentNoReturn.getFirstname() + " " + borrowTestNoCommentNoReturn.getLastname());
-        borrowInfo.add("Date of borrowing book: " + borrowTestNoCommentNoReturn.getBorrowed().toString());
+        borrowInfo.add("Name: " + borrow1.getFirstname() + " " + borrow1.getLastname());
+        borrowInfo.add("Date of borrowing book: " + borrow1.getBorrowed().toString());
         borrowInfo.add("Book not returned");
         borrowInfo.add("No comment");
         borrowInfo.add("Book is not available");
@@ -257,17 +252,8 @@ public class BookShelfServiceTests {
         HashMap<Book, List<String>> bookHistory = bookShelfService.getBooksHistory(bookNotAvailable.getTitle());
 
         assertEquals(bookListHashMap, bookHistory);
-
     }
 
-//    @Test
-//    public void createSuccessTest(){
-//        Mockito.doReturn(Category).when(categoryRepository).findByName(bookAvailable.getCategory().getName());
-//
-//        bookShelfService.create(bookAvailable);
-//
-//        Mockito.verify(bookRepository).save(bookAvailable);
-//    }
 //
 //    @Test
 //    public void createBookshelfResourceNotFoundExceptionTest() {

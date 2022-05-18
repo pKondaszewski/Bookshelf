@@ -45,7 +45,7 @@ public class CategoryServiceTest {
     private static HashMap<String, Integer> outputMap;
 
     @BeforeAll
-    public static void setModel() {
+    public static void initVariables() {
         service = new CategoryService(categoryRepository, bookRepository);
 
         category = new Category(null, categoryName);
@@ -135,5 +135,4 @@ public class CategoryServiceTest {
 
         assertEquals(service.getAmountOfBooksPerCategory(), outputMap);
     }
-
 }

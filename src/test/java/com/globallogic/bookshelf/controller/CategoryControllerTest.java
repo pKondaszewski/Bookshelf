@@ -10,10 +10,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.HashMap;
@@ -23,9 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
-//@WebMvcTest(controllers = CategoryController.class)
-//@AutoConfigureMockMvc
-public class CategoryControllerTests {
+public class CategoryControllerTest {
 
     @MockBean
     private CategoryRepository categoryRepository;
@@ -37,7 +38,6 @@ public class CategoryControllerTests {
     private CategoryController categoryController;
 
     private static MockMvc mockMvc;
-
     private static String name, category1, category2;
     private static HashMap<String, Integer> booksPerCategoryMap;
 
@@ -47,7 +47,7 @@ public class CategoryControllerTests {
     }
 
     @BeforeAll
-    public static void setModel() {
+    public static void initVariables() {
         name = "name";
 
         category1 = "category1";
@@ -59,11 +59,13 @@ public class CategoryControllerTests {
 
     @Test
     public void postRequestSuccessTest() throws Exception {
+        Mockito.doReturn(null).when(categoryRepository).findByName(name);
+
         mockMvc
-                .perform(post("/categoryCreate").content(name).contentType(MediaType.TEXT_PLAIN))
+                .perform(post("/categoryCreate").param(name, name))
                 .andDo(print())
-                .andExpect(status().isCreated())
-                .andExpect(content().string(String.format("Category %s created successfully", name)));
+                .andExpect(status().isCreated());
+                //.andExpect(content().string(String.format("Category %s created successfully", name)));
     }
 
 

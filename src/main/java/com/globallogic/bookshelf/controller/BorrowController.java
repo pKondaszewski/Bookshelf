@@ -53,7 +53,7 @@ public class BorrowController {
      * @return ResponseEntity that informs about the borrowing of the book.
      */
     @ApiOperation(value = "Borrows a book based on the id")
-    @ApiResponses(value = { @ApiResponse(code = 201, message = "Book borrowed"),
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "Book borrowed"),
                             @ApiResponse(code = 404, message = "Bad Request"),
                             @ApiResponse(code = 500, message = "Internal Bookshelf server error"),
                             @ApiResponse(code = 409, message = "Book is already borrowed")})
@@ -158,7 +158,7 @@ public class BorrowController {
      * @param id id of the borrow
      * @return ResponseEntity that informs about the removal of the borrow
      */
-    @DeleteMapping(path = "/borrowDelete", produces = MediaType.TEXT_PLAIN_VALUE)
+    @DeleteMapping(path = "/borrowDelete")
     @ApiOperation(value = "Deleting specific borrow by id")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Borrow deleted"),
                             @ApiResponse(code = 404, message = "Borrow not found"),
@@ -184,10 +184,10 @@ public class BorrowController {
      * @param lastname   String lastname of the user
      * @return Response entity with list containing finished borrows, active holding books and amount of them.
      */
-    @GetMapping(path = "/userHistory", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/userHistory")
     @ApiOperation(value = "Getting specific user borrow history")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "Borrow history returned"),
-            @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "Borrow history returned"),
+                            @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
     public ResponseEntity<UserHistory> getUserBorrowHistory(@RequestParam String firstname,
                                                             @RequestParam String lastname) {
         UserHistory userHistory = borrowsService.getUserBorrowHistory(firstname, lastname);
