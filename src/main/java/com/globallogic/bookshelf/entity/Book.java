@@ -29,10 +29,5 @@ public class Book {
     @JoinColumn(name = "category_id", referencedColumnName = "id")
     protected Category category;
 
-    public Book(String author, String title, boolean available,Category category) {
-        this.author = author;
-        this.title = title;
-        this.available = available;
-        this.category = category;
-    }
+
 }

@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.Date;
+import java.util.NoSuchElementException;
 
 /**
  * Client-server communication class that's processes /borrow requests
@@ -127,7 +128,7 @@ public class BorrowController {
     /**
      * PUT Request to return one book based on the id of borrow and book id.
      *
-     * @param borrow_id id of borrow.
+     * @param borrowId id of borrow.
      * @return String that informs about the returning of the book.
      */
     @ApiOperation(value = "Returning a book.")
@@ -136,18 +137,18 @@ public class BorrowController {
             @ApiResponse(code = 500, message = "Internal Bookshelf server error"),
             @ApiResponse(code = 404, message = "Book no found")})
     @PutMapping(path = "/bookReturn")
-    public ResponseEntity<String> returnBorrow(@RequestParam Integer borrow_id) {
+    public ResponseEntity<String> returnBorrow(@RequestParam Integer borrowId) {
         try {
-            borrowsService.returnBook(borrow_id);
-            return new ResponseEntity<>(String.format("Borrow with id= %s ended", borrow_id),
+            borrowsService.returnBook(borrowId);
+            return new ResponseEntity<>(String.format("Borrow with id= %s ended", borrowId),
                     HttpStatus.OK);
         } catch (BookshelfResourceNotFoundException exception) {
             return new ResponseEntity<>(
-                    String.format("Borrow with id= %s not found", borrow_id),
+                    String.format("Borrow with id= %s not found", borrowId),
                     HttpStatus.NOT_FOUND);
         } catch (BookshelfConflictException exception) {
             return new ResponseEntity<>(
-                    String.format("Borrow with id : %s is ended.", borrow_id),
+                    String.format("Borrow with id : %s is ended.", borrowId),
                     HttpStatus.CONFLICT);
         }
     }
@@ -155,7 +156,7 @@ public class BorrowController {
     /**
      * DELETE Request to remove one borrow based on the id.
      *
-     * @param id id of the borrow
+     * @param borrowId id of the borrow
      * @return ResponseEntity that informs about the removal of the borrow
      */
     @DeleteMapping(path = "/borrowDelete")
@@ -164,15 +165,15 @@ public class BorrowController {
                             @ApiResponse(code = 404, message = "Borrow not found"),
                             @ApiResponse(code = 409, message = "Borrow is still active"),
                             @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
-    public ResponseEntity<String> deleteBorrow(@RequestParam Integer id) {
+    public ResponseEntity<String> deleteBorrow(@RequestParam Integer borrowId) {
         try {
-            borrowsService.deleteBorrow(id);
-            log.info("Deleting borrow id={}", id);
-            return new ResponseEntity<>(String.format("Borrow id=%d deleted successfully", id), HttpStatus.OK);
+            borrowsService.deleteBorrow(borrowId);
+            log.info("Deleting borrow id={}", borrowId);
+            return new ResponseEntity<>(String.format("Borrow id= %s deleted successfully", borrowId), HttpStatus.OK);
         } catch (BookshelfResourceNotFoundException exception) {
-            return new ResponseEntity<>(String.format("Borrow with id=%d doesn't exist", id), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(String.format("Borrow with id= %s doesn't exist", borrowId), HttpStatus.NOT_FOUND);
         } catch (BookshelfConflictException exception) {
-            return new ResponseEntity<>(String.format("Borrow with id=%d is still active. Can't delete", id),
+            return new ResponseEntity<>(String.format("Borrow with id= %s is still active. Can't delete", borrowId),
                     HttpStatus.CONFLICT);
         }
     }
@@ -180,20 +181,20 @@ public class BorrowController {
     /**
      * GET Request to get borrow history and additional information based by the specific user
      *
-     * @param firstname String firstname of the user
-     * @param lastname   String lastname of the user
+     * @param firstName String firstname of the user
+     * @param lastName   String lastname of the user
      * @return Response entity with list containing finished borrows, active holding books and amount of them.
      */
     @GetMapping(path = "/userHistory")
     @ApiOperation(value = "Getting specific user borrow history")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Borrow history returned"),
                             @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
-    public ResponseEntity<UserHistory> getUserBorrowHistory(@RequestParam String firstname,
-                                                            @RequestParam String lastname) {
-        UserHistory userHistory = borrowsService.getUserBorrowHistory(firstname, lastname);
+    public ResponseEntity<UserHistory> getUserBorrowHistory(@RequestParam String firstName,
+                                                            @RequestParam String lastName) {
+        UserHistory userHistory = borrowsService.getUserBorrowHistory(firstName, lastName);
         log.info("Showing borrow history of user={} {} : {} {} {}",
-                firstname,
-                lastname,
+                firstName,
+                lastName,
                 userHistory.getReturnedBooks(),
                 userHistory.getCurrentlyBorrowedBooks(),
                 userHistory.getNumberOfCurrentlyBorrowedBooks());

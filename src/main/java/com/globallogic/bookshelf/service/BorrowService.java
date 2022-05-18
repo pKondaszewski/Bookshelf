@@ -13,10 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Business logic of the /borrow request
@@ -52,18 +49,20 @@ public class BorrowService {
     @Transactional
     public void borrowBookById(Integer id, String firstname,
                                String lastname, Date borrowDate, String comment) {
-        Optional<Book> book = bookRepository.findById(id);
 
-        if (book.isEmpty()) {
+       Optional<Book> bookOptional = bookRepository.findById(id);
+
+        if (bookOptional.isEmpty()) {
             throw new BookshelfResourceNotFoundException(
                     String.format("Book with id : %s doesn't exist.", id)
             );
         } else {
-            if (book.get().isAvailable()) {
-                book.get().setAvailable(false);
-                bookRepository.save(book.get());
+            Book book = bookOptional.get();
+            if (book.isAvailable()) {
+                book.setAvailable(false);
+                bookRepository.save(book);
                 borrowDate = Verification.ofTheDate(borrowDate);
-                Borrow borrow = new Borrow(null, borrowDate, null, firstname, lastname, comment, book.get());
+                Borrow borrow = new Borrow(null, borrowDate, null, firstname, lastname, comment, book);
                 borrowRepository.save(borrow);
             } else {
                 throw new BookshelfConflictException(

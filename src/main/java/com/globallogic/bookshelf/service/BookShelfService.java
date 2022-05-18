@@ -8,6 +8,7 @@ import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
 import com.globallogic.bookshelf.repository.CategoryRepository;
+import com.globallogic.bookshelf.utils.StringRepresentation;
 import com.globallogic.bookshelf.utils.Verification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -48,7 +49,7 @@ public class BookShelfService {
         if (categoryName != null) {
             category = categoryRepository.findByName(categoryName);
         }
-        Book book = new Book(author, title, available, category);
+        Book book = new Book(null,author, title, available, category);
         Verification.ofTheCategory(category, book, categoryRepository);
         bookRepository.save(book);
     }
@@ -137,19 +138,38 @@ public class BookShelfService {
      *
      * @return List with borrow and information about the book sort by date
      */
-    public List<Borrow> getListOfBorrowedBooksSort() {
-        List<Borrow> booksAvailability = new ArrayList<>();
+    public List<String> getListOfBorrowedBooksSort(boolean dateSort, boolean firstNameSort, boolean lastNameSort) {
+        List<String> booksAvailability = new ArrayList<>();
         List<Book> allBooks = bookRepository.findAll();
         for (Book book : allBooks) {
             if (!book.isAvailable()) {
                 List<Borrow> borrowList = borrowRepository.findAllByBook(book);
                 if (CollectionUtils.isNotEmpty(borrowList)) {
-                    Borrow borrow = borrowList.get(borrowList.size() - 1);
-                    booksAvailability.add(borrow);
-                }
-            }
-            booksAvailability.sort(Comparator.comparing(Borrow::getBorrowed));
+                    if(dateSort == true){
 
+                        Borrow borrow = borrowList.get(borrowList.size() - 1);
+                         StringRepresentation representation =  new StringRepresentation();
+                        String bookInfo = representation.ofTheBorrow(borrow);
+
+                        booksAvailability.add(bookInfo);
+                        Collections.sort(booksAvailability);
+
+
+                    }else if (firstNameSort ==true){
+
+                    }else if (lastNameSort == true){
+
+                    }else {
+
+
+
+                        Borrow borrow = borrowList.get(borrowList.size() - 1);
+                        StringRepresentation representation =  new StringRepresentation();
+                        String bookInfo = representation.ofTheBorrow(borrow);
+                        booksAvailability.add(bookInfo);
+                }}
+
+            }
         }
         return booksAvailability;
     }
@@ -159,18 +179,17 @@ public class BookShelfService {
      *
      * @return Hashmap with book and information about the book availability (owner and date of the borrow)
      */
-    public HashMap<Book, String> getListOfBorrowedBooks() {
-        HashMap<Book, String> booksAvailability = new HashMap<>();
+    public List<String> getListOfBorrowedBooks() {
+        List<String>  booksAvailability = new ArrayList<>();
         List<Book> allBooks = bookRepository.findAll();
         for (Book book : allBooks) {
             if (!book.isAvailable()) {
                 List<Borrow> borrowList = borrowRepository.findAllByBook(book);
                 if (CollectionUtils.isNotEmpty(borrowList)) {
                     Borrow borrow = borrowList.get(borrowList.size() - 1);
-                    Date dateOfTheBorrow = borrow.getBorrowed();
-                    String ownerOfTheBorrow = "Name : " + borrow.getFirstname() + " " + borrow.getLastname();
-                    String infoAboutTheBorrow = ownerOfTheBorrow + " : Date of borrowing book " + dateOfTheBorrow;
-                    booksAvailability.put(book, infoAboutTheBorrow);
+                    StringRepresentation representation =  new StringRepresentation();
+                    String bookInfo = representation.ofTheBorrow(borrow);
+                    booksAvailability.add(bookInfo);
                 }
             }
         }

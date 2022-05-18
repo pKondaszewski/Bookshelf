@@ -1,5 +1,7 @@
 package com.globallogic.bookshelf.controller;
 
+import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
+import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.CategoryRepository;
 import com.globallogic.bookshelf.service.CategoryService;
 import org.hamcrest.Matchers;
@@ -16,11 +18,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.HashMap;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -28,6 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
 public class CategoryControllerTest {
 
+    private static MockHttpServletRequestBuilder deleteRequestBuilder,deleteResult;
     @MockBean
     private CategoryRepository categoryRepository;
 
@@ -55,27 +62,66 @@ public class CategoryControllerTest {
         booksPerCategoryMap = new HashMap<>();
         booksPerCategoryMap.put(category1, 5);
         booksPerCategoryMap.put(category2, 10);
+        deleteResult = MockMvcRequestBuilders.delete("/category/categoryDelete");
+        deleteRequestBuilder = deleteResult.param("name",name);
     }
 
     @Test
-    public void postRequestSuccessTest() throws Exception {
+    public void createRequestSuccessTest() throws Exception {
         Mockito.doReturn(null).when(categoryRepository).findByName(name);
 
         mockMvc
-                .perform(post("/categoryCreate").param(name, name))
+                .perform(post("/category/categoryCreate").param(name, name))
                 .andDo(print())
-                .andExpect(status().isCreated());
-                //.andExpect(content().string(String.format("Category %s created successfully", name)));
+                .andExpect(status().isCreated())
+                .andExpect(content().string(String.format("Category %s created successfully", name)));
+    }
+    @Test
+    public void createConflictTest() throws Exception {
+        doThrow(new BookshelfConflictException(
+                String.format("Category with name %s already exists.", name))).when(categoryService)
+                .create(name);
+
+        mockMvc
+                .perform(post("/category/categoryCreate").param(name, name))
+                .andDo(print())
+                .andExpect(status().isConflict())
+                .andExpect(content().string(String.format("Category with name %s already exists.", name)));
     }
 
 
     @Test
     public void deleteRequestSuccessTest() throws Exception {
         mockMvc
-                .perform(delete("/categoryDelete").content(name).contentType(MediaType.TEXT_PLAIN))
+                .perform(delete("/category/categoryDelete").param(name,name))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string(String.format("Category %s deleted successfully", name)));
+    }
+
+    @Test
+    public void deleteRequestStartingCategoryTest()throws Exception{
+        doThrow(new BookshelfConflictException(String.format("Can't delete %s. It's a starting category"
+                , name))).when(categoryService)
+                .delete(name);
+
+        mockMvc
+                .perform(delete("/category/categoryDelete").param(name,name))
+                .andDo(print())
+                .andExpect(status().isConflict())
+                .andExpect(content().string(String.format("Can't delete %s. It's a starting category", name)));
+    }
+
+    @Test
+    public void deleteRequestCategoryNotExistTest()throws Exception{
+        doThrow(new BookshelfResourceNotFoundException(String.format("Category with name %s doesn't exist.", name)))
+                .when(categoryService).delete(name);
+
+        mockMvc
+                .perform(delete("/category/categoryDelete").param(name,name))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(String.format("Category with name %s doesn't exist.", name)));
     }
 
     @Test

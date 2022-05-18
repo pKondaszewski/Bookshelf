@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -49,12 +50,12 @@ public class BookShelfController {
                             @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
     @PostMapping(path = "/bookCreate",produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> create(@RequestParam String author, @RequestParam String title, @RequestParam boolean availability,
-                                        @RequestParam(required = false) String categoryName) {
+                                        @RequestParam(required = false, defaultValue = "Default") String categoryName) {
 
         try {
             bookShelfService.create(title, author, availability, categoryName);
             return new ResponseEntity<>(String.format("Book %s created", title), HttpStatus.CREATED);
-        }catch (BookshelfResourceNotFoundException exception){
+        }catch (NullPointerException exception){
             return new ResponseEntity<>(String.format("Category %s not found", categoryName), HttpStatus.NOT_FOUND);
         }
     }
@@ -88,7 +89,7 @@ public class BookShelfController {
      *
      * @return ResponseEntity that contains history of every book and it's availability.
      */
-    @GetMapping(path = "/booksPerCategoryMap", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/getAllBooksAvailable", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Show available books")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "All books available"),
                             @ApiResponse(code = 500, message = "Internal BookShelf server error")})
@@ -151,11 +152,13 @@ public class BookShelfController {
      *
      * @return ResponseEntity that contains book and information about who borrow book at the moment.
      */
-    @GetMapping(path = "/getListOfBorrowedBooksWithNewestBorrowSort", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/getListOfBorrowedBooksSort", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Books History",response = HashMap.class),
             @ApiResponse(code = 500,message = "Internal BookShelf server error")})
-    public ResponseEntity<List<Borrow>> getNewestActiveBorrowSort(){
-        List<Borrow> bookHistoryHashMap = bookShelfService.getListOfBorrowedBooksSort();
+    public ResponseEntity<List<String>> getNewestActiveBorrowSort(@RequestHeader(value = "sortByDate", required = false) boolean dateSort
+            ,@RequestHeader(value = "sortByFirstName", required = false) boolean firstNameSort
+            ,@RequestHeader(value = "sortByLastName", required = false) boolean lastNameSort ){
+        List<String> bookHistoryHashMap = bookShelfService.getListOfBorrowedBooksSort(dateSort,firstNameSort,lastNameSort);
         log.info("Books History={}",bookHistoryHashMap);
         return new ResponseEntity<>(bookHistoryHashMap,HttpStatus.OK);
     }
@@ -165,11 +168,11 @@ public class BookShelfController {
      *
      * @return ResponseEntity that contains book and information about who borrow book at the moment.
      */
-    @GetMapping(path = "/getListOfBorrowedBooksWithNewestBorrow", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/getListOfBorrowedBooks", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Books History",response = HashMap.class),
             @ApiResponse(code = 500,message = "Internal BookShelf server error")})
-    public ResponseEntity<HashMap<Book, String>> getNewestActiveBorrow(){
-        HashMap<Book,String> bookHistoryHashMap = bookShelfService.getListOfBorrowedBooks();
+    public ResponseEntity<List<String>> getNewestActiveBorrow(){
+        List<String> bookHistoryHashMap = bookShelfService.getListOfBorrowedBooks();
         log.info("Books History={}",bookHistoryHashMap);
         return new ResponseEntity<>(bookHistoryHashMap,HttpStatus.OK);
     }
