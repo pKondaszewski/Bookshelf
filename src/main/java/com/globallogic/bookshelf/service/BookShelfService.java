@@ -8,13 +8,17 @@ import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
 import com.globallogic.bookshelf.repository.CategoryRepository;
+import com.globallogic.bookshelf.utils.CustomBorrow;
 import com.globallogic.bookshelf.utils.StringRepresentation;
 import com.globallogic.bookshelf.utils.Verification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+
+
 
 
 /**
@@ -30,6 +34,7 @@ public class BookShelfService {
     protected BookRepository bookRepository;
     protected BorrowRepository borrowRepository;
     protected CategoryRepository categoryRepository;
+
 
 
     public BookShelfService(BookRepository bkRepository, BorrowRepository bwRepository,
@@ -133,46 +138,58 @@ public class BookShelfService {
         return booksAvailability;
     }
 
+
     /**
      * Get information about every book availability
      *
      * @return List with borrow and information about the book sort by date
      */
-    public List<String> getListOfBorrowedBooksSort(boolean dateSort, boolean firstNameSort, boolean lastNameSort) {
-        List<String> booksAvailability = new ArrayList<>();
+    public List<Object> getListOfBorrowedBooksSort(String sort) {
+        List<CustomBorrow> customBorrows = new ArrayList<>();
         List<Book> allBooks = bookRepository.findAll();
+        ModelMapper modelMapper = new ModelMapper();
         for (Book book : allBooks) {
             if (!book.isAvailable()) {
                 List<Borrow> borrowList = borrowRepository.findAllByBook(book);
                 if (CollectionUtils.isNotEmpty(borrowList)) {
-                    if(dateSort == true){
+                   switch (sort) {
+                       case "sortDate":
 
-                        Borrow borrow = borrowList.get(borrowList.size() - 1);
-                         StringRepresentation representation =  new StringRepresentation();
-                        String bookInfo = representation.ofTheBorrow(borrow);
+                           CustomBorrow customBorrow = new CustomBorrow();
+                           Borrow borrow = borrowList.get(borrowList.size() - 1);
+                            modelMapper.map(borrow,customBorrow);
 
-                        booksAvailability.add(bookInfo);
-                        Collections.sort(booksAvailability);
-
-
-                    }else if (firstNameSort ==true){
-
-                    }else if (lastNameSort == true){
-
-                    }else {
+                           Collections.sort(customBorrows, customBorrow.getBorrowed());
+                           customBorrows.sort(customBorrow::getBorrowed);
 
 
 
-                        Borrow borrow = borrowList.get(borrowList.size() - 1);
-                        StringRepresentation representation =  new StringRepresentation();
-                        String bookInfo = representation.ofTheBorrow(borrow);
-                        booksAvailability.add(bookInfo);
+
+                           break;
+
+                       case "sortByName":
+                           Borrow borrow2 = borrowList.get(borrowList.size() - 1);
+
+
+                           booksAvailability.add(borrowList);
+                           break;
+
+                       default:
+//                           Borrow borrow1 = borrowList.get(borrowList.size() - 1);
+//                           StringRepresentation representation1 = new StringRepresentation();
+//                           String bookInfo1 = representation1.ofTheBorrow(borrow1);
+//                           System.out.println(bookInfo1 + "test");
+//                           booksAvailability.add(bookInfo1);
+                           break;
+                   }
                 }}
 
             }
+          return booksAvailability;
         }
-        return booksAvailability;
-    }
+
+
+
 
     /**
      * Get information about every book availability

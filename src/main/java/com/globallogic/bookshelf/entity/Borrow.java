@@ -3,6 +3,7 @@ package com.globallogic.bookshelf.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -16,6 +17,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Data
 @Entity
+@NoArgsConstructor
 public class Borrow {
     @Id
     @SequenceGenerator(name="borrowSeq", sequenceName="borrowSeq", allocationSize = 1)

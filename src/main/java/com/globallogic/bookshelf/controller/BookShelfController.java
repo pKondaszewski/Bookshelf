@@ -55,7 +55,7 @@ public class BookShelfController {
         try {
             bookShelfService.create(title, author, availability, categoryName);
             return new ResponseEntity<>(String.format("Book %s created", title), HttpStatus.CREATED);
-        }catch (NullPointerException exception){
+        }catch (BookshelfResourceNotFoundException exception){
             return new ResponseEntity<>(String.format("Category %s not found", categoryName), HttpStatus.NOT_FOUND);
         }
     }
@@ -155,10 +155,8 @@ public class BookShelfController {
     @GetMapping(path = "/getListOfBorrowedBooksSort", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Books History",response = HashMap.class),
             @ApiResponse(code = 500,message = "Internal BookShelf server error")})
-    public ResponseEntity<List<String>> getNewestActiveBorrowSort(@RequestHeader(value = "sortByDate", required = false) boolean dateSort
-            ,@RequestHeader(value = "sortByFirstName", required = false) boolean firstNameSort
-            ,@RequestHeader(value = "sortByLastName", required = false) boolean lastNameSort ){
-        List<String> bookHistoryHashMap = bookShelfService.getListOfBorrowedBooksSort(dateSort,firstNameSort,lastNameSort);
+    public ResponseEntity<List<Object>> getNewestActiveBorrowSort(@RequestHeader(value = "sort", required = false) String sort) {
+        List<Object> bookHistoryHashMap = bookShelfService.getListOfBorrowedBooksSort(sort);
         log.info("Books History={}",bookHistoryHashMap);
         return new ResponseEntity<>(bookHistoryHashMap,HttpStatus.OK);
     }
