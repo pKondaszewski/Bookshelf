@@ -8,7 +8,7 @@ import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
 import com.globallogic.bookshelf.repository.CategoryRepository;
-import com.globallogic.bookshelf.utils.CustomBorrow;
+import com.globallogic.bookshelf.utils.CustomObjects.CustomBorrow;
 import com.globallogic.bookshelf.utils.StringRepresentation;
 import com.globallogic.bookshelf.utils.Verification;
 import lombok.extern.slf4j.Slf4j;
@@ -142,51 +142,36 @@ public class BookShelfService {
     /**
      * Get information about every book availability
      *
-     * @return List with borrow and information about the book sort by date
+     * @return List with borrow and information about the book (sort by date or lastname)
      */
-    public List<Object> getListOfBorrowedBooksSort(String sort) {
+    public List<CustomBorrow> getListOfBorrowedBooksSort(String sort) {
         List<CustomBorrow> customBorrows = new ArrayList<>();
-        List<Book> allBooks = bookRepository.findAll();
         ModelMapper modelMapper = new ModelMapper();
+        List<Book> allBooks = bookRepository.findAll();
         for (Book book : allBooks) {
             if (!book.isAvailable()) {
                 List<Borrow> borrowList = borrowRepository.findAllByBook(book);
                 if (CollectionUtils.isNotEmpty(borrowList)) {
+                    CustomBorrow customBorrow = new CustomBorrow();
+                    Borrow borrow = borrowList.get(borrowList.size() - 1);
+                    modelMapper.map(borrow, customBorrow);
+                    customBorrows.add(customBorrow);
                    switch (sort) {
-                       case "sortDate":
-
-                           CustomBorrow customBorrow = new CustomBorrow();
-                           Borrow borrow = borrowList.get(borrowList.size() - 1);
-                            modelMapper.map(borrow,customBorrow);
-
-                           Collections.sort(customBorrows, customBorrow.getBorrowed());
-                           customBorrows.sort(customBorrow::getBorrowed);
-
-
-
-
+                       case "sortByDate":
+                           customBorrows.sort((o1, o2) -> o2.getBorrowed().compareTo(o1.getBorrowed()));
                            break;
-
-                       case "sortByName":
-                           Borrow borrow2 = borrowList.get(borrowList.size() - 1);
-
-
-                           booksAvailability.add(borrowList);
+                       case "sortByLastname":
+                           customBorrows.sort(Comparator.comparing(CustomBorrow::getBorrowed));
                            break;
-
                        default:
-//                           Borrow borrow1 = borrowList.get(borrowList.size() - 1);
-//                           StringRepresentation representation1 = new StringRepresentation();
-//                           String bookInfo1 = representation1.ofTheBorrow(borrow1);
-//                           System.out.println(bookInfo1 + "test");
-//                           booksAvailability.add(bookInfo1);
+                           customBorrows.add(customBorrow);
                            break;
                    }
-                }}
-
+                }
             }
-          return booksAvailability;
         }
+        return customBorrows;
+    }
 
 
 
@@ -204,8 +189,7 @@ public class BookShelfService {
                 List<Borrow> borrowList = borrowRepository.findAllByBook(book);
                 if (CollectionUtils.isNotEmpty(borrowList)) {
                     Borrow borrow = borrowList.get(borrowList.size() - 1);
-                    StringRepresentation representation =  new StringRepresentation();
-                    String bookInfo = representation.ofTheBorrow(borrow);
+                    String bookInfo = StringRepresentation.ofTheBorrow(borrow);
                     booksAvailability.add(bookInfo);
                 }
             }
