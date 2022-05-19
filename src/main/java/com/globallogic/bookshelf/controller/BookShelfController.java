@@ -147,19 +147,19 @@ public class BookShelfController {
     }
 
 
-    /**
-     * GET Request to receive a Hashmap that shows last borrow of book sort by date.
-     *
-     * @return ResponseEntity that contains book and information about who borrow book at the moment.
-     */
-    @GetMapping(path = "/getListOfBorrowedBooksSort", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "Books History",response = HashMap.class),
-            @ApiResponse(code = 500,message = "Internal BookShelf server error")})
-    public ResponseEntity<List<Object>> getNewestActiveBorrowSort(@RequestHeader(value = "sort", required = false) String sort) {
-        List<Object> bookHistoryHashMap = bookShelfService.getListOfBorrowedBooksSort(sort);
-        log.info("Books History={}",bookHistoryHashMap);
-        return new ResponseEntity<>(bookHistoryHashMap,HttpStatus.OK);
-    }
+//    /**
+//     * GET Request to receive a Hashmap that shows last borrow of book sort by date.
+//     *
+//     * @return ResponseEntity that contains book and information about who borrow book at the moment.
+//     */
+//    @GetMapping(path = "/getListOfBorrowedBooksSort", produces = MediaType.APPLICATION_JSON_VALUE)
+//    @ApiResponses(value = {@ApiResponse(code = 200, message = "Books History",response = HashMap.class),
+//            @ApiResponse(code = 500,message = "Internal BookShelf server error")})
+//    public ResponseEntity<List<Object>> getNewestActiveBorrowSort(@RequestHeader(value = "sort", required = false) String sort) {
+//        List<Object> bookHistoryHashMap = bookShelfService.getListOfBorrowedBooksSort(sort);
+//        log.info("Books History={}",bookHistoryHashMap);
+//        return new ResponseEntity<>(bookHistoryHashMap,HttpStatus.OK);
+//    }
 
     /**
      * GET Request to receive a Hashmap that shows last borrow of book.

@@ -13,7 +13,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -27,8 +30,8 @@ import java.util.HashMap;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.doThrow;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -95,7 +98,7 @@ class BookShelfControllerTest {
 
 
         mockMvc
-                .perform(delete("/bookshelf/{id}","1"))
+                .perform(delete("/bookshelf/{id}", "1"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string(String.format("Book with id=%d delete", book.getId())));
@@ -109,7 +112,7 @@ class BookShelfControllerTest {
                 .delete(book.getId());
 
         mockMvc
-                .perform(delete("/bookshelf/{id}","1"))
+                .perform(delete("/bookshelf/{id}", "1"))
                 .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(String.format("Book with id=%d doesn't exist", book.getId())));
@@ -124,11 +127,23 @@ class BookShelfControllerTest {
                 .delete(book.getId());
 
         mockMvc
-                .perform(delete("/bookshelf/{id}","1"))
+                .perform(delete("/bookshelf/{id}", "1"))
                 .andDo(print())
                 .andExpect(status().isConflict())
                 .andExpect(content().string(String.format("Book with id=%d is still borrowed. Can't delete", book.getId())));
     }
+
+    @Test
+    void getAllBooksAvailableSuccessTest() throws Exception {
+        when(bookShelfService.getAllBooksAvailable()).thenReturn(new HashMap<>());
+
+        mockMvc
+                .perform(get("/bookshelf/listOfBooks"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(content().string("{}"));
+    }
+
 
 
 }

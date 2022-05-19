@@ -187,100 +187,7 @@ public class BookShelfServiceTest {
         assertEquals(booksAllAvailability, booksAvailabilityReturn);
     }
 
-//    @Test
-//    public void getListOfBorrowedBooksSortTest() {
-//
-//        ArrayList<Borrow> bookBorrows = new ArrayList<>();
-//        bookBorrows.add(borrow1);
-//
-//        Mockito.doReturn(allBooks).when(bookRepository).findAll();
-//        Mockito.doReturn(bookBorrows).when(borrowRepository).findAllByBook(bookNotAvailable);
-//
-//        List<Borrow> booksAvailabilityReturn = bookShelfService.getListOfBorrowedBooksSort();
-//
-//        assertEquals(booksAvailabilityReturn, booksWithNewestBorrowSort);
-//    }
 
-
-    /**
-     * Method under test: {@link BookShelfService#getListOfBorrowedBooks()}
-     */
-    @Test
-    void testGetListOfBorrowedBooks() {
-        when(this.bookRepository.findAll()).thenReturn(new ArrayList<>());
-        assertTrue(this.bookShelfService.getListOfBorrowedBooks().isEmpty());
-        verify(this.bookRepository).findAll();
-    }
-
-    /**
-     * Method under test: {@link BookShelfService#getListOfBorrowedBooks()}
-     */
-    @Test
-    void GetListOfBorrowedBooksTest() {
-        Category category = new Category();
-        category.setId(1);
-        category.setName("Name");
-
-        Book book = new Book();
-        book.setAuthor("JaneDoe");
-        book.setAvailable(true);
-        book.setCategory(category);
-        book.setId(1);
-        book.setTitle("Dr");
-
-        ArrayList<Book> bookList = new ArrayList<>();
-        bookList.add(book);
-        when(this.bookRepository.findAll()).thenReturn(bookList);
-        assertTrue(this.bookShelfService.getListOfBorrowedBooks().isEmpty());
-        verify(this.bookRepository).findAll();
-    }
-
-    /**
-     * Method under test: {@link BookShelfService#getListOfBorrowedBooks()}
-     */
-    @Test
-    void testGetListOfBorrowedBooks3() {
-        when(this.bookRepository.findAll()).thenThrow(new BookshelfResourceNotFoundException("An error occurred"));
-        assertThrows(BookshelfResourceNotFoundException.class, () -> this.bookShelfService.getListOfBorrowedBooks());
-        verify(this.bookRepository).findAll();
-    }
-
-    /**
-     * Method under test: {@link BookShelfService#getListOfBorrowedBooks()}
-     */
-    @Test
-    void testGetListOfBorrowedBooks4() {
-        when(this.borrowRepository.findAllByBook((Book) any())).thenReturn(new ArrayList<>());
-
-        Category category = new Category();
-        category.setId(1);
-        category.setName("Name");
-        Book book = mock(Book.class);
-        when(book.isAvailable()).thenReturn(false);
-        doNothing().when(book).setAuthor((String) any());
-        doNothing().when(book).setAvailable(anyBoolean());
-        doNothing().when(book).setCategory((Category) any());
-        doNothing().when(book).setId((Integer) any());
-        doNothing().when(book).setTitle((String) any());
-        book.setAuthor("JaneDoe");
-        book.setAvailable(true);
-        book.setCategory(category);
-        book.setId(1);
-        book.setTitle("Dr");
-
-        ArrayList<Book> bookList = new ArrayList<>();
-        bookList.add(book);
-        when(this.bookRepository.findAll()).thenReturn(bookList);
-        assertTrue(this.bookShelfService.getListOfBorrowedBooks().isEmpty());
-        verify(this.borrowRepository).findAllByBook((Book) any());
-        verify(this.bookRepository).findAll();
-        verify(book).isAvailable();
-        verify(book).setAuthor((String) any());
-        verify(book).setAvailable(anyBoolean());
-        verify(book).setCategory((Category) any());
-        verify(book).setId((Integer) any());
-        verify(book).setTitle((String) any());
-    }
 
     @Test
     public void getBooksAvailabilityTest() {
@@ -338,16 +245,5 @@ public class BookShelfServiceTest {
         assertEquals(bookListHashMap, bookHistory);
     }
 
-//
-//    @Test
-//    public void createBookshelfResourceNotFoundExceptionTest() {
-//        Exception exception = assertThrows(BookshelfResourceNotFoundException.class, () ->
-//                bookShelfService.create(bookNotAvailable)
-//        );
-//
-//        String expectedMessage = "Category not found";
-//        String actualMessage = exception.getMessage();
-//        assertTrue(actualMessage.contains(expectedMessage));
-//    }
 }
 
