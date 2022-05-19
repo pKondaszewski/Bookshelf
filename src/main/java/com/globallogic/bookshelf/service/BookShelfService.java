@@ -161,7 +161,7 @@ public class BookShelfService {
                            customBorrows.sort((o1, o2) -> o2.getBorrowed().compareTo(o1.getBorrowed()));
                            break;
                        case "sortByLastname":
-                           customBorrows.sort(Comparator.comparing(CustomBorrow::getBorrowed));
+                           customBorrows.sort(Comparator.comparing(CustomBorrow::getLastname));
                            break;
                        default:
                            customBorrows.add(customBorrow);
