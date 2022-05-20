@@ -163,9 +163,6 @@ public class BookShelfService {
                        case "sortByLastname":
                            customBorrows.sort(Comparator.comparing(CustomBorrow::getLastname));
                            break;
-                       default:
-                           customBorrows.add(customBorrow);
-                           break;
                    }
                 }
             }

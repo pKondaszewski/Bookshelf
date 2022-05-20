@@ -153,7 +153,10 @@ public class BookShelfController {
     @GetMapping(path = "/getListOfBorrowedBooksSort", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Books History"),
                             @ApiResponse(code = 500,message = "Internal BookShelf server error")})
-    public ResponseEntity<List<CustomBorrow>> getNewestActiveBorrowSort(@RequestHeader(value = "sort", required = false) String sort) {
+    public ResponseEntity<List<CustomBorrow>> getNewestActiveBorrowSort(@RequestHeader(
+                                                                            value = "sortOption",
+                                                                            defaultValue = "",
+                                                                            required = false) String sort) {
         List<CustomBorrow> bookHistoryHashMap = bookShelfService.getListOfBorrowedBooksSort(sort);
         log.info("Books History={}",bookHistoryHashMap);
         return new ResponseEntity<>(bookHistoryHashMap,HttpStatus.OK);
