@@ -135,7 +135,7 @@ public class BorrowServiceTest {
                         ,borrow1.getLastname(),borrow1.getBorrowed(),borrow1.getComment())
         );
 
-        String expectedMessage = String.format("Book with id : %s is already borrowed.", borrow1.getId());
+        String expectedMessage = String.format("Book with id: %s is already borrowed.", borrow1.getId());
         String actualMessage = exception.getMessage();
         assertTrue(actualMessage.contains(expectedMessage));
     }
@@ -181,7 +181,7 @@ public class BorrowServiceTest {
         );
 
         String expectedMessage = String.format(
-                "Book with author : %s and title : %s doesn't exist.", author, title
+                "Book with author: %s and title: %s doesn't exist.", author, title
         );
         String actualMessage = exception.getMessage();
         assertTrue(actualMessage.contains(expectedMessage));
@@ -197,7 +197,7 @@ public class BorrowServiceTest {
         );
 
         String expectedMessage = String.format(
-                "Book with author : %s and title : %s is already borrowed.", author, title
+                "Book with author: %s and title: %s is already borrowed.", author, title
         );
         String actualMessage = exception.getMessage();
         assertTrue(actualMessage.contains(expectedMessage));

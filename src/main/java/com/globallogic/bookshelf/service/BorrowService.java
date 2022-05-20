@@ -54,7 +54,7 @@ public class BorrowService {
 
         if (bookOptional.isEmpty()) {
             throw new BookshelfResourceNotFoundException(
-                    String.format("Book with id : %s doesn't exist.", id)
+                    String.format("Book with id: %s doesn't exist.", id)
             );
         } else {
             Book book = bookOptional.get();
@@ -66,7 +66,7 @@ public class BorrowService {
                 borrowRepository.save(borrow);
             } else {
                 throw new BookshelfConflictException(
-                        String.format("Book with id : %s is already borrowed.", id)
+                        String.format("Book with id: %s is already borrowed.", id)
                 );
             }
         }
@@ -92,7 +92,7 @@ public class BorrowService {
         Book book = bookRepository.findByAuthorAndTitle(author, title);
         if (book == null) {
             throw new BookshelfResourceNotFoundException(
-                    String.format("Book with author : %s and title : %s doesn't exist.", author, title)
+                    String.format("Book with author: %s and title: %s doesn't exist.", author, title)
             );
         } else {
             if (book.isAvailable()) {
@@ -103,7 +103,7 @@ public class BorrowService {
                 borrowRepository.save(borrow);
             } else {
                 throw new BookshelfConflictException(
-                        String.format("Book with author : %s and title : %s is already borrowed.", author, title)
+                        String.format("Book with author: %s and title: %s is already borrowed.", author, title)
                 );
             }
         }
@@ -131,7 +131,7 @@ public class BorrowService {
                 borrow.get().setReturned(new Date());
                 borrowRepository.save(borrow.get());
             } else {
-                throw new BookshelfConflictException(String.format("Borrow with id : %s is ended.", borrow.get().getId()));
+                throw new BookshelfConflictException(String.format("Borrow with id: %s is ended.", borrow.get().getId()));
             }
         }
     }
@@ -181,7 +181,8 @@ public class BorrowService {
                 String borrowUserFriendlyLook = StringRepresentation.ofTheBorrow(borrow);
                 completedBorrows.add(borrowUserFriendlyLook);
             } else {
-                log.error("There is something wrong with book : {} and borrow {}", book, borrow);
+                log.error("Error occurred during validation of book.isAvailable(): {} and borrow.getReturned() {}",
+                        book.isAvailable(), borrow.getReturned());
             }
         }
         return new UserHistory(completedBorrows, uncompletedBorrows, numberOfBorrowedBooks);

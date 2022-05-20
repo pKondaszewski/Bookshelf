@@ -1,7 +1,6 @@
 package com.globallogic.bookshelf.controller;
 
 import com.globallogic.bookshelf.entity.Book;
-import com.globallogic.bookshelf.entity.Borrow;
 import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
@@ -14,16 +13,13 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.Date;
-import java.util.NoSuchElementException;
 
 /**
  * Client-server communication class that's processes /borrow requests
@@ -68,17 +64,17 @@ public class BorrowController {
 
         try {
             borrowsService.borrowBookById(BookId, FirstName, LastName, BorrowDate, Comment);
-            log.info("Borrow creation with Id : {} ", BookId);
+            log.info("Borrow creation with Id: {} ", BookId);
             return new ResponseEntity<>(
                     String.format("You borrow book with id: %s ",BookId),
                     HttpStatus.OK);
         } catch (BookshelfResourceNotFoundException exception) {
             return new ResponseEntity<>(
-                    String.format("Book with id : %s doesn't exist.",BookId),
+                    String.format("Book with id: %s doesn't exist.",BookId),
                     HttpStatus.NOT_FOUND);
         } catch (BookshelfConflictException exception) {
             return new ResponseEntity<>(
-                    String.format("Book with id : %s is borrowed.",BookId),
+                    String.format("Book with id: %s is borrowed.",BookId),
                     HttpStatus.CONFLICT);
         }
     }
@@ -109,18 +105,18 @@ public class BorrowController {
                                                              @RequestParam(required = false) String Comment) {
         try {
             borrowsService.borrowBookByAuthorAndTitle(BookAuthor, BookTitle, FirstName, LastName, BorrowDate, Comment);
-            log.info("User : {} {} borrows book with author : {} and title : {}", FirstName, LastName, BookAuthor, BookTitle);
+            log.info("User: {} {} borrows book with author: {} and title: {}", FirstName, LastName, BookAuthor, BookTitle);
             return new ResponseEntity<>(
-                    String.format("User : %s %s borrows book with author : %s and title : %s",
+                    String.format("User: %s %s borrows book with author: %s and title: %s",
                             FirstName, LastName, BookAuthor, BookTitle),
                     HttpStatus.OK);
         } catch (BookshelfResourceNotFoundException exception) {
             return new ResponseEntity<>(
-                    String.format("Book with author : %s and title : %s doesn't exist.", FirstName, LastName),
+                    String.format("Book with author: %s and title: %s doesn't exist.", FirstName, LastName),
                     HttpStatus.NOT_FOUND);
         } catch (BookshelfConflictException exception) {
             return new ResponseEntity<>(
-                    String.format("Book with author : %s and title : %s is already borrowed.", FirstName, LastName),
+                    String.format("Book with author: %s and title: %s is already borrowed.", FirstName, LastName),
                     HttpStatus.CONFLICT);
         }
     }
@@ -148,7 +144,7 @@ public class BorrowController {
                     HttpStatus.NOT_FOUND);
         } catch (BookshelfConflictException exception) {
             return new ResponseEntity<>(
-                    String.format("Borrow with id : %s is ended.", borrowId),
+                    String.format("Borrow with id: %s is ended.", borrowId),
                     HttpStatus.CONFLICT);
         }
     }
@@ -192,7 +188,7 @@ public class BorrowController {
     public ResponseEntity<UserHistory> getUserBorrowHistory(@RequestParam String firstName,
                                                             @RequestParam String lastName) {
         UserHistory userHistory = borrowsService.getUserBorrowHistory(firstName, lastName);
-        log.info("Showing borrow history of user={} {} : {} {} {}",
+        log.info("Showing borrow history of user={} {}: {} {} {}",
                 firstName,
                 lastName,
                 userHistory.getReturnedBooks(),

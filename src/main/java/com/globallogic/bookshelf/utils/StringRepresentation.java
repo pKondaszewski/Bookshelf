@@ -18,7 +18,7 @@ public class StringRepresentation {
         borrowAsString = "Author = " + borrow.getBook().getAuthor() + ", " +
                          "Title = " + borrow.getBook().getTitle() + ", " +
                          "Date of the borrow = " + borrow.getBorrowed() + ", ";
-        if (borrow.getReturned() == null) {
+        if (borrow.getReturned() != null) {
             borrowAsString += "Date of the return = " + borrow.getReturned() + ", ";
         }
         borrowAsString += "Comment = " + borrow.getComment() + ", " +

@@ -88,7 +88,7 @@ public class BorrowControllerTest {
 
     @Test
     void BorrowBookByIdBookNotExistTest() throws Exception {
-        doThrow(new BookshelfResourceNotFoundException(String.format("Book with id : %s doesn't exist.",
+        doThrow(new BookshelfResourceNotFoundException(String.format("Book with id: %s doesn't exist.",
                 String.valueOf(1)))).when(borrowService)
                 .borrowBookById(any(), any(), any(), any(), any());
 
@@ -96,12 +96,12 @@ public class BorrowControllerTest {
                 .perform(post("/borrow/byId").param("BookId", BookId)
                         .param("FirstName", FirstName).param("LastName", LastName))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Book with id : 1 doesn't exist."));
+                .andExpect(content().string("Book with id: 1 doesn't exist."));
     }
 
     @Test
     void borrowBookByIdBookIsBorrowedTest() throws Exception {
-        doThrow(new BookshelfConflictException(String.format("Book with id : %s is borrowed.",
+        doThrow(new BookshelfConflictException(String.format("Book with id: %s is borrowed.",
                 String.valueOf(1)))).when(borrowService)
                 .borrowBookById(any(), any(), any(), any(), any());
 
@@ -109,7 +109,7 @@ public class BorrowControllerTest {
                 .perform(post("/borrow/byId").param("BookId", BookId)
                         .param("FirstName", FirstName).param("LastName", LastName))
                 .andExpect(status().isConflict())
-                .andExpect(content().string("Book with id : 1 is borrowed."));
+                .andExpect(content().string("Book with id: 1 is borrowed."));
     }
 
 
@@ -119,13 +119,13 @@ public class BorrowControllerTest {
                 .perform(post("/borrow/byAuthorAndTitle").param("BookAuthor", BookAuthor).param("BookTitle", BookTitle)
                         .param("FirstName", FirstName).param("LastName", LastName))
                 .andExpect(status().isOk())
-                .andExpect(content().string(String.format("User : %s %s borrows book with author : %s and title : %s",
+                .andExpect(content().string(String.format("User: %s %s borrows book with author: %s and title: %s",
                         FirstName, LastName, BookAuthor, BookTitle)));
     }
 
     @Test
     void borrowBookByAuthorAndTitleBookNotExistTest() throws Exception {
-        doThrow(new BookshelfResourceNotFoundException(String.format("Book with author : %s and title : %s doesn't exist."
+        doThrow(new BookshelfResourceNotFoundException(String.format("Book with author: %s and title: %s doesn't exist."
                 , FirstName, LastName)))
                 .when(borrowService)
                 .borrowBookByAuthorAndTitle(any(), any(), any(), any(), any(), any());
@@ -135,12 +135,12 @@ public class BorrowControllerTest {
                         .param("FirstName", FirstName).param("LastName", LastName))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(String.format(
-                        "Book with author : %s and title : %s doesn't exist.", FirstName, LastName)));
+                        "Book with author: %s and title: %s doesn't exist.", FirstName, LastName)));
     }
 
     @Test
     void borrowBookByAuthorAndTitleIsBorrowTest() throws Exception {
-        doThrow(new BookshelfConflictException(String.format("Book with author : %s and title : %s is already borrowed."
+        doThrow(new BookshelfConflictException(String.format("Book with author: %s and title: %s is already borrowed."
                 , FirstName, LastName)))
                 .when(borrowService)
                 .borrowBookByAuthorAndTitle(any(), any(), any(), any(), any(), any());
@@ -149,7 +149,7 @@ public class BorrowControllerTest {
                 .perform(post("/borrow/byAuthorAndTitle").param("BookAuthor", BookAuthor).param("BookTitle", BookTitle)
                         .param("FirstName", FirstName).param("LastName", LastName))
                 .andExpect(status().isConflict())
-                .andExpect(content().string(String.format("Book with author : %s and title : %s is already borrowed.",
+                .andExpect(content().string(String.format("Book with author: %s and title: %s is already borrowed.",
                         FirstName, LastName)));
     }
 
@@ -181,14 +181,14 @@ public class BorrowControllerTest {
     @Test
     public void returnBookBorrowIsEndedTest() throws Exception {
 
-        doThrow(new BookshelfConflictException(String.format("Borrow with id : %s is ended.", borrowId)))
+        doThrow(new BookshelfConflictException(String.format("Borrow with id: %s is ended.", borrowId)))
                 .when(borrowService)
                 .returnBook(any());
 
         mockMvc
                 .perform(put("/borrow/bookReturn").param("borrowId", borrowId))
                 .andExpect(status().isConflict())
-                .andExpect(content().string(String.format("Borrow with id : %s is ended.", borrowId)));
+                .andExpect(content().string(String.format("Borrow with id: %s is ended.", borrowId)));
 
     }
 

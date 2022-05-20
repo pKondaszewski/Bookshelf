@@ -107,7 +107,7 @@ public class BookShelfServiceTest {
 
         booksWithNewestBorrow = new HashMap<>();
         booksWithNewestBorrow.put(bookNotAvailable,
-                String.format("Name : %s %s : Date of borrowing book %s",
+                String.format("Name: %s %s: Date of borrowing book %s",
                         borrow.getFirstname(),
                         borrow.getLastname(),
                         borrow.getBorrowed()));
@@ -116,7 +116,7 @@ public class BookShelfServiceTest {
         booksAvailability = new HashMap<>();
         booksAvailability.put(bookAvailable, "available");
         booksAvailability.put(bookNotAvailable,
-                String.format("%s %s : %s",
+                String.format("%s %s: %s",
                         borrow.getFirstname(),
                         borrow.getLastname(),
                         borrow.getBorrowed()));

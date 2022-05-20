@@ -3,7 +3,6 @@ package com.globallogic.bookshelf.utils;
 import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.entity.Category;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
-import com.globallogic.bookshelf.repository.CategoryRepository;
 
 import java.util.Date;
 
@@ -18,13 +17,13 @@ public class Verification {
      * @param category object of the category
      * @param book object of the book
      */
-    public static void ofTheCategory(Category category, Book book, CategoryRepository categoryRepository) {
+    public static void ofTheCategory(Category category, Book book) {
         if (category == null) {
             throw new BookshelfResourceNotFoundException("Category not found");
         } else if (category.getName().equals("Default")) {
             book.setCategory(new Category(4, "Default"));
         } else {
-            book.setCategory(categoryRepository.getById(category.getId()));
+            book.setCategory(category);
         }
     }
 

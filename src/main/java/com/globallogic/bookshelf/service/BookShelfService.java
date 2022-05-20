@@ -55,7 +55,7 @@ public class BookShelfService {
             category = categoryRepository.findByName(categoryName);
         }
         Book book = new Book(null,author, title, available, category);
-        Verification.ofTheCategory(category, book, categoryRepository);
+        Verification.ofTheCategory(category, book);
         bookRepository.save(book);
     }
 
@@ -131,7 +131,7 @@ public class BookShelfService {
                 Borrow activeBorrow = bookBorrows.get(bookBorrows.size() - 1);
                 Date dateOfTheBorrow = activeBorrow.getBorrowed();
                 String ownerOfTheBorrow = activeBorrow.getFirstname() + " " + activeBorrow.getLastname();
-                String infoAboutTheBorrow = ownerOfTheBorrow + " : " + dateOfTheBorrow;
+                String infoAboutTheBorrow = ownerOfTheBorrow + ": " + dateOfTheBorrow;
                 booksAvailability.put(book, infoAboutTheBorrow);
             }
         }
@@ -157,10 +157,16 @@ public class BookShelfService {
                     modelMapper.map(borrow, customBorrow);
                     customBorrows.add(customBorrow);
                    switch (sort) {
-                       case "sortByDate":
+                       case "sortByDateDsc":
                            customBorrows.sort((o1, o2) -> o2.getBorrowed().compareTo(o1.getBorrowed()));
                            break;
-                       case "sortByLastname":
+                       case "sortByDateAsc":
+                           customBorrows.sort(Comparator.comparing(CustomBorrow::getBorrowed));
+                           break;
+                       case "sortByLastnameDsc":
+                           customBorrows.sort((o1, o2) -> o2.getLastname().compareTo(o1.getLastname()));
+                           break;
+                       case "sortByLastnameAsc":
                            customBorrows.sort(Comparator.comparing(CustomBorrow::getLastname));
                            break;
                    }

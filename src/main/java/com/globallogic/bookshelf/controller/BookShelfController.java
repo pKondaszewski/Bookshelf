@@ -117,7 +117,7 @@ public class BookShelfController {
      * @return ResponseEntity that contains every book and it's availability (actual owner of the book and borrow date) HashMap
      */
     @GetMapping(path = "/booksAvailability", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Shows map book : availability (info about the owner of the book)")
+    @ApiOperation(value = "Shows map book: availability (info about the owner of the book)")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "All books", response = HashMap.class),
                             @ApiResponse(code = 500, message = "Internal BookShelf server error")})
     public ResponseEntity<HashMap<Book, String>> getBooksAvailability() {
