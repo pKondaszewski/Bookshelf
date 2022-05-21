@@ -21,7 +21,7 @@ public class Verification {
         if (category == null) {
             throw new BookshelfResourceNotFoundException("Category not found");
         } else if (category.getName().equals("Default")) {
-            book.setCategory(new Category(4, "Default"));
+            book.getCategory().setId(4);
         } else {
             book.setCategory(category);
         }

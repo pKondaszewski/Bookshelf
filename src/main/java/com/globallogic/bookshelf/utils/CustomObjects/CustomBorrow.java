@@ -1,7 +1,6 @@
 package com.globallogic.bookshelf.utils.CustomObjects;
 import lombok.*;
 
-
 /**
  * DTO class for borrow entity
  */

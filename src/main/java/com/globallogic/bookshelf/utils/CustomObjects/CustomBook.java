@@ -1,6 +1,5 @@
 package com.globallogic.bookshelf.utils.CustomObjects;
 
-
 import lombok.Getter;
 import lombok.Setter;
 

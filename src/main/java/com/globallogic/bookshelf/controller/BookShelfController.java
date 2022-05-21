@@ -72,7 +72,6 @@ public class BookShelfController {
                             @ApiResponse(code = 500, message = "Internal Category server error")})
     public ResponseEntity<String> delete(@PathVariable(name = "id") Integer id) {
         try {
-            Book foundBook = bookRepository.getById(id);
             bookShelfService.delete(id);
             return new ResponseEntity<>(String.format("Book with id=%d delete", id), HttpStatus.OK);
         } catch (BookshelfResourceNotFoundException exception) {
@@ -151,6 +150,7 @@ public class BookShelfController {
      * @return ResponseEntity that contains book and information about who borrow book at the moment.
      */
     @GetMapping(path = "/getListOfBorrowedBooksSort", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Return list of borrows with availability to sort results")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Books History"),
                             @ApiResponse(code = 500,message = "Internal BookShelf server error")})
     public ResponseEntity<List<CustomBorrow>> getNewestActiveBorrowSort(@RequestHeader(

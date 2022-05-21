@@ -18,9 +18,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-
-
-
 /**
  * Business logic of the /bookshelf request
  *
