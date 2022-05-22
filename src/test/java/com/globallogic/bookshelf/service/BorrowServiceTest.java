@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -37,14 +38,10 @@ public class BorrowServiceTest {
 
     private static Borrow borrow7;
     private static Book availableBook3;
-    @Autowired
-    private BorrowService borrowService;
-
     private static Book availableBook, availableBook2, notAvailableBook, notAvailableBook2;
-    private static Borrow borrow3, borrow1, borrow2, borrow4, borrow5, borrow6;
+    private static Borrow borrow3, borrow1, borrow2, borrow5, borrow6;
     private static String firstname, surname, author, title;
     private static List<Borrow> borrowList;
-    private static Book availableBookTest, notAvailableBookTest, available2BookTest, available3BookTest, notAvailableBookTest2;
     private static UserHistory correctUserHistory;
 
 
@@ -91,7 +88,6 @@ public class BorrowServiceTest {
         borrow1 = new Borrow(1, date1, date2, firstname, surname, comment, availableBook);
         borrow2 = new Borrow(2, date1, null, firstname, surname, comment, notAvailableBook);
         borrow3 = new Borrow(null, date1, null, firstname, surname, null, availableBook3);
-        borrow4 = new Borrow(4, null, null, firstname, surname, comment, availableBook2);
         borrow5 = new Borrow(4, null, null, firstname, surname, comment, notAvailableBook);
         borrow6 = new Borrow(4, date1, null, firstname, surname, comment, notAvailableBook2);
         borrow7 = new Borrow(null, date1, null, firstname, surname, null, availableBook);

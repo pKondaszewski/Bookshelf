@@ -3,7 +3,14 @@ package com.globallogic.bookshelf.utils;
 import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.entity.Category;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
+
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,7 +28,7 @@ public class VerificationTest {
         category = null;
         category1 = new Category(4, "Default");
         category2 = new Category(1, "CategoryName");
-        book = new Book();
+        book = new Book(1, "a", "s", true, category1);
     }
 
     @Test
@@ -47,5 +54,20 @@ public class VerificationTest {
         Verification.ofTheCategory(category2, book);
 
         assertEquals(category2, book.getCategory());
+    }
+
+    @Test
+    void notNullOfTheDateTest() {
+
+        LocalDateTime atStartOfDayResult = LocalDate.of(1970, 1, 1).atStartOfDay();
+        Verification.ofTheDate(Date.from(atStartOfDayResult.atZone(ZoneId.of("UTC")).toInstant()));
+    }
+
+    @Test
+
+    void nullOfTheDateTest() {
+
+
+        Verification.ofTheDate(null);
     }
 }

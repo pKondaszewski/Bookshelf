@@ -26,6 +26,7 @@ import org.springframework.test.context.ContextConfiguration;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {BookShelfService.class})
 @ExtendWith(MockitoExtension.class)
@@ -179,7 +180,6 @@ public class BookShelfServiceTest {
     }
 
 
-
     @Test
     public void getBooksAvailabilityTest() {
         ArrayList<Borrow> bookBorrows = new ArrayList<>();
@@ -192,6 +192,8 @@ public class BookShelfServiceTest {
 
         assertEquals(booksAvailability, booksAvailabilityReturn);
     }
+
+
 
     @Test
     public void getBookHistoryTest() {

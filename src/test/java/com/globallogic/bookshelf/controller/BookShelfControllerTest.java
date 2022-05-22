@@ -6,21 +6,29 @@ import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.service.BookShelfService;
+import com.globallogic.bookshelf.utils.UserHistory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -28,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@ContextConfiguration(classes = {BookShelfController.class})
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
 class BookShelfControllerTest {
 
@@ -56,17 +65,19 @@ class BookShelfControllerTest {
     @BeforeAll
     public static void setModel() {
         String Available = "Available";
-        bookTitle = "test";
+        bookTitle = "bookTitle";
         categoryName = "aaa";
-        book = new Book(1, "Author", bookTitle, true, new Category(1, "test"));
-        book2 = new Book(1, "a", bookTitle, true, new Category(1, "test"));
+        book = new Book(1, "Author2", bookTitle, true, new Category(1, "test"));
+        book2 = new Book(1, "Author1", bookTitle, true, new Category(1, "test"));
 
         allBooksAvailableHashMap = new HashMap<>();
         allBooksAvailableHashMap.put(book, Available);
-        allBooksAvailableHashMap.put(book2, "Not Available");
 
         allBooksHashMap = new HashMap<>();
         allBooksHashMap.put(book.getAuthor(), book.getTitle());
+        allBooksHashMap.put(book2.getAuthor(), book2.getTitle());
+
+        HashMap<String, String> test = new HashMap<>();
 
 
     }
@@ -75,9 +86,8 @@ class BookShelfControllerTest {
     @Test
     void createSuccessTest() throws Exception {
 
-
         mockMvc
-                .perform(MockMvcRequestBuilders.post("/bookshelf/bookCreate")
+                .perform(post("/bookshelf/bookCreate")
                         .param("author", book.getAuthor()).param("title", bookTitle)
                         .param("availability", String.valueOf(book.isAvailable())))
                 .andDo(print())
@@ -127,15 +137,66 @@ class BookShelfControllerTest {
 
     @Test
     void getAllBooksAvailableSuccessTest() throws Exception {
-        when(bookShelfService.getAllBooksAvailable()).thenReturn(new HashMap<>());
+        when(bookShelfService.getAllBooksAvailable()).thenReturn(allBooksAvailableHashMap);
+
+        mockMvc
+                .perform(get("/bookshelf/getAllBooksAvailable"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content().string("{\"" +
+                        "Book(id=1, author=Author2, title=bookTitle, available=true, " +
+                        "category=Category(id=1, name=test))\":\"Available\"}"));
+    }
+
+
+    @Test
+    public void getAllBooksSuccessTest() throws Exception {
+
+
+        when(bookShelfService.getAllBooks()).thenReturn(allBooksHashMap);
 
         mockMvc
                 .perform(get("/bookshelf/listOfBooks"))
+                .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(content().contentType("application/json"))
+                .andExpect(content().string("{\"Author2\":\"bookTitle\",\"Author1\":\"bookTitle\"}"));
+    }
+
+    @Test
+    public void getAllBooksSuccess2Test() throws Exception {
+
+        when(bookShelfService.getAllBooks()).thenReturn(new HashMap<>());
+
+        mockMvc
+                .perform(get("/bookshelf/listOfBooks"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
                 .andExpect(content().string("{}"));
     }
 
 
+    @Test
+    void testGetBookHistory() throws Exception {
+        when(bookShelfService.getBooksHistory(any())).thenReturn(new HashMap<>());
+
+        mockMvc
+                .perform(get("/bookshelf/bookHistory/{name}", "Name"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(content().string("{}"));
+    }
+
+
+    @Test
+    void testGetBookHistory4() throws Exception {
+        when(bookShelfService.getBooksHistory((String) org.mockito.Mockito.any()))
+                .thenThrow(new NullPointerException());
+        mockMvc
+                .perform(get("/bookshelf/bookHistory/{name}", "Name"))
+                .andExpect(status().isNotFound());
+    }
 
 }

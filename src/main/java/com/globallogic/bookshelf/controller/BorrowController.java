@@ -63,7 +63,7 @@ public class BorrowController {
             borrowsService.borrowBookById(BookId, FirstName, LastName, BorrowDate, Comment);
             log.info("Borrow creation with Id: {} ", BookId);
             return new ResponseEntity<>(
-                    String.format("You borrow book with id: %s ",BookId),
+                    String.format("%s %s borrow book with id: %s ",BookId,FirstName,LastName),
                     HttpStatus.OK);
         } catch (BookshelfResourceNotFoundException exception) {
             return new ResponseEntity<>(
@@ -85,7 +85,7 @@ public class BorrowController {
      * @param LastName       lastname of the person that is borrowing the book
      * @param BorrowDate     date of the borrow
      * @param Comment        additional comment for the borrow
-     * @return @return ResponseEntity that informs about the borrowing of the book.
+     * @return ResponseEntity that informs about the borrowing of the book.
      */
     @PostMapping(path = "/byAuthorAndTitle")
     @ApiOperation(value = "Borrows a book based on author and title")

@@ -40,7 +40,10 @@ public class BookShelfController {
     /**
      * POST Request to create a book
      *
-     * @param author,title,availability,category - Author of book,title, availability and category of book
+     * @param author of book
+     * @param title of book
+     * @param categoryName name of category
+     * @param availability book availability
      * @return ResponseEntity that informs about the creation of the book
      */
     @ApiOperation(value = "Creates a book entity.")
@@ -85,7 +88,7 @@ public class BookShelfController {
     /**
      * GET Request to receive a map that shows list of all books Available.
      *
-     * @return ResponseEntity that contains history of every book and it's availability.
+     * @return ResponseEntity that contains history of every book, and it's availability.
      */
     @GetMapping(path = "/getAllBooksAvailable", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Show available books")
@@ -100,7 +103,7 @@ public class BookShelfController {
     /**
      * GET Request to receive a map that shows list of all books.
      *
-     * @return ResponseEntity that contains history of every book and it's availability.
+     * @return ResponseEntity that contains history of every book, and it's availability.
      */
     @GetMapping(path = "/listOfBooks", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = { @ApiResponse(code = 200, message = "All books", response = HashMap.class),
@@ -113,7 +116,7 @@ public class BookShelfController {
     /**
      * GET Request to receive a map that shows every book availability.
      *
-     * @return ResponseEntity that contains every book and it's availability (actual owner of the book and borrow date) HashMap
+     * @return ResponseEntity that contains every book, and it's availability (actual owner of the book and borrow date) HashMap
      */
     @GetMapping(path = "/booksAvailability", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Shows map book: availability (info about the owner of the book)")
@@ -128,7 +131,8 @@ public class BookShelfController {
     /**
      * GET Request to receive a map that shows history of all book.
      *
-     * @return ResponseEntity that contains history of every book and it's availability.
+     * @param name
+     * @return ResponseEntity that contains history of every book, and it's availability.
      */
     @GetMapping(path = "/bookHistory/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Book History",response = HashMap.class),

@@ -16,6 +16,7 @@ public class Verification {
      *
      * @param category object of the category
      * @param book object of the book
+     *
      */
     public static void ofTheCategory(Category category, Book book) {
         if (category == null) {

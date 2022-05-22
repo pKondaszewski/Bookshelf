@@ -44,7 +44,10 @@ public class BookShelfService {
     /**
      * Create a book with specified parameters
      *
-     * @param title body of the book
+     * @param title of book
+     * @param author of book
+     * @param available of book
+     * @param categoryName name of category
      */
     public void create(String title, String author, boolean available, String categoryName) {
         Category category = new Category();
@@ -83,21 +86,21 @@ public class BookShelfService {
     /**
      * Get information about every book available
      *
-     * @return Hashmap with book and information about the book available (name and available book)
+     * @return Hashmap with book and information about the book (Author and book Title)
      */
     public HashMap<String, String> getAllBooks() {
         HashMap<String, String> bookMap = new HashMap<>();
         List<Book> bookList = bookRepository.findAll();
         for (Book book : bookList) {
-            String bookName = book.getTitle();
+            String bookTitle = book.getTitle();
             String bookAuthor = book.getAuthor();
-            bookMap.put(bookAuthor, bookName);
+            bookMap.put(bookAuthor, bookTitle);
         }
         return bookMap;
     }
 
     /**
-     * Get information about every book available
+     * Get information about every book
      *
      * @return Hashmap with book and information about the book available (name and available book)
      */
@@ -139,7 +142,8 @@ public class BookShelfService {
     /**
      * Get information about every book availability
      *
-     * @return List with borrow and information about the book (sort by date or lastname)
+     * @param sort type of sort
+     * @return List with borrow and information about the book sort by date
      */
     public List<CustomBorrow> getListOfBorrowedBooksSort(String sort) {
         List<CustomBorrow> customBorrows = new ArrayList<>();
@@ -177,7 +181,7 @@ public class BookShelfService {
 
 
     /**
-     * Get information about every book availability
+     * Get information about book and the last person who borrow sort by date or by name of person borrowed.
      *
      * @return Hashmap with book and information about the book availability (owner and date of the borrow)
      */
@@ -200,6 +204,7 @@ public class BookShelfService {
     /**
      * Get information about every book history
      *
+     * @param title title of book
      * @return Hashmap with book and information about the book borrow history
      */
     public HashMap<Book, List<String>> getBooksHistory(String title) {

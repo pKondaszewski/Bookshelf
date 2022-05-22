@@ -6,7 +6,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/bookshelf
     username: postgres
     password: root
-#    password: admin
+    #password: admin
   jpa:
     hibernate:
       ddl-auto: update
