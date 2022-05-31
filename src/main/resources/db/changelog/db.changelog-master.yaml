@@ -93,6 +93,39 @@ databaseChangeLog:
                     nullable: false
                     foreignKeyName: fk_book_id
                     references: book(id)
+  - changeSet:
+      id: create_Log_entity
+      author: PrzemekGL
+      context: prod, test
+      changes:
+        - createTable:
+            tableName: log
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: interval
+                  type: int
+                  remarks: Time of interval log in minutes
+  - changeSet:
+      id: insert_bookshelflog_interval
+      author: PrzemekGL
+      context: prod, test
+      changes:
+        - insert:
+            columns:
+              - column:
+                  name: id
+                  value: 1
+              - column:
+                  name: interval
+                  value: ${bookshelf-log.interval}
+            tableName: log
   - include:
       - context: prod, test
       - file: /db/changelog/changes/category_init.sql

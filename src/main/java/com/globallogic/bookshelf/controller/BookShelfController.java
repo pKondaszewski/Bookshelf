@@ -36,7 +36,6 @@ public class BookShelfController {
     @Autowired
     private BookShelfService bookShelfService;
 
-
     /**
      * POST Request to create a book
      *

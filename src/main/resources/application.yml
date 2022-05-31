@@ -1,6 +1,12 @@
 server:
-  port : 8467
+  port: 8467
+  bookshelf-log:
+    interval: 10
 spring:
+  cloud:
+    config:
+      import-check:
+        enabled: false
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/bookshelf
@@ -17,3 +23,6 @@ spring:
     #contexts: prod
     contexts: test
     dropFirst: false
+    parameters:
+      bookshelf-log:
+        interval: ${server.bookshelf-log.interval}

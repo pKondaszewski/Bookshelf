@@ -2,6 +2,8 @@ package com.globallogic.bookshelf.utils;
 
 import com.globallogic.bookshelf.entity.Borrow;
 
+import java.util.ArrayList;
+
 /**
  * Special class to create a user-friendly String output
  */
@@ -24,5 +26,13 @@ public class StringRepresentation {
         borrowAsString += "Comment = " + borrow.getComment() + ", " +
                           "CategoryName = " + borrow.getBook().getCategory().getName();
         return borrowAsString;
+    }
+
+    public static String ofTheLog(String timeInUTC, Integer numberOfAvailableBooks,
+                                  Integer numberOfUnavailableBooks, ArrayList<String> titlesOfAvailableBooks) {
+        return timeInUTC + " " +
+                "number of available books: " + numberOfAvailableBooks + ", " +
+                "number of unavailable books: " + numberOfUnavailableBooks + ", " +
+                "titles of available books: " + titlesOfAvailableBooks + "\n";
     }
 }
