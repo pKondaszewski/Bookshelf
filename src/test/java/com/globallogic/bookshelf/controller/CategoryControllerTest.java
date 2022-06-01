@@ -16,8 +16,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.HashMap;
@@ -30,7 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
 public class CategoryControllerTest {
 
-    private static MockHttpServletRequestBuilder deleteRequestBuilder,deleteResult;
     @MockBean
     private CategoryRepository categoryRepository;
 
@@ -58,8 +55,6 @@ public class CategoryControllerTest {
         booksPerCategoryMap = new HashMap<>();
         booksPerCategoryMap.put(category1, 5);
         booksPerCategoryMap.put(category2, 10);
-        deleteResult = MockMvcRequestBuilders.delete("/category/categoryDelete");
-        deleteRequestBuilder = deleteResult.param("name",name);
     }
 
     @Test

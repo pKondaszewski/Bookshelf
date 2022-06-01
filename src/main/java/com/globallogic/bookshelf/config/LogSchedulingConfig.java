@@ -30,7 +30,7 @@ public class LogSchedulingConfig implements SchedulingConfigurer {
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
         taskRegistrar.setScheduler(taskExecutor());
         taskRegistrar.addTriggerTask(
-                () -> logService.writeLog(),
+                () -> logService.handleFile(),
                 context -> {
                     Optional<Date> lastCompletionTime = Optional.ofNullable(context.lastCompletionTime());
                     Instant nextExecutionTime = lastCompletionTime.orElseGet(Date::new).toInstant()

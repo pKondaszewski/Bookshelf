@@ -1,5 +1,8 @@
 package com.globallogic.bookshelf.utils.CustomObjects;
-import lombok.*;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * DTO class for borrow entity

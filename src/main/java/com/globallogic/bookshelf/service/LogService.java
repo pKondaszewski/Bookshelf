@@ -43,23 +43,26 @@ public class LogService {
         logRepository.save(log);
     }
 
-    public void writeLog() {
+    public void handleFile() {
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true));
-            Instant instant = Instant.now();
-            String timeInUTC = instant.atZone(ZoneOffset.UTC).toString();
-            int numberOfAvailableBooks = bookRepository.findAllByAvailable(true).size();
-            int numberOfUnavailableBooks = bookRepository.findAllByAvailable(false).size();
-            ArrayList<String> titlesOfAvailableBooks = new ArrayList<>();
-            for (Book book : bookRepository.findAllByAvailable(true)) {
-                titlesOfAvailableBooks.add(book.getTitle());
-            }
-            String logEntry = StringRepresentation.ofTheLog(timeInUTC, numberOfAvailableBooks,
-                    numberOfUnavailableBooks, titlesOfAvailableBooks);
-            writer.append(logEntry);
+            writer.append(createLog());
             writer.close();
         } catch (IOException exception) {
             log.error("Error occurred during writing data into the log file.");
         }
+    }
+
+    public String createLog() {
+        Instant instant = Instant.now();
+        String timeInUTC = instant.atZone(ZoneOffset.UTC).toString();
+        int numberOfAvailableBooks = bookRepository.findAllByAvailable(true).size();
+        int numberOfUnavailableBooks = bookRepository.findAllByAvailable(false).size();
+        ArrayList<String> titlesOfAvailableBooks = new ArrayList<>();
+        for (Book book : bookRepository.findAllByAvailable(true)) {
+            titlesOfAvailableBooks.add(book.getTitle());
+        }
+        return StringRepresentation.ofTheLog(timeInUTC, numberOfAvailableBooks,
+                numberOfUnavailableBooks, titlesOfAvailableBooks);
     }
 }
