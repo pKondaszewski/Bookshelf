@@ -14,6 +14,7 @@ import com.globallogic.bookshelf.utils.StringRepresentation;
 import com.globallogic.bookshelf.utils.UserHistory;
 import com.globallogic.bookshelf.utils.Verification;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -35,6 +36,7 @@ import java.util.Optional;
 @EnableFeignClients
 public class BorrowService {
 
+    @Autowired
     protected ShelfUserFeignClient shelfUserFeignClient;
     protected BorrowRepository borrowRepository;
     protected BookRepository bookRepository;
