@@ -28,6 +28,4 @@ public class Book {
     @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "category_id", referencedColumnName = "id")
     protected Category category;
-
-
 }

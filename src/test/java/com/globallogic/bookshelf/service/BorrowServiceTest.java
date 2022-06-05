@@ -9,22 +9,18 @@ import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
+import com.globallogic.bookshelf.repository.ReservationRepository;
 import com.globallogic.bookshelf.utils.StringRepresentation;
 import com.globallogic.bookshelf.utils.UserHistory;
-
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-
+import com.globallogic.bookshelf.utils.Verification;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -37,14 +33,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {BorrowService.class})
 @ExtendWith(MockitoExtension.class)
@@ -58,7 +50,6 @@ public class BorrowServiceTest {
     private static UserHistory correctUserHistory;
     private static ResponseEntity<?> responseEntity;
 
-
     @Mock
     private static BookRepository bookRepository;
 
@@ -70,6 +61,7 @@ public class BorrowServiceTest {
     @Mock
     private static ShelfUserFeignClient shelfUserFeignClient;
 
+    private static ReservationRepository reservationRepository;
 
     @InjectMocks
     private static BorrowService borrowService;
@@ -80,8 +72,6 @@ public class BorrowServiceTest {
 
     @BeforeAll
     public static void initVariables() {
-        borrowService = new BorrowService(borrowRepository, bookRepository, shelfUserFeignClient);
-
         date1 = Date.valueOf(LocalDate.of(1, 1, 1));
         Date date2 = Date.valueOf(LocalDate.of(2, 2, 2));
 
@@ -105,9 +95,9 @@ public class BorrowServiceTest {
 
         borrow1 = new Borrow(1, date1, date2, firstname, lastname, comment, availableBook);
         borrow2 = new Borrow(2, date1, null, firstname, lastname, comment, notAvailableBook);
-        borrow3 = new Borrow(null, date1, null, firstname, lastname, null, availableBook3);
+        borrow3 = new Borrow(null, null, null, firstname, lastname, null, availableBook3);
         borrow6 = new Borrow(4, date1, null, firstname, lastname, comment, notAvailableBook2);
-        borrow7 = new Borrow(null, date1, null, firstname, lastname, null, availableBook);
+        borrow7 = new Borrow(null, null, null, firstname, lastname, null, availableBook);
 
         borrowList = new ArrayList<>();
         borrowList.add(borrow1);
@@ -134,13 +124,12 @@ public class BorrowServiceTest {
     public void borrowBookByIdSuccessTest() {
         when(shelfUserFeignClient.getUserStatus((String) any(), (String) any()))
                 .thenReturn((ResponseEntity<String>) responseEntity);
-
         Mockito.doReturn(Optional.of(availableBook)).when(bookRepository).findById(id);
-
-        borrowService.borrowBookById(id, firstname, lastname, date1, null);
-
+        try (MockedStatic<Verification> mockedStatic = mockStatic(Verification.class)) {
+            mockedStatic.when(() -> Verification.ofTheReservation(availableBook)).thenReturn(true);
+            borrowService.borrowBookById(id, firstname, lastname, null, null);
+        }
         Mockito.verify(borrowRepository).save(borrow7);
-
     }
 
 
@@ -167,8 +156,8 @@ public class BorrowServiceTest {
         Mockito.doReturn(Optional.of(notAvailableBook)).when(bookRepository).findById(notAvailableBook.getId());
 
         Exception exception = assertThrows(BookshelfConflictException.class, () ->
-                borrowService.borrowBookById(notAvailableBook.getId(), borrow1.getFirstname()
-                        , borrow1.getLastname(), borrow1.getBorrowed(), borrow1.getComment())
+                borrowService.borrowBookById(notAvailableBook.getId(), borrow1.getFirstname(),
+                        borrow1.getLastname(), borrow1.getBorrowed(), borrow1.getComment())
         );
 
         String expectedMessage = String.format("Book with id: %s is already borrowed.", borrow1.getId());
@@ -200,9 +189,10 @@ public class BorrowServiceTest {
         when(shelfUserFeignClient.getUserStatus((String) any(), (String) any()))
                 .thenReturn((ResponseEntity<String>) responseEntity);
         Mockito.doReturn(availableBook3).when(bookRepository).findByAuthorAndTitle(author, title);
-
-        borrowService.borrowBookByAuthorAndTitle(author, title, firstname, lastname, date1, null);
-
+        try (MockedStatic<Verification> mockedStatic = mockStatic(Verification.class)) {
+            mockedStatic.when(() -> Verification.ofTheReservation(availableBook3)).thenReturn(true);
+            borrowService.borrowBookByAuthorAndTitle(author, title, firstname, lastname, null, null);
+        }
         Mockito.verify(borrowRepository).save(borrow3);
     }
 

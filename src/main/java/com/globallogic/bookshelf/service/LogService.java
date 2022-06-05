@@ -17,7 +17,7 @@ import java.util.ArrayList;
 
 
 /**
- * Custom logger class with time interval setup
+ * Logger service class with time interval setup
  * @author Przemyslaw Kondaszewski
  */
 @Slf4j

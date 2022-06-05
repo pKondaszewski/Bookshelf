@@ -4,8 +4,11 @@ package com.globallogic.bookshelf.controller;
 import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
+import com.globallogic.bookshelf.exeptions.LocalDateTimeException;
+import com.globallogic.bookshelf.exeptions.ReservationConflictException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.service.BookShelfService;
+import com.globallogic.bookshelf.service.ReservationService;
 import com.globallogic.bookshelf.utils.CustomObjects.CustomBorrow;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -13,11 +16,16 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 
@@ -38,6 +46,8 @@ public class BookShelfController {
     private BookRepository bookRepository;
     @Autowired
     private BookShelfService bookShelfService;
+    @Autowired
+    private ReservationService reservationService;
 
     /**
      * POST Request to create a book
@@ -180,5 +190,45 @@ public class BookShelfController {
         List<String> bookHistoryHashMap = bookShelfService.getListOfBorrowedBooks();
         log.info("Books History={}",bookHistoryHashMap);
         return new ResponseEntity<>(bookHistoryHashMap,HttpStatus.OK);
+    }
+
+    @PutMapping(path = "/reservation")
+    @ApiOperation(value = "Reserving an available book. Makes the book unavailable to borrow for a specified period of time.")
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "Book reserved successfully"),
+                            @ApiResponse(code = 404, message = "Book not found"),
+                            @ApiResponse(code = 409,
+                                    message = "Book is already reserved/Book is borrowed/Given date is before actual date"),
+                            @ApiResponse(code = 500, message = "Internal BookShelf server error")})
+    public ResponseEntity<String> reservation(@RequestParam Integer bookId,
+                                              @RequestParam
+                                                  @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
+                                              @RequestParam
+                                                  @DateTimeFormat(pattern = "HH:mm") LocalTime time,
+                                              @RequestParam String firstname, @RequestParam String lastname,
+                                              @RequestParam(required = false) String comment) {
+        try {
+            reservationService.reservation(bookId, date, time, firstname, lastname, comment);
+            log.info("Reservation created successfully. " +
+                            "Book with id = {} is reserved by {} {}. " +
+                            "Date of the reservation: {}. Time of the reservation: {}",
+                    bookId, firstname, lastname, date, time);
+            return new ResponseEntity<>(
+                    String.format("Reservation created successfully. " +
+                                    "Book with id: %d is reserved by %s %s. " +
+                                    "Date of the reservation: %s. Time of the reservation: %s",
+                    bookId, firstname, lastname, date, time), HttpStatus.OK);
+        } catch (BookshelfResourceNotFoundException exception) {
+            return new ResponseEntity<>(String.format("Book with id = %d not found.", bookId), HttpStatus.NOT_FOUND);
+        } catch (ReservationConflictException exception) {
+            return new ResponseEntity<>(String.format("Book with id = %d is already reserved.", bookId), HttpStatus.CONFLICT);
+        } catch (LocalDateTimeException exception) {
+            return new ResponseEntity<>(
+                String.format("Given date: %s and time: %s of the reservation is before actual date: %s and time: %s",
+                        date, time,
+                        LocalDateTime.now().toLocalDate(),
+                        LocalDateTime.now().toLocalTime().truncatedTo(ChronoUnit.MINUTES)), HttpStatus.CONFLICT);
+        } catch (BookshelfConflictException exception) {
+            return new ResponseEntity<>(String.format("Book with id = %d is not available.", bookId), HttpStatus.CONFLICT);
+        }
     }
 }

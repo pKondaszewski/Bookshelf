@@ -4,28 +4,28 @@ import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.entity.Category;
 import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
+import com.globallogic.bookshelf.exeptions.LocalDateTimeException;
+import com.globallogic.bookshelf.exeptions.ReservationConflictException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.service.BookShelfService;
-import com.globallogic.bookshelf.utils.UserHistory;
+import com.globallogic.bookshelf.service.ReservationService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -46,16 +46,22 @@ class BookShelfControllerTest {
     @MockBean
     private static BookShelfService bookShelfService;
 
+    @MockBean
+    private static ReservationService reservationService;
+
     @InjectMocks
     private BookShelfController bookShelfController;
 
 
     private static MockMvc mockMvc;
     private static Book book, book2;
-    private static String bookTitle;
+    private static String bookTitle, firstname, lastname, comment;
     private static HashMap<Book, String> allBooksAvailableHashMap;
     private static HashMap<String, String> allBooksHashMap;
     private static String categoryName;
+    private static Integer bookId;
+     static LocalDate date;
+    private static LocalTime time;
 
     @BeforeEach
     public void setMockMvc() {
@@ -79,6 +85,11 @@ class BookShelfControllerTest {
 
         HashMap<String, String> test = new HashMap<>();
 
+        bookId = 1;
+        firstname = "Jan";
+        lastname = "Kowalski";
+        date = LocalDate.of(1970, 1, 1);
+        time = LocalTime.of(12, 12);
 
     }
 
@@ -121,7 +132,7 @@ class BookShelfControllerTest {
     }
 
     @Test
-    void bookDeleteBookIsBorrowedTest() throws Exception {
+    void deleteBookIsBorrowedTest() throws Exception {
 
 
         doThrow(new BookshelfConflictException(
@@ -191,7 +202,7 @@ class BookShelfControllerTest {
 
 
     @Test
-    void getBookHistoryNullPointerExceptionTest() throws Exception {
+    void getBookHistoryResourceNotFoundExceptionTest() throws Exception {
         when(bookShelfService.getBooksHistory((String) org.mockito.Mockito.any()))
                 .thenThrow(new NullPointerException());
         mockMvc
@@ -199,4 +210,92 @@ class BookShelfControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    public void putReservationSuccessTest() throws Exception {
+        mockMvc
+                .perform(put("/bookshelf/reservation")
+                        .param("bookId", String.valueOf(bookId))
+                        .param("date", String.valueOf(date))
+                        .param("time", String.valueOf(time))
+                        .param("firstname", firstname)
+                        .param("lastname", lastname)
+                        .param("comment", comment))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void putReservationBookshelfResourceNotFoundExceptionTest() throws Exception {
+        doThrow(new BookshelfResourceNotFoundException(String.format("Book with id = %d not found.", bookId)))
+                .when(reservationService).reservation(bookId, date, time, firstname, lastname, comment);
+
+
+        mockMvc
+                .perform(put("/bookshelf/reservation")
+                        .param("bookId", String.valueOf(bookId))
+                        .param("date", String.valueOf(date))
+                        .param("time", String.valueOf(time))
+                        .param("firstname", firstname)
+                        .param("lastname", lastname)
+                        .param("comment", comment))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(String.format("Book with id = %d not found.", bookId)));
+    }
+
+    @Test
+    public void putReservationReservationConflictExceptionTest() throws Exception {
+        String exceptionMessage = String.format("Book with id = %d is already reserved.", bookId);
+        doThrow(new ReservationConflictException(exceptionMessage))
+                .when(reservationService).reservation(bookId, date, time, firstname, lastname, comment);
+
+
+        mockMvc
+                .perform(put("/bookshelf/reservation")
+                        .param("bookId", String.valueOf(bookId))
+                        .param("date", String.valueOf(date))
+                        .param("time", String.valueOf(time))
+                        .param("firstname", firstname)
+                        .param("lastname", lastname)
+                        .param("comment", comment))
+                .andExpect(status().isConflict())
+                .andExpect(content().string(exceptionMessage));
+    }
+
+    @Test
+    public void putReservationLocalDateTimeExceptionTest() throws Exception {
+        doThrow(new LocalDateTimeException(String.format("Given date: %s and time: %s of the reservation is before actual date: %s and time: %s",
+                date, time,
+                LocalDateTime.now().toLocalDate(),
+                LocalDateTime.now().toLocalTime().truncatedTo(ChronoUnit.MINUTES))))
+                .when(reservationService).reservation(bookId, date, time, firstname, lastname, comment);
+
+
+        mockMvc
+                .perform(put("/bookshelf/reservation")
+                        .param("bookId", String.valueOf(bookId))
+                        .param("date", String.valueOf(date))
+                        .param("time", String.valueOf(time))
+                        .param("firstname", firstname)
+                        .param("lastname", lastname)
+                        .param("comment", comment))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    public void putReservationBookshelfConflictExceptionTest() throws Exception {
+        String exceptionMessage = String.format("Book with id = %d is not available.", bookId);
+        doThrow(new BookshelfConflictException(exceptionMessage))
+                .when(reservationService).reservation(bookId, date, time, firstname, lastname, comment);
+
+
+        mockMvc
+                .perform(put("/bookshelf/reservation")
+                        .param("bookId", String.valueOf(bookId))
+                        .param("date", String.valueOf(date))
+                        .param("time", String.valueOf(time))
+                        .param("firstname", firstname)
+                        .param("lastname", lastname)
+                        .param("comment", comment))
+                .andExpect(status().isConflict())
+                .andExpect(content().string(exceptionMessage));
+    }
 }

@@ -4,10 +4,10 @@ import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.exeptions.BookshelfException;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
+import com.globallogic.bookshelf.exeptions.ReservationConflictException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
 import com.globallogic.bookshelf.service.BorrowService;
-import com.globallogic.bookshelf.utils.Status;
 import com.globallogic.bookshelf.utils.UserHistory;
 import feign.FeignException;
 import io.swagger.annotations.Api;
@@ -78,6 +78,10 @@ public class BorrowController {
             return new ResponseEntity<>(
                     String.format("Book with id: %s doesn't exist.",BookId),
                     HttpStatus.NOT_FOUND);
+        } catch (ReservationConflictException exception) {
+            return new ResponseEntity<>(
+                    String.format("Book with id: %s is reserved.", BookId),
+                    HttpStatus.CONFLICT);
         } catch (BookshelfConflictException exception) {
             return new ResponseEntity<>(
                     String.format("Book with id: %s is borrowed.",BookId),
@@ -128,6 +132,10 @@ public class BorrowController {
             return new ResponseEntity<>(
                     String.format("Book with author: %s and title: %s doesn't exist.", FirstName, LastName),
                     HttpStatus.NOT_FOUND);
+        } catch (ReservationConflictException exception) {
+            return new ResponseEntity<>(
+                    String.format("Book with author: %s and title: %s is reserved.", FirstName, LastName),
+                    HttpStatus.CONFLICT);
         } catch (BookshelfConflictException exception) {
             return new ResponseEntity<>(
                     String.format("Book with author: %s and title: %s is already borrowed.", FirstName, LastName),

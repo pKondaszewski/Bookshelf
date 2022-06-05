@@ -93,6 +93,48 @@ databaseChangeLog:
                     nullable: false
                     foreignKeyName: fk_book_id
                     references: book(id)
+        - createTable:
+            tableName: reservation
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: firstname
+                  type: varchar(25)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: lastname
+                  type: varchar(25)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: comment
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: book_id
+                  type: int
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_book_id
+                    references: book(id)
+#              - column:
+#                  name: endDateOfReservation
+#                  type: date
+#                  constraints:
+#                    nullable: false
+#              - column:
+#                  name: endTimeOfReservation
+#                  type: time
+#                  constraints:
+#                    nullable: false
   - changeSet:
       id: create_Log_entity
       author: PrzemekGL

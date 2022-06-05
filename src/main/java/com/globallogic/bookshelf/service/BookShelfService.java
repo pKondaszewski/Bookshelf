@@ -33,7 +33,6 @@ public class BookShelfService {
     protected CategoryRepository categoryRepository;
 
 
-
     public BookShelfService(BookRepository bkRepository, BorrowRepository bwRepository,
                             CategoryRepository cRepository) {
         bookRepository = bkRepository;
@@ -54,7 +53,7 @@ public class BookShelfService {
         if (categoryName != null) {
             category = categoryRepository.findByName(categoryName);
         }
-        Book book = new Book(null,author, title, available, category);
+        Book book = new Book(null, author, title, available, category);
         Verification.ofTheCategory(category, book);
         bookRepository.save(book);
     }
@@ -181,9 +180,9 @@ public class BookShelfService {
 
 
     /**
-     * Get information about book and the last person who borrow sort by date or by name of person borrowed.
+     * Get information about borrowed books.
      *
-     * @return Hashmap with book and information about the book availability (owner and date of the borrow)
+     * @return List of strings with information about the book ant the borrow
      */
     public List<String> getListOfBorrowedBooks() {
         List<String>  booksAvailability = new ArrayList<>();

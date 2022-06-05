@@ -1,7 +1,6 @@
 package com.globallogic.bookshelf.service;
 
 import com.globallogic.bookshelf.entity.Book;
-import com.globallogic.bookshelf.entity.Log;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.LogRepository;
 import com.globallogic.bookshelf.utils.StringRepresentation;
@@ -20,7 +19,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mockStatic;
 
 @ContextConfiguration(classes = {LogService.class})
 @ExtendWith(MockitoExtension.class)
@@ -62,12 +61,13 @@ public class LogServiceTest {
 
     @Test
     public void createLogSuccessTest() {
-        MockedStatic<Instant> mockedStatic = mockStatic(Instant.class);
-        mockedStatic.when(Instant::now).thenReturn(instant);
-        Mockito.doReturn(allAvailableBooks).when(bookRepository).findAllByAvailable(true);
-        Mockito.doReturn(new ArrayList<>()).when(bookRepository).findAllByAvailable(false);
-        String result = logService.createLog();
+        try (MockedStatic<Instant> mockedStatic = mockStatic(Instant.class)) {
+            mockedStatic.when(Instant::now).thenReturn(instant);
+            Mockito.doReturn(allAvailableBooks).when(bookRepository).findAllByAvailable(true);
+            Mockito.doReturn(new ArrayList<>()).when(bookRepository).findAllByAvailable(false);
+            String result = logService.createLog();
 
-        assertEquals(result, createLogSuccessOutput);
+            assertEquals(result, createLogSuccessOutput);
+        }
     }
 }

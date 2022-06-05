@@ -6,15 +6,13 @@ import com.globallogic.bookshelf.entity.Borrow;
 import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.exeptions.BookshelfException;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
+import com.globallogic.bookshelf.exeptions.ReservationConflictException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
-import com.globallogic.bookshelf.utils.Status;
+import com.globallogic.bookshelf.repository.ReservationRepository;
 import com.globallogic.bookshelf.utils.StringRepresentation;
 import com.globallogic.bookshelf.utils.UserHistory;
 import com.globallogic.bookshelf.utils.Verification;
-import feign.FeignException;
-import feign.Request;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.http.ResponseEntity;
@@ -40,11 +38,12 @@ public class BorrowService {
     protected ShelfUserFeignClient shelfUserFeignClient;
     protected BorrowRepository borrowRepository;
     protected BookRepository bookRepository;
+    protected ReservationRepository reservationRepository;
 
-    public BorrowService(BorrowRepository bwRepository, BookRepository bkRepository,ShelfUserFeignClient helfUserFeignClient) {
-        borrowRepository = bwRepository;
-        bookRepository = bkRepository;
-        shelfUserFeignClient = helfUserFeignClient;
+    public BorrowService(BorrowRepository borrowRepository, BookRepository bookRepository, ReservationRepository reservationRepository) {
+        this.borrowRepository = borrowRepository;
+        this.bookRepository = bookRepository;
+        this.reservationRepository = reservationRepository;
     }
 
 
@@ -64,8 +63,8 @@ public class BorrowService {
     public void borrowBookById(Integer id, String firstname,
                                String lastname, Date borrowDate, String comment) {
        Optional<Book> bookOptional = bookRepository.findById(id);
-            ResponseEntity responseEntity = shelfUserFeignClient.getUserStatus(firstname,lastname);
-          if(responseEntity.getBody().equals("ACTIVE"))  {
+       ResponseEntity responseEntity = shelfUserFeignClient.getUserStatus(firstname,lastname);
+       if(responseEntity.getBody().equals("ACTIVE"))  {
            if (bookOptional.isEmpty()) {
                throw new BookshelfResourceNotFoundException(
                        String.format("Book with id: %s doesn't exist.", id)
@@ -73,25 +72,27 @@ public class BorrowService {
            } else {
                Book book = bookOptional.get();
                if (book.isAvailable()) {
-                   book.setAvailable(false);
-                   bookRepository.save(book);
-                   borrowDate = Verification.ofTheDate(borrowDate);
-                   Borrow borrow = new Borrow(null, borrowDate, null, firstname, lastname, comment, book);
-                   borrowRepository.save(borrow);
+                   if (Verification.ofTheReservation(book)) {
+                       book.setAvailable(false);
+                       bookRepository.save(book);
+                       borrowDate = Verification.ofTheDate(borrowDate);
+                       Borrow borrow = new Borrow(null, borrowDate, null, firstname, lastname, comment, book);
+                       borrowRepository.save(borrow);
+                   } else {
+                       throw new ReservationConflictException(
+                               String.format("Book with id: %d is reserved.", id));
+                   }
                } else {
                    throw new BookshelfConflictException(
                            String.format("Book with id: %s is already borrowed.", id)
                    );
                }
            }
-       }
+        }
         if (responseEntity.getBody().equals("INACTIVE")) {
               throw new BookshelfException(responseEntity.getBody().toString());
           }
-
-
     }
-
 
 
     /**
@@ -120,15 +121,19 @@ public class BorrowService {
             );
         } else {
             if (book.isAvailable()) {
-                book.setAvailable(false);
-                bookRepository.save(book);
-                borrowDate = Verification.ofTheDate(borrowDate);
-                Borrow borrow = new Borrow(null, borrowDate, null, firstname, lastname, comment, book);
-                borrowRepository.save(borrow);
+                if (Verification.ofTheReservation(book)) {
+                    book.setAvailable(false);
+                    bookRepository.save(book);
+                    borrowDate = Verification.ofTheDate(borrowDate);
+                    Borrow borrow = new Borrow(null, borrowDate, null, firstname, lastname, comment, book);
+                    borrowRepository.save(borrow);
+                } else {
+                    throw new ReservationConflictException(
+                            String.format("Book with author: %s and title: %s is reserved.", author, title));
+                }
             } else {
                 throw new BookshelfConflictException(
-                        String.format("Book with author: %s and title: %s is already borrowed.", author, title)
-                );
+                        String.format("Book with author: %s and title: %s is already borrowed.", author, title));
             }
         }
     }  if (responseEntity.getBody().equals("INACTIVE")) {

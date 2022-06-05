@@ -34,5 +34,4 @@ public class Borrow {
     @OneToOne
     @JoinColumn(name = "book_id",referencedColumnName = "id")
     protected Book book;
-
 }

@@ -2,13 +2,11 @@ package com.globallogic.bookshelf.controller;
 
 
 import com.globallogic.bookshelf.client.ShelfUserFeignClient;
-import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.utils.Status;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

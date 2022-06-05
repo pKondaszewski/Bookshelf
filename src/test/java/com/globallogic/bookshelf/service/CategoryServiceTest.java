@@ -33,7 +33,7 @@ public class CategoryServiceTest {
     private static List<String> startingCategories;
 
     @InjectMocks
-    private static CategoryService service;
+    private static CategoryService categoryService;
 
     private static Category category;
     private static final String categoryName = "randomName";
@@ -46,8 +46,6 @@ public class CategoryServiceTest {
 
     @BeforeAll
     public static void initVariables() {
-        service = new CategoryService(categoryRepository, bookRepository);
-
         category = new Category(null, categoryName);
         allCategories = new ArrayList<>();
         allCategories.add(category);
@@ -64,7 +62,7 @@ public class CategoryServiceTest {
     public void createWithNameSuccessTest() {
         Mockito.doReturn(null).when(categoryRepository).findByName(categoryName);
 
-        service.create(categoryName);
+        categoryService.create(categoryName);
 
         Mockito.verify(categoryRepository).save(category);
     }
@@ -74,7 +72,7 @@ public class CategoryServiceTest {
         Mockito.doReturn(category).when(categoryRepository).findByName(categoryName);
 
         Exception exception = assertThrows(BookshelfConflictException.class, () ->
-                service.create(categoryName)
+                categoryService.create(categoryName)
         );
 
         String expectedMessage = String.format("Category with name %s already exists.", categoryName);
@@ -86,7 +84,7 @@ public class CategoryServiceTest {
     public void deleteWithNameSuccessTest() {
         Mockito.doReturn(category).when(categoryRepository).findByName(categoryName);
 
-        service.delete(categoryName);
+        categoryService.delete(categoryName);
 
         Mockito.verify(categoryRepository).delete(category);
     }
@@ -96,7 +94,7 @@ public class CategoryServiceTest {
         Mockito.doReturn(true).when(startingCategories).contains(categoryName);
 
         Exception exception = assertThrows(BookshelfConflictException.class, () ->
-                service.delete(categoryName)
+                categoryService.delete(categoryName)
         );
 
         String expectedMessage = String.format("Can't delete %s. It's a starting category", categoryName);
@@ -109,7 +107,7 @@ public class CategoryServiceTest {
         Mockito.doReturn(null).when(categoryRepository).findByName(categoryName);
 
         Exception exception = assertThrows(BookshelfResourceNotFoundException.class, () ->
-                service.delete(categoryName)
+                categoryService.delete(categoryName)
         );
 
         String expectedMessage = String.format("Category with name %s doesn't exist.", categoryName);
@@ -122,7 +120,7 @@ public class CategoryServiceTest {
         Mockito.doReturn(category).when(categoryRepository).findByName(categoryName);
         Mockito.doReturn(foundBooksByCategory).when(bookRepository).findAllByCategory(category);
 
-        service.delete(categoryName);
+        categoryService.delete(categoryName);
 
         assertEquals("Default", book.getCategory().getName());
         assertEquals(4, book.getCategory().getId());
@@ -133,6 +131,6 @@ public class CategoryServiceTest {
         Mockito.doReturn(allCategories).when(categoryRepository).findAll();
         Mockito.doReturn(new ArrayList<>(1)).when(bookRepository).findAllByCategory(category);
 
-        assertEquals(service.getAmountOfBooksPerCategory(), outputMap);
+        assertEquals(categoryService.getAmountOfBooksPerCategory(), outputMap);
     }
 }
