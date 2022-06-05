@@ -21,12 +21,22 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {BookShelfService.class})
 @ExtendWith(MockitoExtension.class)
@@ -191,6 +201,50 @@ public class BookShelfServiceTest {
         HashMap<Book, String> booksAvailabilityReturn = bookShelfService.getBooksAvailability();
 
         assertEquals(booksAvailability, booksAvailabilityReturn);
+    }
+
+
+    @Test
+    void getListOfBorrowedBooksSortTest() {
+        when(this.bookRepository.findAll()).thenReturn(new ArrayList<>());
+        assertTrue(this.bookShelfService.getListOfBorrowedBooksSort("Sort").isEmpty());
+        verify(this.bookRepository).findAll();
+    }
+
+
+    @Test
+    void getListOfBorrowedBooksSortWithBookTest() {
+        ArrayList<Book> bookList = new ArrayList<>();
+        bookList.add(bookAvailable);
+        when(bookRepository.findAll()).thenReturn(bookList);
+        assertTrue(bookShelfService.getListOfBorrowedBooksSort("Sort").isEmpty());
+        verify(bookRepository).findAll();
+    }
+
+
+    @Test
+    void GetListOfBorrowedBooksSortBookshelfResourceNotFoundExceptionTest() {
+        when(bookRepository.findAll()).thenThrow(new BookshelfResourceNotFoundException("An error occurred"));
+        assertThrows(BookshelfResourceNotFoundException.class,
+                () -> bookShelfService.getListOfBorrowedBooksSort("Sort"));
+        verify(bookRepository).findAll();
+    }
+
+
+    @Test
+    void getListOfBorrowedBooksTest() {
+        ArrayList<Book> bookList = new ArrayList<>();
+        bookList.add(bookAvailable);
+        when(this.bookRepository.findAll()).thenReturn(bookList);
+        assertTrue(this.bookShelfService.getListOfBorrowedBooks().isEmpty());
+        verify(this.bookRepository).findAll();
+    }
+
+    @Test
+    void getListOfBorrowedBooksBookshelfResourceNotFoundExceptionTest() {
+        when(this.bookRepository.findAll()).thenThrow(new BookshelfResourceNotFoundException("An error occurred"));
+        assertThrows(BookshelfResourceNotFoundException.class, () -> this.bookShelfService.getListOfBorrowedBooks());
+        verify(this.bookRepository).findAll();
     }
 
 

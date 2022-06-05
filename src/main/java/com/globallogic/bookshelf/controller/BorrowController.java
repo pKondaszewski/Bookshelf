@@ -2,11 +2,14 @@ package com.globallogic.bookshelf.controller;
 
 import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
+import com.globallogic.bookshelf.exeptions.BookshelfException;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
 import com.globallogic.bookshelf.service.BorrowService;
+import com.globallogic.bookshelf.utils.Status;
 import com.globallogic.bookshelf.utils.UserHistory;
+import feign.FeignException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -32,6 +35,8 @@ import java.util.Date;
 @Slf4j
 @Api("Management Api")
 public class BorrowController {
+    @Autowired
+    private ShelfUserController shelfUserController;
     @Autowired
     private BorrowService borrowsService;
     @Autowired
@@ -61,8 +66,9 @@ public class BorrowController {
                                                  @RequestParam(required = false)
                                                  @DateTimeFormat(pattern = "yyyy-MM-dd") Date BorrowDate,
                                                  @RequestParam(required = false) String Comment) {
-
+        ResponseEntity responseEntity = shelfUserController.getUserStatus(FirstName,LastName);
         try {
+
             borrowsService.borrowBookById(BookId, FirstName, LastName, BorrowDate, Comment);
             log.info("Borrow creation with Id: {} ", BookId);
             return new ResponseEntity<>(
@@ -75,6 +81,12 @@ public class BorrowController {
         } catch (BookshelfConflictException exception) {
             return new ResponseEntity<>(
                     String.format("Book with id: %s is borrowed.",BookId),
+                    HttpStatus.CONFLICT);
+        }catch (FeignException.NotFound exception){
+            return new ResponseEntity<>(responseEntity.getBody().toString(),
+                    HttpStatus.NOT_FOUND);
+        }catch (BookshelfException exception){
+            return new ResponseEntity<>(responseEntity.getBody().toString(),
                     HttpStatus.CONFLICT);
         }
     }
@@ -102,7 +114,9 @@ public class BorrowController {
                                                              @RequestParam String LastName,
                                                              @RequestParam(required = false)
                                                              @DateTimeFormat(pattern = "yyyy-MM-dd") Date BorrowDate,
+
                                                              @RequestParam(required = false) String Comment) {
+        ResponseEntity responseEntity = shelfUserController.getUserStatus(FirstName,LastName);
         try {
             borrowsService.borrowBookByAuthorAndTitle(BookAuthor, BookTitle, FirstName, LastName, BorrowDate, Comment);
             log.info("User: {} {} borrows book with author: {} and title: {}", FirstName, LastName, BookAuthor, BookTitle);
@@ -117,6 +131,12 @@ public class BorrowController {
         } catch (BookshelfConflictException exception) {
             return new ResponseEntity<>(
                     String.format("Book with author: %s and title: %s is already borrowed.", FirstName, LastName),
+                    HttpStatus.CONFLICT);
+        }catch (FeignException.NotFound exception){
+            return new ResponseEntity<>(responseEntity.getBody().toString(),
+                    HttpStatus.NOT_FOUND);
+        }catch (BookshelfException exception){
+            return new ResponseEntity<>(responseEntity.getBody().toString(),
                     HttpStatus.CONFLICT);
         }
     }

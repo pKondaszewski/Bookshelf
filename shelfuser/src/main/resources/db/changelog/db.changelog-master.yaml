@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_user_table
+      author: gl
+      context: prod, test
+      changes:
+        - createTable:
+            tableName: shelf_user
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: firstname
+                  type: varchar(25)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: lastname
+                  type: varchar(25)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(25)
+                  constraints:
+                    nullable: false

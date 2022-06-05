@@ -179,7 +179,7 @@ class BookShelfControllerTest {
 
 
     @Test
-    void testGetBookHistory() throws Exception {
+    void getBookHistoryTest() throws Exception {
         when(bookShelfService.getBooksHistory(any())).thenReturn(new HashMap<>());
 
         mockMvc
@@ -191,7 +191,7 @@ class BookShelfControllerTest {
 
 
     @Test
-    void testGetBookHistory4() throws Exception {
+    void getBookHistoryNullPointerExceptionTest() throws Exception {
         when(bookShelfService.getBooksHistory((String) org.mockito.Mockito.any()))
                 .thenThrow(new NullPointerException());
         mockMvc

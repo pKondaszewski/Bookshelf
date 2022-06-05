@@ -1,16 +1,15 @@
-package com.globallogic.bookshelf;
+package com.globallogic.shelfuser;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
-
-@EnableFeignClients
 @SpringBootApplication
-public class BookshelfApplication {
+@EnableFeignClients
+public class ShelfUserApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(BookshelfApplication.class, args);
-    }
+	public static void main(String[] args) {
+		SpringApplication.run(ShelfUserApplication.class, args);
+	}
 
 }

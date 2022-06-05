@@ -1,14 +1,9 @@
 server:
-  port: 8467
-  bookshelf-log:
-    interval: 10
-sample:
-  client:
-    url: http://localhost:8466/
+  port : 8466
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/bookshelf
+    url: jdbc:postgresql://localhost:5432/bookshelfuser
     username: postgres
     #password: root
     password: admin
@@ -22,6 +17,3 @@ spring:
     #contexts: prod
     contexts: test
     dropFirst: false
-    parameters:
-      bookshelf-log:
-        interval: ${server.bookshelf-log.interval}

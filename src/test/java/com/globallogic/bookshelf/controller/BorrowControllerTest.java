@@ -54,6 +54,9 @@ public class BorrowControllerTest {
     @MockBean
     private static BorrowService borrowService;
 
+    @MockBean
+    private static ShelfUserController shelfUserController;
+
     @InjectMocks
     private BorrowController borrowController;
 
