@@ -36,16 +36,17 @@ import java.util.Optional;
 @EnableFeignClients
 public class BorrowService {
 
-    @Autowired
     protected ShelfUserFeignClient shelfUserFeignClient;
     protected BorrowRepository borrowRepository;
     protected BookRepository bookRepository;
     protected ReservationRepository reservationRepository;
 
-    public BorrowService(BorrowRepository borrowRepository, BookRepository bookRepository, ReservationRepository reservationRepository) {
+    public BorrowService(BorrowRepository borrowRepository, BookRepository bookRepository,
+                         ReservationRepository reservationRepository, ShelfUserFeignClient shelfUserFeignClient) {
         this.borrowRepository = borrowRepository;
         this.bookRepository = bookRepository;
         this.reservationRepository = reservationRepository;
+        this.shelfUserFeignClient = shelfUserFeignClient;
     }
 
 
