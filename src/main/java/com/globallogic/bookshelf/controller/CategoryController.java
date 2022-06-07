@@ -4,15 +4,13 @@ import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.service.CategoryService;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 
@@ -27,7 +25,7 @@ import java.util.HashMap;
 @RequestMapping(value = "/category")
 @Slf4j
 @Api("Management Api")
-public class CategoryController {
+public class CategoryController implements CategoryInterface{
 
     @Autowired
     private CategoryService categoryService;
@@ -38,12 +36,8 @@ public class CategoryController {
      * @param name name of the category
      * @return ResponseEntity that informs about the creation of the category
      */
-    @PostMapping(path = "/categoryCreate")
-    @ApiOperation(value = "Create a category with given name")
-    @ApiResponses(value = { @ApiResponse(code = 201, message = "Category created"),
-                            @ApiResponse(code = 409, message = "Category with given name already exists"),
-                            @ApiResponse(code = 500, message = "Internal Category server error")})
-    public ResponseEntity<String> create(@RequestParam(name = "name") String name) {
+    @Override
+    public ResponseEntity<String> create(String name) {
         try {
             categoryService.create(name);
             log.info("Creating category={}", name);
@@ -60,13 +54,8 @@ public class CategoryController {
      * @param name name of the category
      * @return ResponseEntity that informs about the removal of the category
      */
-    @DeleteMapping(path = "/categoryDelete",produces = MediaType.TEXT_PLAIN_VALUE)
-    @ApiOperation(value = "Delete a category based by the name")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "Category deleted"),
-                            @ApiResponse(code = 404, message = "Category not found"),
-                            @ApiResponse(code = 409, message = "Can't delete starting category"),
-                            @ApiResponse(code = 500, message = "Internal Category server error")})
-    public ResponseEntity<String> delete(@RequestParam String name) {
+    @Override
+    public ResponseEntity<String> delete(String name) {
         try {
             categoryService.delete(name);
             log.info("Deleting category={}", name);
@@ -85,10 +74,7 @@ public class CategoryController {
      *
      * @return ResponseEntity that contains books per certain category ratios HashMap
      */
-    @GetMapping(path = "/amountOfBooksPerCategory", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Show amount of books per each category")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "Books per category ratios found"),
-                            @ApiResponse(code = 500, message = "Internal Category server error")})
+    @Override
     public ResponseEntity<HashMap<String, Integer>> getAmountOfBooksPerCategory() {
         HashMap<String, Integer> booksPerCategoryMap = categoryService.getAmountOfBooksPerCategory();
         log.info("Books per category ratios = {}", booksPerCategoryMap);

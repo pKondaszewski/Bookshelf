@@ -125,16 +125,6 @@ databaseChangeLog:
                     nullable: false
                     foreignKeyName: fk_book_id
                     references: book(id)
-#              - column:
-#                  name: endDateOfReservation
-#                  type: date
-#                  constraints:
-#                    nullable: false
-#              - column:
-#                  name: endTimeOfReservation
-#                  type: time
-#                  constraints:
-#                    nullable: false
   - changeSet:
       id: create_Log_entity
       author: PrzemekGL

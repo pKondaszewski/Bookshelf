@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -56,10 +57,11 @@ public class LogService {
     public String createLog() {
         Instant instant = Instant.now();
         String timeInUTC = instant.atZone(ZoneOffset.UTC).toString();
-        int numberOfAvailableBooks = bookRepository.findAllByAvailable(true).size();
+        List<Book> allAvailableBooksList = bookRepository.findAllByAvailable(true);
+        int numberOfAvailableBooks = allAvailableBooksList.size();
         int numberOfUnavailableBooks = bookRepository.findAllByAvailable(false).size();
         ArrayList<String> titlesOfAvailableBooks = new ArrayList<>();
-        for (Book book : bookRepository.findAllByAvailable(true)) {
+        for (Book book : allAvailableBooksList) {
             titlesOfAvailableBooks.add(book.getTitle());
         }
         return StringRepresentation.ofTheLog(timeInUTC, numberOfAvailableBooks,

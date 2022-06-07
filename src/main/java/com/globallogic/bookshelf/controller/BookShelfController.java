@@ -11,16 +11,12 @@ import com.globallogic.bookshelf.service.BookShelfService;
 import com.globallogic.bookshelf.service.ReservationService;
 import com.globallogic.bookshelf.utils.CustomObjects.CustomBorrow;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,7 +36,7 @@ import java.util.List;
 @RequestMapping(value = "/bookshelf")
 @Slf4j
 @Api("Management Api")
-public class BookShelfController {
+public class BookShelfController implements BookShelfInterface {
 
     @Autowired
     private BookRepository bookRepository;
@@ -58,18 +54,13 @@ public class BookShelfController {
      * @param availability book availability
      * @return ResponseEntity that informs about the creation of the book
      */
-    @ApiOperation(value = "Creates a book entity.")
-    @ApiResponses(value = { @ApiResponse(code = 201, message = "Book entry created", response = Book.class),
-                            @ApiResponse(code = 400, message = "Bad Request"),
-                            @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
-    @PostMapping(path = "/bookCreate",produces = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity<String> create(@RequestParam String author, @RequestParam String title, @RequestParam boolean availability,
-                                        @RequestParam(required = false, defaultValue = "Default") String categoryName) {
-
+    @Override
+    public ResponseEntity<String> create(String author, String title, boolean availability, String categoryName) {
         try {
             bookShelfService.create(title, author, availability, categoryName);
+            log.info("Book with title: {} and author: {} created successfully", title, author);
             return new ResponseEntity<>(String.format("Book %s created", title), HttpStatus.CREATED);
-        }catch (BookshelfResourceNotFoundException exception){
+        } catch (BookshelfResourceNotFoundException exception){
             return new ResponseEntity<>(String.format("Category %s not found", categoryName), HttpStatus.NOT_FOUND);
         }
     }
@@ -80,14 +71,11 @@ public class BookShelfController {
      * @param id id of the book
      * @return ResponseEntity that informs about the removal of the book
      */
-    @DeleteMapping(path = "/{id}")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "Book deleted", response = String.class),
-                            @ApiResponse(code = 404, message = "Book not found"),
-                            @ApiResponse(code = 409, message = "Can't delete borrowed book"),
-                            @ApiResponse(code = 500, message = "Internal Category server error")})
-    public ResponseEntity<String> delete(@PathVariable(name = "id") Integer id) {
+    @Override
+    public ResponseEntity<String> delete(Integer id) {
         try {
             bookShelfService.delete(id);
+            log.info("Book with id = {} deleted successfully", id);
             return new ResponseEntity<>(String.format("Book with id=%d delete", id), HttpStatus.OK);
         } catch (BookshelfResourceNotFoundException exception) {
             return new ResponseEntity<>(String.format("Book with id=%d doesn't exist", id), HttpStatus.NOT_FOUND);
@@ -102,10 +90,7 @@ public class BookShelfController {
      *
      * @return ResponseEntity that contains history of every book, and it's availability.
      */
-    @GetMapping(path = "/getAllBooksAvailable", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Show available books")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "All books available"),
-                            @ApiResponse(code = 500, message = "Internal BookShelf server error")})
+    @Override
     public ResponseEntity<HashMap<Book, String>> getAllBooksAvailable() {
         HashMap<Book, String> booksAvailable = bookShelfService.getAllBooksAvailable();
         log.info("Books available = {}", booksAvailable);
@@ -117,12 +102,11 @@ public class BookShelfController {
      *
      * @return ResponseEntity that contains history of every book, and it's availability.
      */
-    @GetMapping(path = "/listOfBooks", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "All books", response = HashMap.class),
-                            @ApiResponse(code = 500, message = "Internal BookShelf server error")})
+    @Override
     public ResponseEntity<HashMap<String, String>> getAllBooks() {
-        HashMap<String, String> booksAvailable = bookShelfService.getAllBooks();
-        return new ResponseEntity<>(booksAvailable, HttpStatus.OK);
+        HashMap<String, String> allBooksWithAvailabilityHashMap = bookShelfService.getAllBooks();
+        log.info("All books = {}", allBooksWithAvailabilityHashMap);
+        return new ResponseEntity<>(allBooksWithAvailabilityHashMap, HttpStatus.OK);
     }
 
     /**
@@ -130,10 +114,7 @@ public class BookShelfController {
      *
      * @return ResponseEntity that contains every book, and it's availability (actual owner of the book and borrow date) HashMap
      */
-    @GetMapping(path = "/booksAvailability", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Shows map book: availability (info about the owner of the book)")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "All books", response = HashMap.class),
-                            @ApiResponse(code = 500, message = "Internal BookShelf server error")})
+    @Override
     public ResponseEntity<HashMap<Book, String>> getBooksAvailability() {
         HashMap<Book, String> booksAvailability = bookShelfService.getBooksAvailability();
         log.info("Books availability={}", booksAvailability);
@@ -143,14 +124,12 @@ public class BookShelfController {
     /**
      * GET Request to receive a map that shows history of all book.
      *
-     * @param name
+     * @param name name of the book
      * @return ResponseEntity that contains history of every book, and it's availability.
      */
-    @GetMapping(path = "/bookHistory/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "Book History",response = HashMap.class),
-    @ApiResponse(code = 500,message = "Internal BookShelf server error")})
-    public ResponseEntity<HashMap<Book, List<String>>> getBookHistory(@PathVariable(name = "name") String name) {
-        HashMap bookHistoryHashMap = null;
+    @Override
+    public ResponseEntity<HashMap<Book, List<String>>> getBookHistory(String name) {
+        HashMap<Book, List<String>> bookHistoryHashMap = null;
         try {
             bookHistoryHashMap = bookShelfService.getBooksHistory(name);
             log.info("Book History={}", bookHistoryHashMap);
@@ -165,17 +144,11 @@ public class BookShelfController {
      *
      * @return ResponseEntity that contains book and information about who borrow book at the moment.
      */
-    @GetMapping(path = "/getListOfBorrowedBooksSort", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Return list of borrows with availability to sort results")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "Books History"),
-                            @ApiResponse(code = 500,message = "Internal BookShelf server error")})
-    public ResponseEntity<List<CustomBorrow>> getNewestActiveBorrowSort(@RequestHeader(
-                                                                            value = "sortOption",
-                                                                            defaultValue = "",
-                                                                            required = false) String sort) {
+    @Override
+    public ResponseEntity<List<CustomBorrow>> getNewestActiveBorrowSort(String sort) {
         List<CustomBorrow> bookHistoryHashMap = bookShelfService.getListOfBorrowedBooksSort(sort);
-        log.info("Books History={}",bookHistoryHashMap);
-        return new ResponseEntity<>(bookHistoryHashMap,HttpStatus.OK);
+        log.info("Sorted books History={}", bookHistoryHashMap);
+        return new ResponseEntity<>(bookHistoryHashMap, HttpStatus.OK);
     }
 
     /**
@@ -183,50 +156,45 @@ public class BookShelfController {
      *
      * @return ResponseEntity that contains book and information about who borrow book at the moment.
      */
-    @GetMapping(path = "/getListOfBorrowedBooks", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "Books History",response = HashMap.class),
-            @ApiResponse(code = 500,message = "Internal BookShelf server error")})
-    public ResponseEntity<List<String>> getNewestActiveBorrow(){
+    @Override
+    public ResponseEntity<List<String>> getNewestActiveBorrow() {
         List<String> bookHistoryHashMap = bookShelfService.getListOfBorrowedBooks();
-        log.info("Books History={}",bookHistoryHashMap);
+        log.info("Books History={}", bookHistoryHashMap);
         return new ResponseEntity<>(bookHistoryHashMap,HttpStatus.OK);
     }
 
-    @PutMapping(path = "/reservation")
-    @ApiOperation(value = "Reserving an available book. Makes the book unavailable to borrow for a specified period of time.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "Book reserved successfully"),
-                            @ApiResponse(code = 404, message = "Book not found"),
-                            @ApiResponse(code = 409,
-                                    message = "Book is already reserved/Book is borrowed/Given date is before actual date"),
-                            @ApiResponse(code = 500, message = "Internal BookShelf server error")})
-    public ResponseEntity<String> reservation(@RequestParam Integer bookId,
-                                              @RequestParam
-                                                  @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
-                                              @RequestParam
-                                                  @DateTimeFormat(pattern = "HH:mm") LocalTime time,
-                                              @RequestParam String firstname, @RequestParam String lastname,
-                                              @RequestParam(required = false) String comment) {
+    /**
+     * PUT Request to set a reservation on a specific book.
+     *
+     * @param bookId id of the book
+     * @param date end date of the reservation
+     * @param time end time of the reservation
+     * @param firstname firstname of the reservation owner
+     * @param lastname lastname of the reservation owner
+     * @param comment additional comment for the reservation
+     * @return String, brief information about the reservation
+     */
+    @Override
+    public ResponseEntity<String> reservation(Integer bookId, LocalDate date, LocalTime time,
+                                              String firstname, String lastname, String comment) {
         try {
             reservationService.reservation(bookId, date, time, firstname, lastname, comment);
-            log.info("Reservation created successfully. " +
-                            "Book with id = {} is reserved by {} {}. " +
+            log.info("Reservation created successfully. Book with id = {} is reserved by {} {}. " +
                             "Date of the reservation: {}. Time of the reservation: {}",
                     bookId, firstname, lastname, date, time);
             return new ResponseEntity<>(
-                    String.format("Reservation created successfully. " +
-                                    "Book with id: %d is reserved by %s %s. " +
+                    String.format("Reservation created successfully. Book with id: %d is reserved by %s %s. " +
                                     "Date of the reservation: %s. Time of the reservation: %s",
-                    bookId, firstname, lastname, date, time), HttpStatus.OK);
+                            bookId, firstname, lastname, date, time), HttpStatus.OK);
         } catch (BookshelfResourceNotFoundException exception) {
             return new ResponseEntity<>(String.format("Book with id = %d not found.", bookId), HttpStatus.NOT_FOUND);
         } catch (ReservationConflictException exception) {
             return new ResponseEntity<>(String.format("Book with id = %d is already reserved.", bookId), HttpStatus.CONFLICT);
         } catch (LocalDateTimeException exception) {
             return new ResponseEntity<>(
-                String.format("Given date: %s and time: %s of the reservation is before actual date: %s and time: %s",
-                        date, time,
-                        LocalDateTime.now().toLocalDate(),
-                        LocalDateTime.now().toLocalTime().truncatedTo(ChronoUnit.MINUTES)), HttpStatus.CONFLICT);
+                    String.format("Given date: %s and time: %s of the reservation is before actual date: %s and time: %s",
+                            date, time, LocalDateTime.now().toLocalDate(),
+                            LocalDateTime.now().toLocalTime().truncatedTo(ChronoUnit.MINUTES)), HttpStatus.CONFLICT);
         } catch (BookshelfConflictException exception) {
             return new ResponseEntity<>(String.format("Book with id = %d is not available.", bookId), HttpStatus.CONFLICT);
         }

@@ -220,7 +220,11 @@ class BookShelfControllerTest {
                         .param("firstname", firstname)
                         .param("lastname", lastname)
                         .param("comment", comment))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().string( String.format("Reservation created successfully. " +
+                                "Book with id: %d is reserved by %s %s. " +
+                                "Date of the reservation: %s. Time of the reservation: %s",
+                        bookId, firstname, lastname, date, time)));
     }
 
     @Test

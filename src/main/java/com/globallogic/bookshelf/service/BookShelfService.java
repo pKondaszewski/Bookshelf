@@ -177,8 +177,6 @@ public class BookShelfService {
     }
 
 
-
-
     /**
      * Get information about borrowed books.
      *
