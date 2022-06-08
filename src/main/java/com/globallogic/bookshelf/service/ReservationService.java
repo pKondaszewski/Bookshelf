@@ -53,7 +53,8 @@ public class ReservationService {
             } else {
                 if (Verification.ofTheReservation(book)) {
                     if (Verification.ofTheLocalDateTime(date, time)) {
-                        Reservation reservation = new Reservation(null, firstname, lastname, date, time, comment, book);
+                        Reservation reservation = new Reservation(
+                                null, firstname, lastname, LocalDate.now(), LocalTime.now(), date, time, comment, book);
                         reservationRepository.save(reservation);
                     } else {
                         throw new LocalDateTimeException(

@@ -20,6 +20,10 @@ public class Reservation {
     private String firstname;
     private String lastname;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate startDateOfReservation;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+    private LocalTime startTimeOfReservation;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate endDateOfReservation;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     private LocalTime endTimeOfReservation;

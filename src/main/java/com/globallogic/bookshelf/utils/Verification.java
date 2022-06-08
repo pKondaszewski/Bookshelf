@@ -25,8 +25,6 @@ public class Verification {
         Verification.reservationRepository = reservationRepository;
     }
 
-
-
     /**
      * Method that's handle category setup for certain book entity (sets id based on the category object)
      * @param category object of the category

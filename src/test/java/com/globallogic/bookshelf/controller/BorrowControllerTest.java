@@ -4,6 +4,7 @@ import com.globallogic.bookshelf.entity.Book;
 import com.globallogic.bookshelf.entity.Category;
 import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
+import com.globallogic.bookshelf.exeptions.ReservationConflictException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
 import com.globallogic.bookshelf.service.BorrowService;
@@ -147,6 +148,20 @@ public class BorrowControllerTest {
                 .andExpect(status().isConflict())
                 .andExpect(content().string(String.format("Book with author: %s and title: %s is already borrowed.",
                         FirstName, LastName)));
+    }
+
+    @Test
+    void borrowBookByAuthorAndTitleReservationConflictExceptionTest() throws Exception {
+        String exceptionMessage = String.format("Book with author: %s and title: %s is reserved.", FirstName, LastName);
+        doThrow(new ReservationConflictException(exceptionMessage))
+                .when(borrowService)
+                .borrowBookByAuthorAndTitle(any(), any(), any(), any(), any(), any());
+
+        mockMvc
+                .perform(post("/borrow/byAuthorAndTitle").param("BookAuthor", BookAuthor).param("BookTitle", BookTitle)
+                        .param("FirstName", FirstName).param("LastName", LastName))
+                .andExpect(status().isConflict())
+                .andExpect(content().string(exceptionMessage));
     }
 
 

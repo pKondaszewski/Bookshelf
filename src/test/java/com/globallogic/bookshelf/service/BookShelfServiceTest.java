@@ -8,6 +8,9 @@ import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
 import com.globallogic.bookshelf.repository.CategoryRepository;
+
+import java.util.ArrayList;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,11 +18,21 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.*;
 
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -51,6 +64,7 @@ public class BookShelfServiceTest {
 
 
     private static List<Book> allBooks;
+    private static ArrayList<Book> bookList;
     private static ArrayList<Object> booksWithNewestBorrowSort;
 
     @BeforeAll
@@ -68,6 +82,9 @@ public class BookShelfServiceTest {
         allBooks = new ArrayList<>();
         allBooks.add(bookAvailable);
         allBooks.add(bookNotAvailable);
+
+        bookList = new ArrayList<>();
+        bookList.add(bookAvailable);
 
         String firstname = "Andrzej";
         String lastname = "Kowalski";
@@ -186,17 +203,8 @@ public class BookShelfServiceTest {
         assertEquals(booksAvailability, booksAvailabilityReturn);
     }
 
-
     @Test
-    void getListOfBorrowedBooksSortTest() {
-        when(this.bookRepository.findAll()).thenReturn(new ArrayList<>());
-        assertTrue(this.bookShelfService.getListOfBorrowedBooksSort("Sort").isEmpty());
-        verify(this.bookRepository).findAll();
-    }
-
-
-    @Test
-    void getListOfBorrowedBooksSortWithBookTest() {
+    public void getListOfBorrowedBooksSortWithBookTest() {
         ArrayList<Book> bookList = new ArrayList<>();
         bookList.add(bookAvailable);
         when(bookRepository.findAll()).thenReturn(bookList);
@@ -204,9 +212,24 @@ public class BookShelfServiceTest {
         verify(bookRepository).findAll();
     }
 
+    @Test
+    public void getListOfBorrowedBooksSortEmptyListTest() {
+        when(bookRepository.findAll()).thenReturn(new ArrayList<>());
+        assertTrue(bookShelfService.getListOfBorrowedBooksSort("Sort").isEmpty());
+        verify(bookRepository).findAll();
+    }
 
     @Test
-    void GetListOfBorrowedBooksSortBookshelfResourceNotFoundExceptionTest() {
+    public void getListOfBorrowedBooksSortTest() {
+        when(bookRepository.findAll()).thenReturn(bookList);
+
+        assertTrue(bookShelfService.getListOfBorrowedBooksSort("Sort").isEmpty());
+
+        verify(bookRepository).findAll();
+    }
+
+    @Test
+    void getListOfBorrowedBooksSortBookshelfResourceNotFoundExceptionTest() {
         when(bookRepository.findAll()).thenThrow(new BookshelfResourceNotFoundException("An error occurred"));
         assertThrows(BookshelfResourceNotFoundException.class,
                 () -> bookShelfService.getListOfBorrowedBooksSort("Sort"));
@@ -229,7 +252,6 @@ public class BookShelfServiceTest {
         assertThrows(BookshelfResourceNotFoundException.class, () -> this.bookShelfService.getListOfBorrowedBooks());
         verify(this.bookRepository).findAll();
     }
-
 
 
     @Test
