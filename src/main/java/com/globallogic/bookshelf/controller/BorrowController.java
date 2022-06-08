@@ -57,7 +57,7 @@ public class BorrowController implements BorrowInterface {
             borrowsService.borrowBookById(BookId, FirstName, LastName, BorrowDate, Comment);
             log.info("Borrow creation with Id: {} ", BookId);
             return new ResponseEntity<>(
-                    String.format("%s %s borrow book with id: %s ", FirstName, LastName, BookId),
+                    String.format("%s %s borrow book with id: %s ",FirstName,LastName,BookId),
                     HttpStatus.OK);
         } catch (BookshelfResourceNotFoundException exception) {
             return new ResponseEntity<>(
@@ -72,10 +72,10 @@ public class BorrowController implements BorrowInterface {
                     String.format("Book with id: %s is borrowed.",BookId),
                     HttpStatus.CONFLICT);
         }catch (FeignException.NotFound exception){
-            return new ResponseEntity<>(responseEntity.getBody().toString(),
+            return new ResponseEntity<>(String.format("User %s %s not found status: %s",FirstName,LastName,responseEntity.getBody().toString()) ,
                     HttpStatus.NOT_FOUND);
         }catch (BookshelfException exception){
-            return new ResponseEntity<>(responseEntity.getBody().toString(),
+            return new ResponseEntity<>(String.format("Status of user %s %s is %s",FirstName,LastName,responseEntity.getBody().toString()),
                     HttpStatus.CONFLICT);
         }
     }
@@ -115,10 +115,10 @@ public class BorrowController implements BorrowInterface {
                     String.format("Book with author: %s and title: %s is already borrowed.", FirstName, LastName),
                     HttpStatus.CONFLICT);
         } catch (FeignException.NotFound exception){
-            return new ResponseEntity<>(responseEntity.getBody().toString(),
+            return new ResponseEntity<>(String.format("User %s %s not found status: %s",FirstName,LastName,responseEntity.getBody().toString()) ,
                     HttpStatus.NOT_FOUND);
-        } catch (BookshelfException exception){
-            return new ResponseEntity<>(responseEntity.getBody().toString(),
+        }catch (BookshelfException exception){
+            return new ResponseEntity<>(String.format("Status of user %s %s is %s",FirstName,LastName,responseEntity.getBody().toString()),
                     HttpStatus.CONFLICT);
         }
     }

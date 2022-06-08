@@ -5,8 +5,8 @@ spring:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/bookshelfuser
     username: postgres
-    password: root
-    #password: admin
+    #password: root
+    password: admin
   jpa:
     hibernate:
       ddl-auto: update

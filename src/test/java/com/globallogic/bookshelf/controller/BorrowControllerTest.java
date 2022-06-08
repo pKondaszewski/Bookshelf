@@ -79,7 +79,7 @@ public class BorrowControllerTest {
                 .perform(post("/borrow/byId").param("BookId", BookId)
                         .param("FirstName", FirstName).param("LastName", LastName))
                 .andExpect(status().isOk())
-                .andExpect(content().string(String.format("%s %s borrow book with id: %s ", FirstName, LastName, BookId)));
+                .andExpect(content().string(String.format("%s %s borrow book with id: %s ", FirstName, LastName,BookId)));
     }
 
     @Test

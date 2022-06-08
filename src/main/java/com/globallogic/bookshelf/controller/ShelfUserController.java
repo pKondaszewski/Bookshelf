@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/shelfUser")
 @RequiredArgsConstructor
-public class ShelfUserController {
+public class ShelfUserController implements ShelfUserFeignClient{
 
     private final ShelfUserFeignClient userFeignClient;
 
-    @PostMapping("/userAdd")
+    @Override
     public ResponseEntity<String> userAdd(@RequestParam String firstName
             , @RequestParam String lastName
             , @RequestParam Status status){
@@ -26,7 +26,7 @@ public class ShelfUserController {
         return new ResponseEntity<>(String.format("User %s %s created", firstName, lastName), HttpStatus.CREATED);
     }
 
-    @GetMapping("/userStatus")
+    @Override
     public ResponseEntity<String> getUserStatus(@RequestParam String firstName,@RequestParam String lastName){
         String status = Status.NOT_PRESENT.name();
         try {

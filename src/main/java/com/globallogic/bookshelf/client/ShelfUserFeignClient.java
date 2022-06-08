@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(value = "shelfUser",url = "http://localhost:8466/shelfUser/" )
+@FeignClient(value = "shelfUser",url = "${user.client.url}" )
 public interface ShelfUserFeignClient {
 
     @RequestMapping(method = RequestMethod.POST,

@@ -2,16 +2,16 @@ server:
   port: 8467
   bookshelf-log:
     interval: 10
-sample:
+user:
   client:
-    url: http://localhost:8466/
+    url: http://localhost:8466/shelfUser/
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/bookshelf
     username: postgres
-    password: root
-    #password: admin
+    #password: root
+    password: admin
   jpa:
     hibernate:
       ddl-auto: update

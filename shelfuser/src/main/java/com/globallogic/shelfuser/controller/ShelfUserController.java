@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/shelfUser")
 @Slf4j
 @Api("Management Api")
-public class ShelfUserController {
+public class ShelfUserController implements ShelfUserInterface {
 
 
     @Autowired
@@ -46,11 +46,7 @@ public class ShelfUserController {
      * @param status
      * @return ResponseEntity that contains information about created user.
      */
-    @ApiOperation(value = "Create user.")
-    @ApiResponses(value = {@ApiResponse(code = 201, message = "User Add", response = ShelfUserController.class),
-            @ApiResponse(code = 400, message = "Bad Request"),
-            @ApiResponse(code = 500, message = "Internal Bookshelf server error")})
-    @PostMapping(path = "/userAdd", produces = MediaType.TEXT_PLAIN_VALUE)
+    @Override
     public ResponseEntity<String> userAdd(@RequestParam String firstName
             , @RequestParam String lastName
             , @RequestParam Status status) {
@@ -65,11 +61,7 @@ public class ShelfUserController {
      * @param id id of the book
      * @return ResponseEntity that informs about the removal of the user
      */
-    @DeleteMapping(path = "/{id}")
-    @ApiOperation(value = "Delete user.")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "User deleted", response = String.class),
-            @ApiResponse(code = 404, message = "User not found"),
-            @ApiResponse(code = 500, message = "Internal Category server error")})
+    @Override
     public ResponseEntity<String> userDelete(@PathVariable(name = "id") Integer id) {
         try {
             shelfUserService.userDelete(id);
@@ -88,11 +80,7 @@ public class ShelfUserController {
      * @param lastName  of user
      * @return ResponseEntity that informs about change of user status
      */
-    @PutMapping
-    @ApiOperation(value = "Change user status.")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "User status change", response = String.class),
-            @ApiResponse(code = 404, message = "User not found"),
-            @ApiResponse(code = 500, message = "Internal Category server error")})
+    @Override
     public ResponseEntity<String> userChangeStatus(@RequestParam String firstName, @RequestParam String lastName, @RequestParam Status status) {
         try {
             shelfUserService.userChangeStatus(firstName, lastName, status);
@@ -114,10 +102,7 @@ public class ShelfUserController {
      * @param lastName
      * @return String that contains user status information.
      */
-    @ApiOperation(value = "Get user status.")
-    @GetMapping(path = "/userStatus", produces = MediaType.TEXT_PLAIN_VALUE)
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "User status", response = String.class),
-            @ApiResponse(code = 500, message = "Internal BookShelf server error")})
+    @Override
     public ResponseEntity<String> getUserStatus(@RequestParam String firstName, @RequestParam String lastName) {
 
         try {
