@@ -5,8 +5,7 @@ spring:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/bookshelfuser
     username: postgres
-    #password: root
-    password: admin
+    password: root
   jpa:
     hibernate:
       ddl-auto: update
@@ -14,6 +13,6 @@ spring:
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   liquibase:
-    #contexts: prod
-    contexts: test
+    contexts: prod
+    #contexts: test
     dropFirst: false
