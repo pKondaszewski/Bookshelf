@@ -43,8 +43,7 @@ public class CategoryService {
     public void create(String name) {
         Category foundCategory = categoryRepository.findByName(name);
         if (foundCategory == null) {
-            Category category = new Category();
-            category.setName(name);
+            Category category = new Category(null, name);
             categoryRepository.save(category);
         } else {
             throw new BookshelfConflictException(String.format("Category with name %s already exists.", name));

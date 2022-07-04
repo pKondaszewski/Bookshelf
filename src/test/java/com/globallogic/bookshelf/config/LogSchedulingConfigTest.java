@@ -26,9 +26,6 @@ class LogSchedulingConfigTest {
 
     @Test
     void configureTasksTest() {
-        when(logService.getIntervalTime()).thenReturn(42);
-        doNothing().when(logService).handleFile();
-
         ScheduledTaskRegistrar scheduledTaskRegistrar = new ScheduledTaskRegistrar();
         logSchedulingConfig.configureTasks(scheduledTaskRegistrar);
 
