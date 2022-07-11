@@ -8,7 +8,7 @@ import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.CategoryRepository;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -27,11 +27,7 @@ public class CategoryService {
     public CategoryService(CategoryRepository cRepository, BookRepository bRepository) {
         categoryRepository = cRepository;
         bookRepository = bRepository;
-        startingCategories = new ArrayList<>(4);
-        startingCategories.add("Programming");
-        startingCategories.add("Management");
-        startingCategories.add("Testing");
-        startingCategories.add("Default");
+        startingCategories = Arrays.asList("Programming", "Management", "Testing", "Default");
     }
 
     /**
