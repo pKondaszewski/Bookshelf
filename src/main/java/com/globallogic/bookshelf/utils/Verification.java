@@ -48,10 +48,7 @@ public class Verification {
      * @return date value (current or given as param)
      */
     public static Date ofTheDate(Date date) {
-        if (date == null) {
-            date = new Date();
-        }
-        return date;
+        return date == null ? new Date() : date;
     }
 
     /**
