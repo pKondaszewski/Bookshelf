@@ -114,7 +114,7 @@ class BookShelfControllerTest {
                 .perform(delete("/bookshelf/{id}", "1"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().string(String.format("Book with id=%d delete", book.getId())));
+                .andExpect(content().string(String.format("Book with id=%d deleted successfully", book.getId())));
     }
 
     @Test

@@ -15,7 +15,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Optional;
 
 /**
  * Reservation service class for reserving books
@@ -43,29 +42,27 @@ public class ReservationService {
      */
     public void reservation(Integer bookId, LocalDate date, LocalTime time,
                             String firstname, String lastname, String comment) {
-        Optional<Book> foundBook = bookRepository.findById(bookId);
-        if (foundBook.isEmpty()) {
-            throw new BookshelfResourceNotFoundException(String.format("Book with id = %d doesn't exist", bookId));
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(
+                        () -> new BookshelfResourceNotFoundException(String.format("Book with id = %d doesn't exist", bookId))
+                );
+        if (!book.isAvailable()) {
+            throw new BookshelfConflictException(String.format("Book with id = %d is borrowed.", bookId));
         } else {
-            Book book = foundBook.get();
-            if (!book.isAvailable()) {
-                throw new BookshelfConflictException(String.format("Book with id = %d is borrowed.", bookId));
-            } else {
-                if (Verification.ofTheReservation(book)) {
-                    if (Verification.ofTheLocalDateTime(date, time)) {
-                        Reservation reservation = new Reservation(
-                                null, firstname, lastname, LocalDate.now(), LocalTime.now(), date, time, comment, book);
-                        reservationRepository.save(reservation);
-                    } else {
-                        throw new LocalDateTimeException(
-                                String.format("Given date: %s and time: %s of the reservation is before actual date: %s and time: %s",
-                                        date, time,
-                                        LocalDateTime.now().toLocalDate(),
-                                        LocalDateTime.now().toLocalTime().truncatedTo(ChronoUnit.MINUTES)));
-                    }
+            if (Verification.ofTheReservation(book)) {
+                if (Verification.ofTheLocalDateTime(date, time)) {
+                    Reservation reservation = new Reservation(
+                            null, firstname, lastname, LocalDate.now(), LocalTime.now(), date, time, comment, book);
+                    reservationRepository.save(reservation);
                 } else {
-                    throw new ReservationConflictException(String.format("Book with id = %d is already reserved.", bookId));
+                    throw new LocalDateTimeException(
+                            String.format("Given date: %s and time: %s of the reservation is before actual date: %s and time: %s",
+                                    date, time,
+                                    LocalDateTime.now().toLocalDate(),
+                                    LocalDateTime.now().toLocalTime().truncatedTo(ChronoUnit.MINUTES)));
                 }
+            } else {
+                throw new ReservationConflictException(String.format("Book with id = %d is already reserved.", bookId));
             }
         }
     }

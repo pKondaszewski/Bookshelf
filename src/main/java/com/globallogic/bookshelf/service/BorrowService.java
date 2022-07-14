@@ -22,7 +22,6 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Business logic of the /borrow request
@@ -64,31 +63,27 @@ public class BorrowService {
     @Transactional
     public void borrowBookById(Integer id, String firstname,
                                String lastname, Date borrowDate, String comment) {
-       Optional<Book> bookOptional = bookRepository.findById(id);
        ResponseEntity responseEntity = shelfUserFeignClient.getUserStatus(firstname,lastname);
        if(responseEntity.getBody().equals("ACTIVE"))  {
-           if (bookOptional.isEmpty()) {
-               throw new BookshelfResourceNotFoundException(
-                       String.format("Book with id: %s doesn't exist.", id)
-               );
-           } else {
-               Book book = bookOptional.get();
-               if (book.isAvailable()) {
-                   if (Verification.ofTheReservation(book)) {
-                       book.setAvailable(false);
-                       bookRepository.save(book);
-                       borrowDate = Verification.ofTheDate(borrowDate);
-                       Borrow borrow = new Borrow(null, borrowDate, null, firstname, lastname, comment, book);
-                       borrowRepository.save(borrow);
-                   } else {
-                       throw new ReservationConflictException(
-                               String.format("Book with id: %d is reserved.", id));
-                   }
-               } else {
-                   throw new BookshelfConflictException(
-                           String.format("Book with id: %s is already borrowed.", id)
+           Book book = bookRepository.findById(id)
+                   .orElseThrow(() -> new BookshelfResourceNotFoundException(
+                           String.format("Book with id: %s doesn't exist.", id))
                    );
+           if (book.isAvailable()) {
+               if (Verification.ofTheReservation(book)) {
+                   book.setAvailable(false);
+                   bookRepository.save(book);
+                   borrowDate = Verification.ofTheDate(borrowDate);
+                   Borrow borrow = new Borrow(null, borrowDate, null, firstname, lastname, comment, book);
+                   borrowRepository.save(borrow);
+               } else {
+                   throw new ReservationConflictException(
+                           String.format("Book with id: %d is reserved.", id));
                }
+           } else {
+               throw new BookshelfConflictException(
+                       String.format("Book with id: %s is already borrowed.", id)
+               );
            }
         }
         if (responseEntity.getBody().equals("INACTIVE")) {
@@ -113,15 +108,12 @@ public class BorrowService {
     @Transactional
     public void borrowBookByAuthorAndTitle(String author, String title, String firstname,
                                            String lastname, Date borrowDate, String comment) {
-
-        Book book = bookRepository.findByAuthorAndTitle(author, title);
         ResponseEntity responseEntity = shelfUserFeignClient.getUserStatus(firstname,lastname);
         if(responseEntity.getBody().equals("ACTIVE"))  {
-        if (book == null) {
-            throw new BookshelfResourceNotFoundException(
-                    String.format("Book with author: %s and title: %s doesn't exist.", author, title)
-            );
-        } else {
+            Book book = bookRepository.findByAuthorAndTitle(author, title)
+                    .orElseThrow(() -> new BookshelfResourceNotFoundException(
+                            String.format("Book with author: %s and title: %s doesn't exist.", author, title))
+                    );
             if (book.isAvailable()) {
                 if (Verification.ofTheReservation(book)) {
                     book.setAvailable(false);
@@ -138,10 +130,9 @@ public class BorrowService {
                         String.format("Book with author: %s and title: %s is already borrowed.", author, title));
             }
         }
-    }  if (responseEntity.getBody().equals("INACTIVE")) {
+        if (responseEntity.getBody().equals("INACTIVE")) {
             throw new BookshelfException(responseEntity.getBody().toString());
         }
-
     }
 
 
@@ -153,21 +144,18 @@ public class BorrowService {
      */
     @Transactional
     public void returnBook(Integer id) {
-        Optional<Borrow> borrow = borrowRepository.findById(id);
-        if (borrow.isEmpty()) {
-            throw new BookshelfResourceNotFoundException(
-                    String.format("Borrow with id= %s not found", id)
-            );
+        Borrow borrow = borrowRepository.findById(id)
+                .orElseThrow(() -> new BookshelfResourceNotFoundException(
+                        String.format("Borrow with id= %s not found", id)
+                ));
+        Book book = bookRepository.findById(borrow.getBook().getId()).get();
+        if (!book.isAvailable()) {
+            book.setAvailable(true);
+            bookRepository.save(book);
+            borrow.setReturned(new Date());
+            borrowRepository.save(borrow);
         } else {
-            Book book = bookRepository.findById(borrow.get().getBook().getId()).get();
-            if (!book.isAvailable()) {
-                book.setAvailable(true);
-                bookRepository.save(book);
-                borrow.get().setReturned(new Date());
-                borrowRepository.save(borrow.get());
-            } else {
-                throw new BookshelfConflictException(String.format("Borrow with id: %s is ended.", borrow.get().getId()));
-            }
+            throw new BookshelfConflictException(String.format("Borrow with id: %s is ended.", borrow.getId()));
         }
     }
 
@@ -181,16 +169,14 @@ public class BorrowService {
      */
     @Transactional
     public void deleteBorrow(Integer id) {
-        Optional<Borrow> foundBorrow = borrowRepository.findById(id);
-        if (foundBorrow.isEmpty()) {
-            throw new BookshelfResourceNotFoundException(String.format("Borrow with id=%d doesn't exist", id));
+        Borrow borrow = borrowRepository.findById(id)
+                .orElseThrow(
+                        () -> new BookshelfResourceNotFoundException(String.format("Borrow with id=%d doesn't exist", id))
+                );
+        if (borrow.getReturned() == null) {
+            throw new BookshelfConflictException(String.format("Borrow with id=%d is still active. Can't delete", id));
         } else {
-            Borrow borrow = foundBorrow.get();
-            if (borrow.getReturned() == null) {
-                throw new BookshelfConflictException(String.format("Borrow with id=%d is still active. Can't delete", id));
-            } else {
-                borrowRepository.deleteById(id);
-            }
+            borrowRepository.deleteById(id);
         }
     }
 

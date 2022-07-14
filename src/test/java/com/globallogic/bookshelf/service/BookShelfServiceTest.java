@@ -8,9 +8,6 @@ import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
 import com.globallogic.bookshelf.repository.CategoryRepository;
-
-import java.util.ArrayList;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,21 +15,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.*;
 
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyBoolean;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -65,7 +52,6 @@ public class BookShelfServiceTest {
 
     private static List<Book> allBooks;
     private static ArrayList<Book> bookList;
-    private static ArrayList<Object> booksWithNewestBorrowSort;
 
     @BeforeAll
     public static void initVariables() {
@@ -103,16 +89,7 @@ public class BookShelfServiceTest {
         books.put(bookAvailable.getAuthor(), bookAvailable.getTitle());
         books.put(bookNotAvailable.getAuthor(), bookNotAvailable.getTitle());
 
-        booksWithNewestBorrowSort = new ArrayList<>();
-        booksWithNewestBorrowSort.add(borrow1);
 
-
-        HashMap<Book, String> booksWithNewestBorrow = new HashMap<>();
-        booksWithNewestBorrow.put(bookNotAvailable,
-                String.format("Name: %s %s: Date of borrowing book %s",
-                        borrow.getFirstname(),
-                        borrow.getLastname(),
-                        borrow.getBorrowed()));
         booksAllAvailability = new HashMap<>();
         booksAllAvailability.put(bookAvailable, "Available");
         booksAvailability = new HashMap<>();
@@ -241,16 +218,19 @@ public class BookShelfServiceTest {
     void getListOfBorrowedBooksTest() {
         ArrayList<Book> bookList = new ArrayList<>();
         bookList.add(bookAvailable);
-        when(this.bookRepository.findAll()).thenReturn(bookList);
-        assertTrue(this.bookShelfService.getListOfBorrowedBooks().isEmpty());
-        verify(this.bookRepository).findAll();
+
+        when(bookRepository.findAll()).thenReturn(bookList);
+
+        assertTrue(bookShelfService.getListOfBorrowedBooks().isEmpty());
+        verify(bookRepository).findAll();
     }
 
     @Test
     void getListOfBorrowedBooksBookshelfResourceNotFoundExceptionTest() {
-        when(this.bookRepository.findAll()).thenThrow(new BookshelfResourceNotFoundException("An error occurred"));
-        assertThrows(BookshelfResourceNotFoundException.class, () -> this.bookShelfService.getListOfBorrowedBooks());
-        verify(this.bookRepository).findAll();
+        when(bookRepository.findAll()).thenThrow(new BookshelfResourceNotFoundException("An error occurred"));
+
+        assertThrows(BookshelfResourceNotFoundException.class, () -> bookShelfService.getListOfBorrowedBooks());
+        verify(bookRepository).findAll();
     }
 
 

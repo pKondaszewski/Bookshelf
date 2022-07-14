@@ -65,20 +65,18 @@ public class BookShelfService {
      * @param id of book
      */
     public void delete(Integer id) {
-        Optional<Book> foundBook = bookRepository.findById(id);
-        if (foundBook.isEmpty()) {
-            throw new BookshelfResourceNotFoundException(String.format("Book with id=%d doesn't exist", id));
-        } else {
-            Book book = foundBook.get();
-            List<Borrow> borrowList = borrowRepository.findAllByBook(book);
-            if (book.isAvailable()) {
-                for (Borrow borrow : borrowList) {
-                    borrowRepository.delete(borrow);
-                }
-                bookRepository.deleteById(id);
-            } else {
-                throw new BookshelfConflictException(String.format("Book with id=%d is still borrowed. Can't delete", id));
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new BookshelfResourceNotFoundException(
+                        String.format("Book with id=%d doesn't exist", id))
+                );
+        List<Borrow> borrowList = borrowRepository.findAllByBook(book);
+        if (book.isAvailable()) {
+            for (Borrow borrow : borrowList) {
+                borrowRepository.delete(borrow);
             }
+            bookRepository.deleteById(id);
+        } else {
+            throw new BookshelfConflictException(String.format("Book with id=%d is still borrowed. Can't delete", id));
         }
     }
 
@@ -208,9 +206,7 @@ public class BookShelfService {
         HashMap<Book, List<String>> bookHistory = new HashMap<>();
         Book book = bookRepository.findByTitle(title);
         List<Borrow> booksBorrow = borrowRepository.findAllByBook(book);
-
         List<String> bookList = new ArrayList<>();
-
         for (Borrow borrow : booksBorrow) {
             String name = "Name: " + borrow.getFirstname() + " " + borrow.getLastname();
             String comment;
@@ -223,10 +219,8 @@ public class BookShelfService {
                 returnDate = "Book not returned";
             } else {
                 returnDate = "Date of return book: " + borrow.getReturned().toString();
-
             }
             bookList.add(returnDate);
-
 
             if (borrow.getComment() == null) {
                 comment = "No comment";
@@ -244,8 +238,6 @@ public class BookShelfService {
         }
         bookList.add(available);
         bookHistory.put(book, bookList);
-
-
         return bookHistory;
     }
 }

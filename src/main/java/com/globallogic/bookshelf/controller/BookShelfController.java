@@ -76,7 +76,7 @@ public class BookShelfController implements BookShelfInterface {
         try {
             bookShelfService.delete(id);
             log.info("Book with id = {} deleted successfully", id);
-            return new ResponseEntity<>(String.format("Book with id=%d delete", id), HttpStatus.OK);
+            return new ResponseEntity<>(String.format("Book with id=%d deleted successfully", id), HttpStatus.OK);
         } catch (BookshelfResourceNotFoundException exception) {
             return new ResponseEntity<>(String.format("Book with id=%d doesn't exist", id), HttpStatus.NOT_FOUND);
         } catch (BookshelfConflictException exception) {

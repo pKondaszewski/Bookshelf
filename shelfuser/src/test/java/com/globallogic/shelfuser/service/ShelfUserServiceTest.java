@@ -75,7 +75,7 @@ class ShelfUserServiceTest {
     @Test
     void userChangeStatusTest() {
         shelfUser.setStatus("INACTIVE");
-        when(shelfUserRepository.findByFirstnameAndLastname("Adam", "Kot")).thenReturn(shelfUser);
+        when(shelfUserRepository.findByFirstnameAndLastname("Adam", "Kot")).thenReturn(Optional.of(shelfUser));
         shelfUserService.userChangeStatus("Adam", "Kot", Status.ACTIVE);
         verify(shelfUserRepository).findByFirstnameAndLastname("Adam", "Kot");
         verify(shelfUserRepository).save(shelfUser);
@@ -85,7 +85,7 @@ class ShelfUserServiceTest {
     @Test
     void userStatusGetTest() {
 
-        when(shelfUserRepository.findByFirstnameAndLastname("Adam","Kot")).thenReturn(shelfUser);
+        when(shelfUserRepository.findByFirstnameAndLastname("Adam","Kot")).thenReturn(Optional.of(shelfUser));
         assertEquals("ACTIVE", shelfUserService.userStatusGet("Adam", "Kot"));
         verify(shelfUserRepository).findByFirstnameAndLastname("Adam", "Kot");
     }

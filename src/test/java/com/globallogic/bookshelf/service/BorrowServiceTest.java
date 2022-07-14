@@ -7,19 +7,13 @@ import com.globallogic.bookshelf.entity.Borrow;
 import com.globallogic.bookshelf.entity.Category;
 import com.globallogic.bookshelf.exeptions.BookshelfConflictException;
 import com.globallogic.bookshelf.exeptions.BookshelfResourceNotFoundException;
-import com.globallogic.bookshelf.exeptions.ReservationConflictException;
 import com.globallogic.bookshelf.repository.BookRepository;
 import com.globallogic.bookshelf.repository.BorrowRepository;
 import com.globallogic.bookshelf.repository.ReservationRepository;
 import com.globallogic.bookshelf.utils.StringRepresentation;
 import com.globallogic.bookshelf.utils.UserHistory;
 import com.globallogic.bookshelf.utils.Verification;
-
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,8 +21,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -41,15 +33,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {BorrowService.class})
 @ExtendWith(MockitoExtension.class)
@@ -200,7 +187,7 @@ public class BorrowServiceTest {
     public void borrowBookByAuthorAndTitleSuccessTest() {
         when(shelfUserFeignClient.getUserStatus((String) any(), (String) any()))
                 .thenReturn((ResponseEntity<String>) responseEntity);
-        Mockito.doReturn(availableBook3).when(bookRepository).findByAuthorAndTitle(author, title);
+        Mockito.doReturn(Optional.of(availableBook3)).when(bookRepository).findByAuthorAndTitle(author, title);
         try (MockedStatic<Verification> mockedStatic = mockStatic(Verification.class)) {
             mockedStatic.when(() -> Verification.ofTheReservation(availableBook3)).thenReturn(true);
             borrowService.borrowBookByAuthorAndTitle(author, title, firstname, lastname, null, null);
@@ -214,7 +201,7 @@ public class BorrowServiceTest {
     public void borrowBookByAuthorAndTitleResourceNotFoundExceptionTest() {
         when(shelfUserFeignClient.getUserStatus((String) any(), (String) any()))
                 .thenReturn((ResponseEntity<String>) responseEntity);
-        Mockito.doReturn(null).when(bookRepository).findByAuthorAndTitle(author, title);
+        Mockito.doReturn(Optional.empty()).when(bookRepository).findByAuthorAndTitle(author, title);
 
 
         Exception exception = assertThrows(BookshelfResourceNotFoundException.class, () ->

@@ -59,14 +59,11 @@ public class ShelfUserService {
 
     @Transactional
     public void userDelete(Integer id) {
-        Optional<ShelfUser> foundUser = shelfUserRepository.findById(id);
-        if (foundUser.isEmpty()) {
-            throw new BookshelfResourceNotFoundException(String.format("User with id=%s doesn't exist", id));
-        } else {
-            shelfUserRepository.deleteById(id);
-        }
-
-
+        shelfUserRepository.findById(id)
+                .orElseThrow(
+                        () -> new BookshelfResourceNotFoundException(String.format("User with id=%s doesn't exist", id))
+                );
+        shelfUserRepository.deleteById(id);
     }
 
 
@@ -78,18 +75,17 @@ public class ShelfUserService {
      *
      */
     public void userChangeStatus(String firstName, String lastName, Status status) {
-        ShelfUser foundUser = shelfUserRepository.findByFirstnameAndLastname(firstName, lastName);
-        if (foundUser == null) {
-            throw new BookshelfResourceNotFoundException(
-                    String.format("User %s %s not found", firstName, lastName)
-            );
-        }
-        if (foundUser.getStatus().equals(status.name())) {
+        ShelfUser user = shelfUserRepository.findByFirstnameAndLastname(firstName, lastName)
+                .orElseThrow(
+                        () -> new BookshelfResourceNotFoundException(
+                                String.format("User %s %s not found", firstName, lastName))
+                );
+        if (user.getStatus().equals(status.name())) {
             throw new BookshelfConflictException(String.format("Status of user %s %s is already %s",
                     firstName, lastName, status.name()));
         } else {
-            foundUser.setStatus(status.name());
-            shelfUserRepository.save(foundUser);
+            user.setStatus(status.name());
+            shelfUserRepository.save(user);
         }
     }
 
@@ -102,14 +98,11 @@ public class ShelfUserService {
      */
 
     public String userStatusGet(String firstName, String lastName) {
-        ShelfUser foundUser = shelfUserRepository.findByFirstnameAndLastname(firstName, lastName);
-        String status;
-        if (foundUser == null) {
-            throw new BookshelfResourceNotFoundException(String.format("User %s %s doesn't exist", firstName, lastName));
-        } else {
-            status = foundUser.getStatus();
-
-        }
-        return status;
+        ShelfUser user = shelfUserRepository.findByFirstnameAndLastname(firstName, lastName)
+                .orElseThrow(
+                        () -> new BookshelfResourceNotFoundException(
+                                String.format("User %s %s doesn't exist", firstName, lastName))
+                );
+        return user.getStatus();
     }
 }
