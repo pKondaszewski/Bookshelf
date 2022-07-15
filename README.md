@@ -34,7 +34,7 @@ Liquibase → 4.10.0
 
 ## Frameworks
 
-Spring Boot, Hibernate, Lombok, jUnit, Mockito, Slf4j
+Spring Boot, Hibernate, jUnit, Mockito
 
 ## IDE
 
